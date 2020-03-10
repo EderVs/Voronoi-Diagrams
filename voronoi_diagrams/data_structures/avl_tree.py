@@ -38,15 +38,15 @@ class AVLNode:
         """Return if has right child."""
         return self.right is not None
 
-    def is_contained(self, value: Any) -> bool:
+    def is_contained(self, value: Any, *args: Any, **kwargs: Any) -> bool:
         """Value is contained in the Node."""
         raise NotImplementedError
 
-    def is_left(self, value: Any) -> bool:
+    def is_left(self, value: Any, *args: Any, **kwargs: Any) -> bool:
         """Value is to the left of Node."""
         raise NotImplementedError
 
-    def is_right(self, value: Any) -> bool:
+    def is_right(self, value: Any, *args: Any, **kwargs: Any) -> bool:
         """Value is to the right of Node."""
         raise NotImplementedError
 
@@ -66,15 +66,15 @@ class IntNode(AVLNode):
         """Integer AVL Node constructor."""
         super(IntNode, self).__init__(value, left, right)
 
-    def is_contained(self, value: Any) -> bool:
+    def is_contained(self, value: int, *args: Any, **kwargs: Any) -> bool:
         """Value is contained in the Node."""
         return value == self.value
 
-    def is_left(self, value: Any) -> bool:
+    def is_left(self, value: int, *args: Any, **kwargs: Any) -> bool:
         """Value is to the left of Node."""
         return value < self.value
 
-    def is_right(self, value: Any) -> bool:
+    def is_right(self, value: int, *args: Any, **kwargs: Any) -> bool:
         """Value is to the right of Node."""
         return value > self.value
 
@@ -112,7 +112,9 @@ class AVLTree:
     def update_node_length(self, node: Optional[AVLNode]) -> None:
         """Update Node length with the sum of the their childs + 1."""
         if node is not None:
-            node.length = self.get_node_length(node.left) + self.get_node_length(node.right) + 1
+            node.length = (
+                self.get_node_length(node.left) + self.get_node_length(node.right) + 1
+            )
 
     def update_node_factor(self, node: Optional[AVLNode]) -> None:
         """Update Node factor with the difference between children lengths."""
@@ -124,7 +126,9 @@ class AVLTree:
         """Update Node level based on the max of the level of the children + 1."""
         if node is None:
             return
-        node.level = max(self.get_node_level(node.left), self.get_node_level(node.right)) + 1
+        node.level = (
+            max(self.get_node_level(node.left), self.get_node_level(node.right)) + 1
+        )
 
     def turn_left(self, node: AVLNode) -> None:
         """Turn left the sub-tree in the node sent."""
