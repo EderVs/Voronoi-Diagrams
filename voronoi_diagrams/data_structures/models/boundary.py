@@ -12,21 +12,15 @@ from .bisector import Bisector, PointBisector
 class Boundary:
     """Bisector that is * mapped."""
 
-    left: Point
-    right: Point
     bisector: Bisector
     sign: bool
 
     def __init__(
         self,
-        left: Point,
-        right: Point,
         bisector: Bisector,
         sign: bool,
     ):
         """Construct Boundary."""
-        self.left = left
-        self.right = right
         self.bisector = bisector
         self.sign = sign
 
