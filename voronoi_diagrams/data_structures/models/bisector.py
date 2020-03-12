@@ -19,8 +19,12 @@ class Bisector:
         """Construct bisector."""
         self.sites = sites
 
-    def formula(self, y: float) -> float:
-        """Receive the y coordinate and return the x coordinate of the bisector."""
+    def formula_x(self, y: float) -> float:
+        """Get x coordinate given the y coordinate."""
+        raise NotImplementedError
+
+    def formula_y(self, y: float) -> float:
+        """Get y coordinate given the x coordinate."""
         raise NotImplementedError
 
 
@@ -31,10 +35,24 @@ class PointBisector(Bisector):
         """Construct bisector of Point sites Bisector."""
         super(PointBisector, self).__init__(sites)
 
-    def formula(self, y: float) -> float:
-        """Bisector formula of point sites."""
+    def formula_x(self, y: float) -> float:
+        """Get x coordinate given the y coordinate.
+
+        In this case is a line.
+        """
         p = self.sites[0]
         q = self.sites[1]
         a = (2*q.y - 2*p.y)*y + (p.y**2 - q.y**2) - (q.x**2 - p.x**2)
         b = 2*p.x - 2*q.x
         return a / b
+
+    def formula_y(self, x: float) -> float:
+        """Get y coordinate given the x coordinate.
+
+        In this case is a line.
+        """
+        p = self.sites[0]
+        q = self.sites[1]
+        a = -((q.x - p.x)/(q.y - p.y))
+        b = (q.x**2 - p.x**2 + q.y**2 - p.y**2)/(2*(q.y - p.y))
+        return a*x + b

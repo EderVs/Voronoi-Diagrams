@@ -19,21 +19,21 @@ class LNode(AVLNode):
         """Value is contained in the Node."""
         # TODO: Depending on a y value
         # TODO: Check that the left boundary is to the left of the self.value and the
-        #       right boundary is to the right of the self.value.
+        # right boundary is to the right of the self.value.
         return value == self.value
 
     def is_left(self, value: Event, *args: Any, **kwargs: Any) -> bool:
         """Value is to the left of Node."""
         # TODO: Depending on a y value
         # TODO: Check that the left boundary is to the right of the self.value and the
-        #       right boundary is to the right of the self.value.
+        # right boundary is to the right of the self.value.
         return value < self.value
 
     def is_right(self, value: Event, *args: Any, **kwargs: Any) -> bool:
         """Value is to the right of Node."""
         # TODO: Depending on a y value
         # TODO: Check that the left boundary is to the left of the self.value and the
-        #       right boundary is to the left of the self.value.
+        # right boundary is to the left of the self.value.
         return value > self.value
 
 
