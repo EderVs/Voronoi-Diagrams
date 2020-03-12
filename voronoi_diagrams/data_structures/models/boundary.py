@@ -67,6 +67,7 @@ class PointBoundary(Boundary):
         """Construct Boundary of a site point."""
         super(PointBoundary, self).__init__(left, right, bisector, sign)
 
+    # Used in star
     def distance_to_site(self, point: Point) -> float:
         """Get distance to any of the sites because it is a boundary."""
         return sqrt((self.left.x - point.x)**2 + (self.left.y - point.y)**2)
@@ -75,6 +76,7 @@ class PointBoundary(Boundary):
         """Map a bisector."""
         return Point(point.x, point.y+self.distance_to_site(point))
 
+    # Used in formula_x
     def quadratic_solution(self, a: float, b: float, c: float) -> float:
         """Return the solution of the quadratic function based on the sign of the Boundary."""
         solution = (-b + (-self.sign)*sqrt(b**2 - 4*a*c))/2*a
@@ -94,6 +96,6 @@ class PointBoundary(Boundary):
         d = b - p.y
         e = c**2 - d**2 - p.x**2
         f = -1
-        g = 2*(-a(c+d) + p.x)
+        g = 2*(-a*(c + d) + p.x)
         x = self.quadratic_solution(f, g, e)
         return x
