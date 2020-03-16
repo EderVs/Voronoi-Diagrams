@@ -4,7 +4,7 @@
 from typing import Callable, Tuple
 
 # Models
-from . import Point
+from . import Site, Point
 
 
 class Bisector:
@@ -13,9 +13,9 @@ class Bisector:
     It has its formula(function) associated.
     """
 
-    sites: Tuple[Point, Point]
+    sites: Tuple[Site, Site]
 
-    def __init__(self, sites: Tuple[Point, Point]):
+    def __init__(self, sites: Tuple[Site, Site]):
         """Construct bisector."""
         self.sites = sites
 
@@ -26,6 +26,14 @@ class Bisector:
     def formula_y(self, y: float) -> float:
         """Get y coordinate given the x coordinate."""
         raise NotImplementedError
+
+    def __str__(self):
+        """Get bisector string representation."""
+        return f"Bisector({self.sites[0]}, {self.sites[1]})"
+
+    def __repr__(self):
+        """Get Bisector representation."""
+        return self.__str__()
 
 
 class PointBisector(Bisector):
@@ -42,8 +50,8 @@ class PointBisector(Bisector):
         """
         p = self.sites[0]
         q = self.sites[1]
-        a = (2*q.y - 2*p.y)*y + (p.y**2 - q.y**2) - (q.x**2 - p.x**2)
-        b = 2*p.x - 2*q.x
+        a = (2 * q.y - 2 * p.y) * y + (p.y ** 2 - q.y ** 2) - (q.x ** 2 - p.x ** 2)
+        b = 2 * p.x - 2 * q.x
         return a / b
 
     def formula_y(self, x: float) -> float:
@@ -53,6 +61,6 @@ class PointBisector(Bisector):
         """
         p = self.sites[0]
         q = self.sites[1]
-        a = -((q.x - p.x)/(q.y - p.y))
-        b = (q.x**2 - p.x**2 + q.y**2 - p.y**2)/(2*(q.y - p.y))
-        return a*x + b
+        a = -((q.x - p.x) / (q.y - p.y))
+        b = (q.x ** 2 - p.x ** 2 + q.y ** 2 - p.y ** 2) / (2 * (q.y - p.y))
+        return a * x + b

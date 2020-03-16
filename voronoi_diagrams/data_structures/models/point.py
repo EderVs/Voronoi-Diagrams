@@ -1,8 +1,8 @@
 """Site Representation."""
 
 
-class Point:
-    """Point to handle in Fortune's Algorithm."""
+class Site:
+    """Site to handle in Fortune's Algorithm."""
 
     x: float
     y: float
@@ -11,6 +11,14 @@ class Point:
         """Construct point."""
         self.x = x
         self.y = y
+
+
+class Point(Site):
+    """Point to handle in Fortune's Algorithm."""
+
+    def __init__(self, x, y):
+        """Construct point."""
+        super(Point, self).__init__(x, y)
 
     def __str__(self):
         """Get String representation."""

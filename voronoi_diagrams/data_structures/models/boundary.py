@@ -33,7 +33,7 @@ class Boundary:
         Return > 0 if the point is to the right of the boundary based on l.
         Return < 0 if the point is to the left of the boundary based on l.
         """
-        return point.x - self.bisector.formula_x(point.y)
+        return point.x - self.formula_x(point.y)
 
     def formula_x(self, y: float) -> float:
         """Return the x coordinate given the y coordinate.
@@ -50,6 +50,14 @@ class Boundary:
         """
         point = self.star(Point(x, self.bisector.formula_y(x)))
         return point.y
+
+    def __str__(self):
+        """Get boundary string representation."""
+        return f"Boundary({self.bisector}, {self.sign})"
+
+    def __repr__(self):
+        """Get boundary representation."""
+        return self.__str__()
 
 
 class PointBoundary(Boundary):

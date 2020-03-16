@@ -1,12 +1,12 @@
 """Region representation."""
 
 # Standard Library
-from typing import Callable, Optional
+from typing import Callable, Optional, Any
 from math import sqrt
 
 # Models
 from .boundary import Boundary
-from .point import Point
+from .point import Point, Site
 
 
 class Region:
@@ -14,35 +14,73 @@ class Region:
 
     left: Optional[Boundary]
     right: Optional[Boundary]
-    site: Point
+    site: Site
 
     def __init__(
-        self,
-        left: Optional[Boundary],
-        right: Optional[Boundary],
-        site: Point,
+        self, site: Point, left: Optional[Boundary], right: Optional[Boundary],
     ):
         """Construct Boundary."""
         self.left = left
-        self.right = left
+        self.right = right
         self.site = site
 
     def star(self, point: Point) -> Point:
         """Map a bisector."""
         raise NotImplementedError
 
+    def is_contained(self, point: Point, *args: Any, **kwargs: Any) -> bool:
+        """Value is contained in the Node."""
+        if point.y < self.site.y:
+            return False
+
+        is_left_contained = True
+        is_right_contained = True
+        if self.left is None and self.right is None:
+            return True
+        if self.left is not None:
+            is_left_contained = self.left.get_point_comparison(point) >= 0
+        if self.right is not None:
+            is_right_contained = self.right.get_point_comparison(point) <= 0
+        return is_left_contained and is_right_contained
+
+    def is_left(self, point: Point, *args: Any, **kwargs: Any) -> bool:
+        """Value is to the left of Node."""
+        if point.y < self.site.y:
+            return False
+
+        if self.left is None:
+            return False
+        return self.left.get_point_comparison(point) < 0
+
+    def is_right(self, point: Point, *args: Any, **kwargs: Any) -> bool:
+        """Value is to the right of Node."""
+        if point.y < self.site.y:
+            return False
+
+        if self.right is None:
+            return False
+        return self.right.get_point_comparison(point) > 0
+
+    def __str__(self):
+        """Get Region string representation."""
+        return f"Region({self.site}, {self.left}, {self.right})"
+
+    def __repr__(self):
+        """Get Region representation."""
+        return self.__str__()
+
 
 class PointRegion(Region):
     """Region of a Point site."""
 
-    def __init__(self, left: Boundary, right: Boundary, site: Point):
+    def __init__(self, site: Point, left: Boundary, right: Boundary):
         """Construct Point Region."""
-        super(PointRegion, self).__init__(left, right, site)
+        super(PointRegion, self).__init__(site, left, right)
 
     def distance_to_site(self, point: Point) -> float:
         """Get distance to the site."""
-        return sqrt((self.site.x - point.x)**2 + (self.site.y - point.y)**2)
+        return sqrt((self.site.x - point.x) ** 2 + (self.site.y - point.y) ** 2)
 
     def star(self, point: Point) -> Point:
         """Map a bisector."""
-        return Point(point.x, point.y+self.distance_to_site(point))
+        return Point(point.x, point.y + self.distance_to_site(point))

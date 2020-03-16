@@ -21,30 +21,15 @@ class LNode(AVLNode):
 
     def is_contained(self, value: Event, *args: Any, **kwargs: Any) -> bool:
         """Value is contained in the Node."""
-        point = value.point
-        is_left_contained = True
-        is_right_contained = True
-        if self.region.left is None and self.region.right is None:
-            return True
-        if self.region.right is not None:
-            is_right_contained = self.region.right.get_point_comparison(point) <= 0
-        if self.region.left is not None:
-            is_left_contained = self.region.left.get_point_comparison(point) >= 0
-        return is_left_contained and is_right_contained
+        return self.value.is_contained(value.point)
 
     def is_left(self, value: Event, *args: Any, **kwargs: Any) -> bool:
         """Value is to the left of Node."""
-        if self.region.left is None:
-            return False
-        point = value.point
-        return self.region.left.get_point_comparison(point) < 0
+        return self.value.is_left(value.point)
 
     def is_right(self, value: Event, *args: Any, **kwargs: Any) -> bool:
         """Value is to the right of Node."""
-        if self.region.right is None:
-            return False
-        point = value.point
-        return self.region.right.get_point_comparison(point) > 0
+        return self.value.is_right(value.point)
 
 
 class ListL:
