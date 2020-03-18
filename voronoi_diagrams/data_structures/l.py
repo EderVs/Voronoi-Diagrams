@@ -4,10 +4,10 @@
 from typing import Any
 
 # AVL
-from . import AVLTree, AVLNode
+from .avl_tree import AVLTree, AVLNode
 
 # Models
-from .models import Region, Event, Bisector, Site
+from .models import Region, Event, Bisector, Site, Point
 
 
 class LNode(AVLNode):
@@ -39,24 +39,35 @@ class ListL:
 
     def __init__(self, root: Region):
         """Construct Tree t.
+
         The list must have a root region. If there is one region, this region must not have any
         boundaries.
         """
         self.t = AVLTree(node_class=LNode)
+        self.t.insert(root)
 
-    def _search_region_node(self, point: Event, y: float) -> Region:
-        """Search region where a point is located given a y coordinate."""
-        node = self.t.search(point)
-        print(node)
+    def _search_region_node(self, event: Event) -> LNode:
+        """Search the node of the region where a point is located given a y coordinate."""
+        node = self.t.search(event)
         if node is None:
             # TODO: Create exception.
             raise Exception(
                 "Cannot find a region with this point. Are your boundaries, "
                 "regions and y coordinate right?"
             )
-        return node.value
+        return node  # type: ignore
 
-    def update_site(self, site: Site, y: float):
+    def search_region_contained(self, event: Event) -> Region:
+        """Search the region where a point is located given a y coordinate."""
+        return self._search_region_node(event).region
+
+    def update_with_site(
+        self,
+        site_p: Site,
+        region_left: Region,
+        region_center: Region,
+        region_right: Region,
+    ):
         """Update the L list given a site and the y coordinate.
 
         Suppose p is the site given.
@@ -64,6 +75,7 @@ class ListL:
             found is q and and lets name the Region Rq.
         2.- Let Rp the Region of p. Update the node that contains the Rq with -> Rq, Rp, Rq.
             Each Region will update its boundaries.
-        3.- Return the the intersections to be deleted.
+        3.- Return the intersections to be deleted.
         """
-        pass
+        node = self._search_region_node(site_p)
+        # TODO: Update this node with the regions.

@@ -18,7 +18,10 @@ class Region:
     site: Site
 
     def __init__(
-        self, site: Site, left: Optional[Boundary], right: Optional[Boundary],
+        self,
+        site: Site,
+        left: Optional[Boundary] = None,
+        right: Optional[Boundary] = None,
     ):
         """Construct Boundary."""
         self.left = left

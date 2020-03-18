@@ -223,9 +223,9 @@ class AVLTree:
         for value in values:
             self.insert(value)
 
-    def insert(self, value: Any) -> AVLNode:
+    def insert(self, value: Any, *args: Any, **kwargs: Any) -> AVLNode:
         """Insert value with a Node in the Tree."""
-        node = self.NODE_CLASS(value)
+        node = self.NODE_CLASS(value, *args, **kwargs)
         self.length += 1
         if self.root is None:
             self.root = node
