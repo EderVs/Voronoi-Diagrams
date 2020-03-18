@@ -1,12 +1,13 @@
 """Region representation."""
 
 # Standard Library
-from typing import Callable, Optional, Any
+from typing import Callable, Optional, Any, Union
 from math import sqrt
 
 # Models
-from .boundary import Boundary
-from .point import Point, Site
+from .boundaries import Boundary
+from .points import Point
+from .events import Site
 
 
 class Region:
@@ -17,7 +18,7 @@ class Region:
     site: Site
 
     def __init__(
-        self, site: Point, left: Optional[Boundary], right: Optional[Boundary],
+        self, site: Site, left: Optional[Boundary], right: Optional[Boundary],
     ):
         """Construct Boundary."""
         self.left = left
@@ -30,7 +31,7 @@ class Region:
 
     def is_contained(self, point: Point, *args: Any, **kwargs: Any) -> bool:
         """Value is contained in the Node."""
-        if point.y < self.site.y:
+        if point.y < self.site.point.y:
             return False
 
         is_left_contained = True
@@ -45,7 +46,7 @@ class Region:
 
     def is_left(self, point: Point, *args: Any, **kwargs: Any) -> bool:
         """Value is to the left of Node."""
-        if point.y < self.site.y:
+        if point.y < self.site.point.y:
             return False
 
         if self.left is None:
@@ -54,7 +55,7 @@ class Region:
 
     def is_right(self, point: Point, *args: Any, **kwargs: Any) -> bool:
         """Value is to the right of Node."""
-        if point.y < self.site.y:
+        if point.y < self.site.point.y:
             return False
 
         if self.right is None:
@@ -73,13 +74,15 @@ class Region:
 class PointRegion(Region):
     """Region of a Point site."""
 
-    def __init__(self, site: Point, left: Boundary, right: Boundary):
+    def __init__(self, site: Site, left: Boundary, right: Boundary):
         """Construct Point Region."""
         super(PointRegion, self).__init__(site, left, right)
 
     def distance_to_site(self, point: Point) -> float:
         """Get distance to the site."""
-        return sqrt((self.site.x - point.x) ** 2 + (self.site.y - point.y) ** 2)
+        return sqrt(
+            (self.site.point.x - point.x) ** 2 + (self.site.point.y - point.y) ** 2
+        )
 
     def star(self, point: Point) -> Point:
         """Map a bisector."""

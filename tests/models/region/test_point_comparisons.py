@@ -3,6 +3,7 @@
 # Models
 from voronoi_diagrams.data_structures.l import LNode
 from voronoi_diagrams.data_structures.models import (
+    Site,
     Point,
     PointBisector,
     PointRegion,
@@ -15,8 +16,8 @@ class TestIsContained:
 
     def test_point_contained(self):
         """Test point is contained in a region with both boundaries."""
-        p = Point(0, 0)
-        q = Point(2, 2)
+        p = Site(0, 0)
+        q = Site(2, 2)
         bisector = PointBisector(sites=(p, q))
         boundary_plus = PointBoundary(bisector=bisector, sign=True)
         boundary_minus = PointBoundary(bisector=bisector, sign=False)
@@ -38,8 +39,8 @@ class TestIsContained:
 
     def test_points_in_boundaries(self):
         """Test points in both boundaries."""
-        p = Point(0, 0)
-        q = Point(2, 2)
+        p = Site(0, 0)
+        q = Site(2, 2)
         bisector = PointBisector(sites=(p, q))
         boundary_plus = PointBoundary(bisector=bisector, sign=True)
         boundary_minus = PointBoundary(bisector=bisector, sign=False)
@@ -55,8 +56,8 @@ class TestIsContained:
 
     def test_point_in_site(self):
         """Test point in site."""
-        p = Point(0, 0)
-        q = Point(2, 2)
+        p = Site(0, 0)
+        q = Site(2, 2)
         bisector = PointBisector(sites=(p, q))
         boundary_plus = PointBoundary(bisector=bisector, sign=True)
         boundary_minus = PointBoundary(bisector=bisector, sign=False)
@@ -70,8 +71,8 @@ class TestIsContained:
 
     def test_without_boundaries(self):
         """Test point is contained in a region with both boundaries."""
-        p = Point(0, 0)
-        q = Point(2, 2)
+        p = Site(0, 0)
+        q = Site(2, 2)
         bisector = PointBisector(sites=(p, q))
         boundary_plus = PointBoundary(bisector=bisector, sign=True)
         boundary_minus = PointBoundary(bisector=bisector, sign=False)
@@ -124,8 +125,8 @@ class TestIsLeft:
 
     def test_point_left(self):
         """Test point is contained in a region with both boundaries."""
-        p = Point(0, 0)
-        q = Point(2, 2)
+        p = Site(0, 0)
+        q = Site(2, 2)
         bisector = PointBisector(sites=(p, q))
         boundary_plus = PointBoundary(bisector=bisector, sign=True)
         boundary_minus = PointBoundary(bisector=bisector, sign=False)
@@ -147,8 +148,8 @@ class TestIsLeft:
 
     def test_points_in_boundaries(self):
         """Test points in both boundaries."""
-        p = Point(0, 0)
-        q = Point(2, 2)
+        p = Site(0, 0)
+        q = Site(2, 2)
         bisector = PointBisector(sites=(p, q))
         boundary_plus = PointBoundary(bisector=bisector, sign=True)
         boundary_minus = PointBoundary(bisector=bisector, sign=False)
@@ -164,8 +165,8 @@ class TestIsLeft:
 
     def test_point_in_site(self):
         """Test point in site."""
-        p = Point(0, 0)
-        q = Point(2, 2)
+        p = Site(0, 0)
+        q = Site(2, 2)
         bisector = PointBisector(sites=(p, q))
         boundary_plus = PointBoundary(bisector=bisector, sign=True)
         boundary_minus = PointBoundary(bisector=bisector, sign=False)
@@ -179,8 +180,8 @@ class TestIsLeft:
 
     def test_without_boundaries(self):
         """Test point is contained in a region with both boundaries."""
-        p = Point(0, 0)
-        q = Point(2, 2)
+        p = Site(0, 0)
+        q = Site(2, 2)
         bisector = PointBisector(sites=(p, q))
         boundary_plus = PointBoundary(bisector=bisector, sign=True)
         boundary_minus = PointBoundary(bisector=bisector, sign=False)
@@ -231,8 +232,8 @@ class TestIsRight:
 
     def test_point_right(self):
         """Test point is contained in a region with both boundaries."""
-        p = Point(0, 0)
-        q = Point(2, 2)
+        p = Site(0, 0)
+        q = Site(2, 2)
         bisector = PointBisector(sites=(p, q))
         boundary_plus = PointBoundary(bisector=bisector, sign=True)
         boundary_minus = PointBoundary(bisector=bisector, sign=False)
@@ -254,8 +255,8 @@ class TestIsRight:
 
     def test_points_in_boundaries(self):
         """Test points in both boundaries."""
-        p = Point(0, 0)
-        q = Point(2, 2)
+        p = Site(0, 0)
+        q = Site(2, 2)
         bisector = PointBisector(sites=(p, q))
         boundary_plus = PointBoundary(bisector=bisector, sign=True)
         boundary_minus = PointBoundary(bisector=bisector, sign=False)
@@ -271,8 +272,8 @@ class TestIsRight:
 
     def test_point_in_site(self):
         """Test point in site."""
-        p = Point(0, 0)
-        q = Point(2, 2)
+        p = Site(0, 0)
+        q = Site(2, 2)
         bisector = PointBisector(sites=(p, q))
         boundary_plus = PointBoundary(bisector=bisector, sign=True)
         boundary_minus = PointBoundary(bisector=bisector, sign=False)
@@ -286,8 +287,8 @@ class TestIsRight:
 
     def test_without_boundaries(self):
         """Test point is contained in a region with both boundaries."""
-        p = Point(0, 0)
-        q = Point(2, 2)
+        p = Site(0, 0)
+        q = Site(2, 2)
         bisector = PointBisector(sites=(p, q))
         boundary_plus = PointBoundary(bisector=bisector, sign=True)
         boundary_minus = PointBoundary(bisector=bisector, sign=False)

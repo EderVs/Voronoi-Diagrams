@@ -1,7 +1,7 @@
 """Models used."""
 
-from .point import Point, Site
-from .region import Region, PointRegion
-from .boundary import Boundary, PointBoundary
-from .event import Event
-from .bisector import Bisector, PointBisector
+from .points import Point
+from .regions import Region, PointRegion
+from .boundaries import Boundary, PointBoundary
+from .events import Event, Site, Intersection
+from .bisectors import Bisector, PointBisector

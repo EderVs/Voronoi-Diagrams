@@ -5,8 +5,8 @@ from typing import Callable
 from math import sqrt
 
 # Models
-from .point import Point
-from .bisector import Bisector, PointBisector
+from .points import Point
+from .bisectors import Bisector, PointBisector
 
 
 class Boundary:
@@ -70,7 +70,7 @@ class PointBoundary(Boundary):
     # Used in star
     def distance_to_site(self, point: Point) -> float:
         """Get distance to any of the sites because it is a boundary."""
-        p = self.bisector.sites[0]
+        p = self.bisector.sites[0].point
         return sqrt((p.x - point.x) ** 2 + (p.y - point.y) ** 2)
 
     def star(self, point: Point) -> Point:
@@ -93,8 +93,8 @@ class PointBoundary(Boundary):
         This is the the formula of the bisector mapped with the star map.
         In this case is an hiperbola.
         """
-        p = self.bisector.sites[0]
-        q = self.bisector.sites[1]
+        p = self.bisector.sites[0].point
+        q = self.bisector.sites[1].point
         a = -((q.x - p.x) / (q.y - p.y))
         b = (q.x ** 2 - p.x ** 2 + q.y ** 2 - p.y ** 2) / (2 * (q.y - p.y))
         c = -b + y

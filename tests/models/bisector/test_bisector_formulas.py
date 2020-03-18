@@ -4,8 +4,7 @@ from typing import List, Any
 from random import randint
 
 # Models
-from voronoi_diagrams.data_structures.models.bisector import PointBisector
-from voronoi_diagrams.data_structures.models.point import Point
+from voronoi_diagrams.data_structures.models import PointBisector, Point, Site
 
 
 class TestBisectorFormulas:
@@ -13,26 +12,26 @@ class TestBisectorFormulas:
 
     def test_point_formulas_positive_fixed_values(self):
         """Test point formula with 2 positive fixed sites."""
-        p = Point(0, 0)
-        q = Point(2, 2)
+        p = Site(0, 0)
+        q = Site(2, 2)
         bisector = PointBisector(sites=(p, q))
         assert bisector.formula_x(1) == 1
         assert bisector.formula_y(1) == 1
 
     def test_point_formulas_negative_fixed_values(self):
         """Test point formula with 2 positive fixed sites."""
-        p = Point(0, 0)
-        q = Point(-2, -2)
+        p = Site(0, 0)
+        q = Site(-2, -2)
         bisector = PointBisector(sites=(p, q))
         assert bisector.formula_x(-1) == -1
         assert bisector.formula_y(-1) == -1
 
     def test_point_formulas_random_values(self):
         """Test point formula with 2 random sites."""
-        p = Point(randint(-100, 100), randint(-100, 100))
-        q = Point(randint(-100, 100), randint(-100, 100))
-        while q.x == p.x or q.y == p.y:
-            q = Point(randint(-100, 100), randint(-100, 100))
+        p = Site(randint(-100, 100), randint(-100, 100))
+        q = Site(randint(-100, 100), randint(-100, 100))
+        while q.point.x == p.point.x or q.point.y == p.point.y:
+            q = Site(randint(-100, 100), randint(-100, 100))
         bisector = PointBisector(sites=(p, q))
         x = randint(-100, 100)
         y = bisector.formula_y(x)

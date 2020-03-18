@@ -4,7 +4,8 @@
 from typing import Callable, Tuple
 
 # Models
-from . import Site, Point
+from .events import Site
+from .points import Point
 
 
 class Bisector:
@@ -39,7 +40,7 @@ class Bisector:
 class PointBisector(Bisector):
     """Bisector defined by point sites."""
 
-    def __init__(self, sites: Tuple[Point, Point]):
+    def __init__(self, sites: Tuple[Site, Site]):
         """Construct bisector of Point sites Bisector."""
         super(PointBisector, self).__init__(sites)
 
@@ -48,8 +49,8 @@ class PointBisector(Bisector):
 
         In this case is a line.
         """
-        p = self.sites[0]
-        q = self.sites[1]
+        p = self.sites[0].point
+        q = self.sites[1].point
         a = (2 * q.y - 2 * p.y) * y + (p.y ** 2 - q.y ** 2) - (q.x ** 2 - p.x ** 2)
         b = 2 * p.x - 2 * q.x
         return a / b
@@ -59,8 +60,8 @@ class PointBisector(Bisector):
 
         In this case is a line.
         """
-        p = self.sites[0]
-        q = self.sites[1]
+        p = self.sites[0].point
+        q = self.sites[1].point
         a = -((q.x - p.x) / (q.y - p.y))
         b = (q.x ** 2 - p.x ** 2 + q.y ** 2 - p.y ** 2) / (2 * (q.y - p.y))
         return a * x + b
