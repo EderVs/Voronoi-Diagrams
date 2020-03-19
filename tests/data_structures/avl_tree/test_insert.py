@@ -30,6 +30,13 @@ def check_if_tree_is_balanced(t: AVLTree) -> None:
 class TestInsert:
     """Insert in the AVL Tree."""
 
+    def test_root(self) -> None:
+        """Test that a root is added when the tree is empty."""
+        t = create_tree([])
+        assert t.root is None
+        t.insert(1)
+        assert t.root is not None and t.root.value == 1
+
     def test_case_1(self) -> None:
         """Test we have a turn left."""
         t = create_tree([1, 2, 3])

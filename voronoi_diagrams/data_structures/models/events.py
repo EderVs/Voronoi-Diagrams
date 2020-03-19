@@ -18,6 +18,18 @@ class Event:
         self.point = Point(x, y)
         self.is_site = is_site
 
+    def __str__(self):
+        """Get String representation."""
+        if self.is_site:
+            letter = "S"
+        else:
+            letter = "I"
+        return f"{letter}({self.point.x}, {self.point.y})"
+
+    def __repr__(self):
+        """Get object representation."""
+        return self.__str__()
+
 
 class Site(Event):
     """Site to handle in Fortune's Algorithm."""

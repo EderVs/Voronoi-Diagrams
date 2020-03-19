@@ -1,7 +1,7 @@
 """L list implementation."""
 
 # Standard Library
-from typing import Any
+from typing import Any, Optional
 
 # AVL
 from .avl_tree import AVLTree, AVLNode
@@ -19,23 +19,24 @@ class LNode(AVLNode):
         # Just renaming for clarity.
         self.region: Region = self.value
 
-    def is_contained(self, value: Event, *args: Any, **kwargs: Any) -> bool:
+    def is_contained(self, value: Region, *args: Any, **kwargs: Any) -> bool:
         """Value is contained in the Node."""
-        return self.region.is_contained(value.point)
+        return self.region.is_contained(value.site.point)
 
-    def is_left(self, value: Event, *args: Any, **kwargs: Any) -> bool:
+    def is_left(self, value: Region, *args: Any, **kwargs: Any) -> bool:
         """Value is to the left of Node."""
-        return self.region.is_left(value.point)
+        return self.region.is_left(value.site.point)
 
-    def is_right(self, value: Event, *args: Any, **kwargs: Any) -> bool:
+    def is_right(self, value: Region, *args: Any, **kwargs: Any) -> bool:
         """Value is to the right of Node."""
-        return self.region.is_right(value.point)
+        return self.region.is_right(value.site.point)
 
 
-class ListL:
+class LList:
     """List L used in the Fortune's Algorithm."""
 
     t: AVLTree
+    head: LNode
 
     def __init__(self, root: Region):
         """Construct Tree t.
@@ -44,11 +45,25 @@ class ListL:
         boundaries.
         """
         self.t = AVLTree(node_class=LNode)
-        self.t.insert(root)
+        self.head = self.t.insert(root)  # type: ignore
 
-    def _search_region_node(self, event: Event) -> LNode:
+    def __str__(self):
+        """Get string representation."""
+        string = f"[{self.head.region}"
+        node = self.head.right_neighbor
+        while node is not None:
+            string += f", {node.region}"
+            node = node.right_neighbor
+        string += "]"
+        return string
+
+    def __repr__(self):
+        """Get representation."""
+        return self.__str__()
+
+    def _search_region_node(self, region: Region) -> LNode:
         """Search the node of the region where a point is located given a y coordinate."""
-        node = self.t.search(event)
+        node = self.t.search(region)
         if node is None:
             # TODO: Create exception.
             raise Exception(
@@ -57,25 +72,74 @@ class ListL:
             )
         return node  # type: ignore
 
-    def search_region_contained(self, event: Event) -> Region:
+    def search_region_contained(self, region: Region) -> Region:
         """Search the region where a point is located given a y coordinate."""
-        return self._search_region_node(event).region
+        return self._search_region_node(region).region
+
+    def update_neighbors(
+        self, left_node: Optional[LNode], right_node: Optional[LNode]
+    ) -> None:
+        """Update neighbors between 2 nodes."""
+        if left_node is not None:
+            left_node.right_neighbor = right_node
+            if left_node.left_neighbor is None:
+                self.head = left_node
+        elif right_node is not None:
+            self.head = right_node
+
+        if right_node is not None:
+            right_node.left_neighbor = left_node
 
     def update_with_site(
         self,
         site_p: Site,
-        region_left: Region,
-        region_center: Region,
-        region_right: Region,
+        left_region: Region,
+        center_region: Region,
+        right_region: Region,
     ):
-        """Update the L list given a site and the y coordinate.
+        """Update the L list given a site and the regions to put.
 
-        Suppose p is the site given.
-        1.- Search for the Region where the site is contained. Suppose that the site of the region
-            found is q and and lets name the Region Rq.
-        2.- Let Rp the Region of p. Update the node that contains the Rq with -> Rq, Rp, Rq.
-            Each Region will update its boundaries.
-        3.- Return the intersections to be deleted.
+        - site_p is the site that we want to find the region where it is contained in
+          the tree. Let region_q the region where site_q is contained (q is the site of the region).
+        - left_region is the Region that will be in the left. This region must have q as its site.
+        - center_region is the Region that will be in the center. This region must have p as its 
+          site.
+        - right_region is the Region that will be in the right. This region must have q as its site.
         """
-        node = self._search_region_node(site_p)
-        # TODO: Update this node with the regions.
+        node = self._search_region_node(left_region)
+        left_neighbor = node.left_neighbor
+        right_neighbor = node.right_neighbor
+
+        node.value = center_region
+
+        # Insert in AVLTree
+        # Insert in the left sub tree
+        if node.left is not None:
+            left_region_node = self.t.insert_from_node(left_region, node.left)
+        else:
+            self.t.length += 1
+            node.length += 1
+            left_region_node = LNode(left_region)
+            left_region_node.parent = node
+            node.left = left_region_node
+            self.t.rebalance_to_node(left_region_node, node)
+
+        if node.right is not None:
+            right_region_node = self.t.insert_from_node(right_region, node.right)
+        else:
+            self.t.length += 1
+            node.length += 1
+            right_region_node = LNode(right_region)
+            right_region_node.parent = node
+            node.right = right_region_node
+            self.t.rebalance_to_node(right_region_node, node)
+
+        self.t.rebalance_to_root(node)
+
+        # Update like a list.
+        if left_neighbor is None:
+            self.head = left_region_node  # type: ignore
+        self.update_neighbors(left_neighbor, left_region_node)  # type: ignore
+        self.update_neighbors(left_region_node, node)  # type: ignore
+        self.update_neighbors(node, right_region_node)  # type: ignore
+        self.update_neighbors(right_region_node, right_neighbor)  # type: ignore

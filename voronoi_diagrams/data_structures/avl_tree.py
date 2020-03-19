@@ -187,7 +187,10 @@ class AVLTree:
         self.update_node_factor(left)
 
     def rebalance_node(self, node: AVLNode) -> Optional[AVLNode]:
-        """Rebalance node."""
+        """Rebalance node.
+
+        Return the new root of the sub-tree.
+        """
         if abs(node.factor) <= 1:
             return node
         # Weighted to the right
@@ -218,21 +221,45 @@ class AVLTree:
             if actual is not None:
                 actual = actual.parent
 
+    def rebalance_to_node(self, node_start: AVLNode, node_finish: AVLNode) -> None:
+        """Rebalance tree from node given to other node given.
+
+        node_finish must be an ancestor of node_start if not it will rebalance to the root.
+        node_finish is exclusive.
+        """
+        actual: Optional[AVLNode] = node_start
+        while actual is not None:
+            self.update_node_level(actual)
+            self.update_node_factor(actual)
+
+            if actual == node_finish:
+                self.rebalance_node(actual)
+                break
+
+            actual = self.rebalance_node(actual)
+            if actual is not None:
+                actual = actual.parent
+
     def insert_many(self, values: Iterable[Any]) -> None:
         """Insert many values."""
         for value in values:
             self.insert(value)
 
-    def insert(self, value: Any, *args: Any, **kwargs: Any) -> AVLNode:
+    def insert_from_node(
+        self, value: Any, from_node: AVLNode, *args: Any, **kwargs: Any,
+    ) -> AVLNode:
         """Insert value with a Node in the Tree."""
-        node = self.NODE_CLASS(value, *args, **kwargs)
         self.length += 1
-        if self.root is None:
-            self.root = node
-            return self.root
+        # Update length of all node above
+        actual_parent: Optional[AVLNode] = from_node.parent
+        while actual_parent is not None:
+            actual_parent.length += 1
+            actual_parent = actual_parent.parent
 
-        actual_node: Optional[AVLNode] = self.root
-        last_node: AVLNode = self.root
+        node = self.NODE_CLASS(value, *args, **kwargs)
+
+        actual_node: Optional[AVLNode] = from_node
+        last_node: AVLNode = from_node
         is_left_child = False
         # Get to a leaf.
         while actual_node is not None:
@@ -251,7 +278,19 @@ class AVLTree:
         else:
             last_node.right = node
 
-        self.rebalance_to_root(node)
+        self.rebalance_to_node(node, from_node)
+
+        return node
+
+    def insert(self, value: Any, *args: Any, **kwargs: Any) -> AVLNode:
+        """Insert value with a Node in the Tree."""
+        if self.root is None:
+            node = self.NODE_CLASS(value, *args, **kwargs)
+            self.root = node
+            self.length += 1
+            return self.root
+
+        node = self.insert_from_node(value, self.root)
 
         return node
 
