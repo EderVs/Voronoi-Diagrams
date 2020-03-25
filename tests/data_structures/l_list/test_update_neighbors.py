@@ -23,7 +23,7 @@ class TestUpdateNeighborgs:
     def test_in_l_list_with_one_region_to_the_right(self):
         """Test with just an l list with just one region in it."""
         q = Site(2, 2)
-        r_q = Site(2, 2)
+        r_q = Region(q)
         r_q_node = LNode(r_q)
         ex_head = self.l_list.head
         self.l_list.update_neighbors(self.l_list.head, r_q_node)
@@ -37,7 +37,7 @@ class TestUpdateNeighborgs:
     def test_in_l_list_with_one_region_to_the_left(self):
         """Test with just an l list with just one region in it."""
         q = Site(2, 2)
-        r_q = Site(2, 2)
+        r_q = Region(q)
         r_q_node = LNode(r_q)
         ex_head = self.l_list.head
         self.l_list.update_neighbors(r_q_node, self.l_list.head)
@@ -52,10 +52,10 @@ class TestUpdateNeighborgs:
     def test_in_the_middle(self):
         """Test with just an l list with just one region in it."""
         q = Site(2, 2)
-        r_q = Site(2, 2)
+        r_q = Region(q)
         r_q_node = LNode(r_q)
         r = Site(2, 3)
-        r_r = Site(2, 3)
+        r_r = Region(r)
         r_r_node = LNode(r_r)
         ex_head = self.l_list.head
         self.l_list.update_neighbors(r_q_node, ex_head)
@@ -86,7 +86,7 @@ class TestUpdateNeighborgs:
         assert ex_head.right_neighbor is None
 
         q = Site(2, 2)
-        r_q = Site(2, 2)
+        r_q = Region(q)
         r_q_node = LNode(r_q)
 
         self.l_list.update_neighbors(ex_head, r_q_node)

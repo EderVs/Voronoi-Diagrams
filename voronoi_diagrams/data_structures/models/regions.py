@@ -77,7 +77,7 @@ class Region:
 class PointRegion(Region):
     """Region of a Point site."""
 
-    def __init__(self, site: Site, left: Boundary, right: Boundary):
+    def __init__(self, site: Site, left: Optional[Boundary], right: Optional[Boundary]):
         """Construct Point Region."""
         super(PointRegion, self).__init__(site, left, right)
 

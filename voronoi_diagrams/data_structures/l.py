@@ -90,27 +90,19 @@ class LList:
         if right_node is not None:
             right_node.left_neighbor = left_node
 
-    def update_with_site(
-        self,
-        site_p: Site,
-        left_region: Region,
-        center_region: Region,
-        right_region: Region,
+    def update_regions(
+        self, left_region: Region, center_region: Region, right_region: Region,
     ):
         """Update the L list given a site and the regions to put.
 
-        - site_p is the site that we want to find the region where it is contained in
-          the tree. Let region_q the region where site_q is contained (q is the site of the region).
         - left_region is the Region that will be in the left. This region must have q as its site.
-        - center_region is the Region that will be in the center. This region must have p as its 
+        - center_region is the Region that will be in the center. This region must have p as its
           site.
         - right_region is the Region that will be in the right. This region must have q as its site.
         """
-        node = self._search_region_node(left_region)
-        left_neighbor = node.left_neighbor
-        right_neighbor = node.right_neighbor
+        node = self._search_region_node(center_region)
 
-        node.value = center_region
+        node.value = node.region = center_region
 
         # Insert in AVLTree
         # Insert in the left sub tree
@@ -124,6 +116,7 @@ class LList:
             node.left = left_region_node
             self.t.rebalance_to_node(left_region_node, node)
 
+        # Insert in the right sub tree
         if node.right is not None:
             right_region_node = self.t.insert_from_node(right_region, node.right)
         else:
@@ -137,6 +130,8 @@ class LList:
         self.t.rebalance_to_root(node)
 
         # Update like a list.
+        left_neighbor = node.left_neighbor
+        right_neighbor = node.right_neighbor
         if left_neighbor is None:
             self.head = left_region_node  # type: ignore
         self.update_neighbors(left_neighbor, left_region_node)  # type: ignore
