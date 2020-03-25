@@ -110,8 +110,7 @@ class TestUpdateRegions:
         check_if_tree_is_balanced(self.l_list.t)
 
     def test_in_l_list_to_left(self) -> None:
-        """Test with just an l list with just one region in it."""
-        # TODO: Update Docstring.
+        """Test updating the left part."""
         q = Site(2, 2)
         r = Site(0, 3)
 
@@ -144,8 +143,7 @@ class TestUpdateRegions:
         check_if_tree_is_balanced(self.l_list.t)
 
     def test_in_l_list_to_right(self) -> None:
-        """Test with just an l list with just one region in it."""
-        # TODO: Update Docstring.
+        """Test updating the right part."""
         q = Site(2, 2)
         r = Site(6, 3)
 
