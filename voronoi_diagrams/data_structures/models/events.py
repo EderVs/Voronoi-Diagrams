@@ -1,10 +1,11 @@
 """Event representation."""
 
 # Standar Library
-from typing import Union
+from typing import Union, Any
 
 # Models
 from .points import Point
+from ..avl_tree import AVLNode
 
 
 class Event:
@@ -42,9 +43,17 @@ class Site(Event):
 class Intersection(Event):
     """Intersection to handle in Fortune's Algorithm."""
 
-    def __init__(self, x, y):
+    LEFT_PLACE = 1
+    RIGHT_PLACE = 2
+
+    region_node: AVLNode
+
+    def __init__(
+        self, x, y, region_node: AVLNode,
+    ):
         """Construct point."""
         super(Intersection, self).__init__(x, y, False)
+        self.region_node = region_node
 
 
 # TODO: Weighted point

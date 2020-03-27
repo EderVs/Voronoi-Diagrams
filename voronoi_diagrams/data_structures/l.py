@@ -1,13 +1,13 @@
 """L list implementation."""
 
 # Standard Library
-from typing import Any, Optional
+from typing import Any, Optional, Tuple
 
 # AVL
 from .avl_tree import AVLTree, AVLNode
 
 # Models
-from .models import Region, Event, Bisector, Site, Point
+from .models import Region, Event, Bisector, Site, Point, Boundary
 
 
 class LNode(AVLNode):
@@ -36,7 +36,7 @@ class LList:
     """List L used in the Fortune's Algorithm."""
 
     t: AVLTree
-    head: LNode
+    head: Optional[LNode]
 
     def __init__(self, root: Region):
         """Construct Tree t.
@@ -86,13 +86,28 @@ class LList:
                 self.head = left_node
         elif right_node is not None:
             self.head = right_node
+        else:
+            self.head = None
 
         if right_node is not None:
             right_node.left_neighbor = left_node
 
+    def update_boundaries(
+        self,
+        left_node: Optional[LNode],
+        boundary: Optional[Boundary],
+        right_node: Optional[LNode],
+    ) -> None:
+        """Update boundary in between 2 nodes."""
+        if left_node is not None:
+            left_node.region.right = boundary
+
+        if right_node is not None:
+            right_node.region.left = boundary
+
     def update_regions(
         self, left_region: Region, center_region: Region, right_region: Region,
-    ):
+    ) -> Tuple[LNode, LNode, LNode]:
         """Update the L list given a site and the regions to put.
 
         - left_region is the Region that will be in the left. This region must have q as its site.
@@ -138,3 +153,12 @@ class LList:
         self.update_neighbors(left_region_node, node)  # type: ignore
         self.update_neighbors(node, right_region_node)  # type: ignore
         self.update_neighbors(right_region_node, right_neighbor)  # type: ignore
+        return (left_region_node, node, right_region_node)  # type: ignore
+
+    def remove_region(self, region_node: LNode, new_boundary: Optional[Boundary]):
+        """Remove region in regionNode."""
+        left_neighbor: LNode = region_node.left_neighbor  # type: ignore
+        right_neighbor: LNode = region_node.right_neighbor  # type: ignore
+        self.update_neighbors(left_neighbor, right_neighbor)
+        self.update_boundaries(left_neighbor, new_boundary, right_neighbor)
+        self.t.remove_node(region_node)

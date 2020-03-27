@@ -17,6 +17,8 @@ def check_if_tree_is_balanced(t: AVLTree) -> None:
     Contains assertions.
     """
     queue: List[Any] = list()
+    if t.root is None:
+        return
     queue.append(t.root)
     while len(queue) > 0:
         node = queue.pop(0)

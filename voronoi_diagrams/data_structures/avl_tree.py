@@ -356,12 +356,8 @@ class AVLTree:
         node.right.parent = node.parent
         return node.right
 
-    def remove(self, value: Any) -> bool:
-        """Search and remove value in the Tree."""
-        node = self.search(value)
-        if node is None:
-            return False
-
+    def remove_node(self, node: AVLNode) -> None:
+        """Remove node in the Tree."""
         replace_node: AVLNode
         if node.left is not None:
             is_replace_left = True
@@ -382,4 +378,12 @@ class AVLTree:
             to_rebalance = self.remove_node_without_left(replace_node)
         if to_rebalance is not None:
             self.rebalance_node(to_rebalance)
+
+    def remove(self, value: Any) -> bool:
+        """Search and remove value in the Tree."""
+        node = self.search(value)
+        if node is None:
+            return False
+
+        self.remove_node(node)
         return True
