@@ -138,6 +138,8 @@ class AVLTree:
 
         right_left = right.left
         node.right = right_left
+        if right_left is not None:
+            right_left.parent = node
         right.parent = node.parent
         if node.parent is None:
             self.root = right
@@ -165,6 +167,8 @@ class AVLTree:
 
         left_right = left.right
         node.left = left_right
+        if left_right is not None:
+            left_right.parent = node
         left.parent = node.parent
 
         if node.parent is None:
@@ -305,6 +309,18 @@ class AVLTree:
         while node.left is not None:
             node = node.left
         return node
+
+    def get_max(self) -> Optional[AVLNode]:
+        """Get max Node in a subtree."""
+        if self.root is None:
+            return None
+        return self.get_max_in_subtree(self.root)
+
+    def get_min(self) -> Optional[AVLNode]:
+        """Get min Node in a subtree."""
+        if self.root is None:
+            return None
+        return self.get_min_in_subtree(self.root)
 
     def search(self, value: Any) -> Optional[AVLNode]:
         """Search value in the Tree and return the AVLNode."""
