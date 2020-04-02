@@ -9,9 +9,9 @@ from voronoi_diagrams.data_structures.models import Event
 from voronoi_diagrams.data_structures.models import Site
 
 
-def create_q_queue(event: Event) -> QQueue:
+def create_q_queue() -> QQueue:
     """Create an L List."""
-    q_queue = QQueue(event)
+    q_queue = QQueue()
     return q_queue
 
 
@@ -22,12 +22,14 @@ def validate_q_queue_with_expected_list(
     actual_event = q_queue.dequeue()
     index = 0
     n = len(expected_list)
-    while actual_event is not None or index == n:
-        print("outside", actual_event)
-        assert actual_event == expected_list[index]
+    while actual_event is not None or index != n:
+        assert (
+            actual_event is not None
+            and actual_event.point == expected_list[index].point
+        )
         actual_event = q_queue.dequeue()
         index += 1
-    assert len(expected_list) == 0
+    assert len(expected_list) == index
 
 
 class TestEnqueueDequeueRegions:
@@ -43,7 +45,3 @@ class TestEnqueueDequeueRegions:
             for event in random_list:
                 q_queue.enqueue(event)
             validate_q_queue_with_expected_list(q_queue, expected_list)
-
-
-o = TestEnqueueDequeueRegions()
-o.test_enqueue_dequeue()

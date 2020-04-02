@@ -298,29 +298,47 @@ class AVLTree:
 
         return node
 
-    def get_max_in_subtree(self, node: AVLNode) -> AVLNode:
+    def get_max_node_in_subtree(self, node: AVLNode) -> AVLNode:
         """Get max Node in a subtree."""
         while node.right is not None:
             node = node.right
         return node
 
-    def get_min_in_subtree(self, node: AVLNode) -> AVLNode:
+    def get_min_node_in_subtree(self, node: AVLNode) -> AVLNode:
         """Get min Node in a subtree."""
         while node.left is not None:
             node = node.left
         return node
 
-    def get_max(self) -> Optional[AVLNode]:
+    def get_max_node(self) -> Optional[AVLNode]:
         """Get max Node in a subtree."""
         if self.root is None:
             return None
-        return self.get_max_in_subtree(self.root)
+        return self.get_max_node_in_subtree(self.root)
 
-    def get_min(self) -> Optional[AVLNode]:
+    def get_min_node(self) -> Optional[AVLNode]:
         """Get min Node in a subtree."""
         if self.root is None:
             return None
-        return self.get_min_in_subtree(self.root)
+        return self.get_min_node_in_subtree(self.root)
+
+    def get_max(self) -> Optional[AVLNode]:
+        """Get max value in a subtree."""
+        if self.root is None:
+            return None
+        max_node = self.get_max_node_in_subtree(self.root)
+        if max_node is None:
+            return None
+        return max_node.value
+
+    def get_min(self) -> Optional[AVLNode]:
+        """Get min value in a subtree."""
+        if self.root is None:
+            return None
+        min_node = self.get_min_node_in_subtree(self.root)
+        if min_node is None:
+            return None
+        return min_node.value
 
     def search(self, value: Any) -> Optional[AVLNode]:
         """Search value in the Tree and return the AVLNode."""
@@ -377,10 +395,10 @@ class AVLTree:
         replace_node: AVLNode
         if node.left is not None:
             is_replace_left = True
-            replace_node = self.get_max_in_subtree(node.left)
+            replace_node = self.get_max_node_in_subtree(node.left)
         elif node.right is not None:
             is_replace_left = False
-            replace_node = self.get_min_in_subtree(node.right)
+            replace_node = self.get_min_node_in_subtree(node.right)
         else:
             replace_node = node
             is_replace_left = True

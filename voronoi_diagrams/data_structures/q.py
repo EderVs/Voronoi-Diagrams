@@ -16,12 +16,10 @@ class QNode(AVLNode):
     def __init__(self, value: Event, left=None, right=None) -> None:
         """List L AVL Node constructor."""
         super(QNode, self).__init__(value, left, right)
-        # Just renaming for clarity.
-        self.event: Event = self.value
 
-    def __str__(self):
-        """Get string representation."""
-        return str(self.value)
+    # def __str__(self):
+    #     """Get string representation."""
+    #     return str(self.value)
 
     def is_contained(self, value: Event, *args: Any, **kwargs: Any) -> bool:
         """Value is contained in the Node."""
@@ -71,8 +69,9 @@ class QQueue:
 
         Get the minimun in y axis event and delete it.
         """
-        node = self.t.get_min()
+        node = self.t.get_min_node()
         if node is None:
             return None
+        event = node.value
         self.t.remove_node(node)
-        return node.value
+        return event
