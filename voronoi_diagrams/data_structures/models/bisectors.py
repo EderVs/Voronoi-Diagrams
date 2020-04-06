@@ -1,7 +1,7 @@
 """Bisector representation."""
 
 # Standard Library
-from typing import Callable, Tuple
+from typing import Callable, Tuple, Optional, Any
 
 # Models
 from .events import Site
@@ -36,6 +36,10 @@ class Bisector:
         """Get Bisector representation."""
         return self.__str__()
 
+    def get_point_intersection_point(self, bisector: Any) -> Optional[Point]:
+        """Get the point of intersection between two bisectors."""
+        raise NotImplementedError
+
 
 class PointBisector(Bisector):
     """Bisector defined by point sites."""
@@ -65,3 +69,41 @@ class PointBisector(Bisector):
         a = -((q.x - p.x) / (q.y - p.y))
         b = (q.x ** 2 - p.x ** 2 + q.y ** 2 - p.y ** 2) / (2 * (q.y - p.y))
         return a * x + b
+
+    def get_intersection_point(self, bisector: Bisector) -> Point:
+        """Get the point of intersection between two bisectors."""
+
+        def f_aux_1(xi: float, xj: float, yi: float, yj: float) -> float:
+            """Auxiliar function."""
+            return (xj ** 2 - xi ** 2 + yj ** 2 - yi ** 2) / (2 * (yj - yi))
+
+        def f_aux_2(xi: float, xj: float, yi: float, yj: float) -> float:
+            """Auxiliar function."""
+            return (xj - xi) / (yj - yi)
+
+        def get_x(
+            xi: float,
+            xj: float,
+            xk: float,
+            xl: float,
+            yi: float,
+            yj: float,
+            yk: float,
+            yl: float,
+        ) -> float:
+            return (f_aux_1(xk, xl, yk, yl) - f_aux_1(xi, xj, yi, yj)) / (
+                f_aux_2(xk, xl, yk, yl) - f_aux_2(xi, xj, yi, yj)
+            )
+
+        x1 = self.sites[0].point.x
+        x2 = self.sites[1].point.x
+        y1 = self.sites[0].point.y
+        y2 = self.sites[1].point.y
+
+        x3 = bisector.sites[0].point.x
+        x4 = bisector.sites[1].point.x
+        y3 = bisector.sites[0].point.y
+        y4 = bisector.sites[1].point.y
+
+        x = get_x(x1, x2, x3, x4, y1, y2, y3, y4)
+        return Point(x, self.formula_y(x))
