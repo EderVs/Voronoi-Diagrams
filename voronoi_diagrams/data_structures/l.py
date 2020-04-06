@@ -1,11 +1,13 @@
 """L list implementation."""
 
 # Standard Library
-from typing import Any
+from typing import Any, Optional, Tuple
+
 # AVL
-from . import AVLTree, AVLNode
+from .avl_tree import AVLTree, AVLNode
+
 # Models
-from .models import Region, Event
+from .models import Region, Event, Bisector, Site, Point, Boundary
 
 
 class LNode(AVLNode):
@@ -14,34 +16,149 @@ class LNode(AVLNode):
     def __init__(self, value: Region, left=None, right=None) -> None:
         """List L AVL Node constructor."""
         super(LNode, self).__init__(value, left, right)
+        # Just renaming for clarity.
+        self.region: Region = self.value
 
-    def is_contained(self, value: Event, *args: Any, **kwargs: Any) -> bool:
+    def is_contained(self, value: Region, *args: Any, **kwargs: Any) -> bool:
         """Value is contained in the Node."""
-        # TODO: Depending on a y value
-        # TODO: Check that the left boundary is to the left of the self.value and the
-        #       right boundary is to the right of the self.value.
-        return value == self.value
+        return self.region.is_contained(value.site.point)
 
-    def is_left(self, value: Event, *args: Any, **kwargs: Any) -> bool:
+    def is_left(self, value: Region, *args: Any, **kwargs: Any) -> bool:
         """Value is to the left of Node."""
-        # TODO: Depending on a y value
-        # TODO: Check that the left boundary is to the right of the self.value and the
-        #       right boundary is to the right of the self.value.
-        return value < self.value
+        return self.region.is_left(value.site.point)
 
-    def is_right(self, value: Event, *args: Any, **kwargs: Any) -> bool:
+    def is_right(self, value: Region, *args: Any, **kwargs: Any) -> bool:
         """Value is to the right of Node."""
-        # TODO: Depending on a y value
-        # TODO: Check that the left boundary is to the left of the self.value and the
-        #       right boundary is to the left of the self.value.
-        return value > self.value
+        return self.region.is_right(value.site.point)
 
 
-class ListL:
+class LList:
     """List L used in the Fortune's Algorithm."""
 
     t: AVLTree
+    head: Optional[LNode]
 
-    def __init__(self):
-        """Construct Tree t."""
-        self.t = AVLTree()
+    def __init__(self, root: Region):
+        """Construct Tree t.
+
+        The list must have a root region. If there is one region, this region must not have any
+        boundaries.
+        """
+        self.t = AVLTree(node_class=LNode)
+        self.head = self.t.insert(root)  # type: ignore
+
+    def __str__(self):
+        """Get string representation."""
+        string = f"[{self.head.region}"
+        node = self.head.right_neighbor
+        while node is not None:
+            string += f", {node.region}"
+            node = node.right_neighbor
+        string += "]"
+        return string
+
+    def __repr__(self):
+        """Get representation."""
+        return self.__str__()
+
+    def _search_region_node(self, region: Region) -> LNode:
+        """Search the node of the region where a point is located given a y coordinate."""
+        node = self.t.search(region)
+        if node is None:
+            # TODO: Create exception.
+            raise Exception(
+                "Cannot find a region with this point. Are your boundaries, "
+                "regions and y coordinate right?"
+            )
+        return node  # type: ignore
+
+    def search_region_contained(self, region: Region) -> Region:
+        """Search the region where a point is located given a y coordinate."""
+        return self._search_region_node(region).region
+
+    def update_neighbors(
+        self, left_node: Optional[LNode], right_node: Optional[LNode]
+    ) -> None:
+        """Update neighbors between 2 nodes."""
+        if left_node is not None:
+            left_node.right_neighbor = right_node
+            if left_node.left_neighbor is None:
+                self.head = left_node
+        elif right_node is not None:
+            self.head = right_node
+        else:
+            self.head = None
+
+        if right_node is not None:
+            right_node.left_neighbor = left_node
+
+    def update_boundaries(
+        self,
+        left_node: Optional[LNode],
+        boundary: Optional[Boundary],
+        right_node: Optional[LNode],
+    ) -> None:
+        """Update boundary in between 2 nodes."""
+        if left_node is not None:
+            left_node.region.right = boundary
+
+        if right_node is not None:
+            right_node.region.left = boundary
+
+    def update_regions(
+        self, left_region: Region, center_region: Region, right_region: Region,
+    ) -> Tuple[LNode, LNode, LNode]:
+        """Update the L list given a site and the regions to put.
+
+        - left_region is the Region that will be in the left. This region must have q as its site.
+        - center_region is the Region that will be in the center. This region must have p as its
+          site.
+        - right_region is the Region that will be in the right. This region must have q as its site.
+        """
+        node = self._search_region_node(center_region)
+
+        node.value = node.region = center_region
+
+        # Insert in AVLTree
+        # Insert in the left sub tree
+        if node.left is not None:
+            left_region_node = self.t.insert_from_node(left_region, node.left)
+        else:
+            self.t.length += 1
+            node.length += 1
+            left_region_node = LNode(left_region)
+            left_region_node.parent = node
+            node.left = left_region_node
+            self.t.rebalance_to_node(left_region_node, node)
+
+        # Insert in the right sub tree
+        if node.right is not None:
+            right_region_node = self.t.insert_from_node(right_region, node.right)
+        else:
+            self.t.length += 1
+            node.length += 1
+            right_region_node = LNode(right_region)
+            right_region_node.parent = node
+            node.right = right_region_node
+            self.t.rebalance_to_node(right_region_node, node)
+
+        self.t.rebalance_to_root(node)
+
+        # Update like a list.
+        left_neighbor = node.left_neighbor
+        right_neighbor = node.right_neighbor
+        if left_neighbor is None:
+            self.head = left_region_node  # type: ignore
+        self.update_neighbors(left_neighbor, left_region_node)  # type: ignore
+        self.update_neighbors(left_region_node, node)  # type: ignore
+        self.update_neighbors(node, right_region_node)  # type: ignore
+        self.update_neighbors(right_region_node, right_neighbor)  # type: ignore
+        return (left_region_node, node, right_region_node)  # type: ignore
+
+    def remove_region(self, region_node: LNode, new_boundary: Optional[Boundary]):
+        """Remove region in regionNode."""
+        left_neighbor: LNode = region_node.left_neighbor  # type: ignore
+        right_neighbor: LNode = region_node.right_neighbor  # type: ignore
+        self.update_neighbors(left_neighbor, right_neighbor)
+        self.update_boundaries(left_neighbor, new_boundary, right_neighbor)
+        self.t.remove_node(region_node)

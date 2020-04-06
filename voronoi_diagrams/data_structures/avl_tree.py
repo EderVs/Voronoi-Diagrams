@@ -138,6 +138,8 @@ class AVLTree:
 
         right_left = right.left
         node.right = right_left
+        if right_left is not None:
+            right_left.parent = node
         right.parent = node.parent
         if node.parent is None:
             self.root = right
@@ -165,6 +167,8 @@ class AVLTree:
 
         left_right = left.right
         node.left = left_right
+        if left_right is not None:
+            left_right.parent = node
         left.parent = node.parent
 
         if node.parent is None:
@@ -187,7 +191,10 @@ class AVLTree:
         self.update_node_factor(left)
 
     def rebalance_node(self, node: AVLNode) -> Optional[AVLNode]:
-        """Rebalance node."""
+        """Rebalance node.
+
+        Return the new root of the sub-tree.
+        """
         if abs(node.factor) <= 1:
             return node
         # Weighted to the right
@@ -218,21 +225,45 @@ class AVLTree:
             if actual is not None:
                 actual = actual.parent
 
+    def rebalance_to_node(self, node_start: AVLNode, node_finish: AVLNode) -> None:
+        """Rebalance tree from node given to other node given.
+
+        node_finish must be an ancestor of node_start if not it will rebalance to the root.
+        node_finish is exclusive.
+        """
+        actual: Optional[AVLNode] = node_start
+        while actual is not None:
+            self.update_node_level(actual)
+            self.update_node_factor(actual)
+
+            if actual == node_finish:
+                self.rebalance_node(actual)
+                break
+
+            actual = self.rebalance_node(actual)
+            if actual is not None:
+                actual = actual.parent
+
     def insert_many(self, values: Iterable[Any]) -> None:
         """Insert many values."""
         for value in values:
             self.insert(value)
 
-    def insert(self, value: Any) -> AVLNode:
+    def insert_from_node(
+        self, value: Any, from_node: AVLNode, *args: Any, **kwargs: Any,
+    ) -> AVLNode:
         """Insert value with a Node in the Tree."""
-        node = self.NODE_CLASS(value)
         self.length += 1
-        if self.root is None:
-            self.root = node
-            return self.root
+        # Update length of all node above
+        actual_parent: Optional[AVLNode] = from_node.parent
+        while actual_parent is not None:
+            actual_parent.length += 1
+            actual_parent = actual_parent.parent
 
-        actual_node: Optional[AVLNode] = self.root
-        last_node: AVLNode = self.root
+        node = self.NODE_CLASS(value, *args, **kwargs)
+
+        actual_node: Optional[AVLNode] = from_node
+        last_node: AVLNode = from_node
         is_left_child = False
         # Get to a leaf.
         while actual_node is not None:
@@ -251,21 +282,63 @@ class AVLTree:
         else:
             last_node.right = node
 
-        self.rebalance_to_root(node)
+        self.rebalance_to_node(node, from_node)
 
         return node
 
-    def get_max_in_subtree(self, node: AVLNode) -> AVLNode:
+    def insert(self, value: Any, *args: Any, **kwargs: Any) -> AVLNode:
+        """Insert value with a Node in the Tree."""
+        if self.root is None:
+            node = self.NODE_CLASS(value, *args, **kwargs)
+            self.root = node
+            self.length += 1
+            return self.root
+
+        node = self.insert_from_node(value, self.root)
+
+        return node
+
+    def get_max_node_in_subtree(self, node: AVLNode) -> AVLNode:
         """Get max Node in a subtree."""
         while node.right is not None:
             node = node.right
         return node
 
-    def get_min_in_subtree(self, node: AVLNode) -> AVLNode:
+    def get_min_node_in_subtree(self, node: AVLNode) -> AVLNode:
         """Get min Node in a subtree."""
         while node.left is not None:
             node = node.left
         return node
+
+    def get_max_node(self) -> Optional[AVLNode]:
+        """Get max Node in a subtree."""
+        if self.root is None:
+            return None
+        return self.get_max_node_in_subtree(self.root)
+
+    def get_min_node(self) -> Optional[AVLNode]:
+        """Get min Node in a subtree."""
+        if self.root is None:
+            return None
+        return self.get_min_node_in_subtree(self.root)
+
+    def get_max(self) -> Optional[AVLNode]:
+        """Get max value in a subtree."""
+        if self.root is None:
+            return None
+        max_node = self.get_max_node_in_subtree(self.root)
+        if max_node is None:
+            return None
+        return max_node.value
+
+    def get_min(self) -> Optional[AVLNode]:
+        """Get min value in a subtree."""
+        if self.root is None:
+            return None
+        min_node = self.get_min_node_in_subtree(self.root)
+        if min_node is None:
+            return None
+        return min_node.value
 
     def search(self, value: Any) -> Optional[AVLNode]:
         """Search value in the Tree and return the AVLNode."""
@@ -317,19 +390,15 @@ class AVLTree:
         node.right.parent = node.parent
         return node.right
 
-    def remove(self, value: Any) -> bool:
-        """Search and remove value in the Tree."""
-        node = self.search(value)
-        if node is None:
-            return False
-
+    def remove_node(self, node: AVLNode) -> None:
+        """Remove node in the Tree."""
         replace_node: AVLNode
         if node.left is not None:
             is_replace_left = True
-            replace_node = self.get_max_in_subtree(node.left)
+            replace_node = self.get_max_node_in_subtree(node.left)
         elif node.right is not None:
             is_replace_left = False
-            replace_node = self.get_min_in_subtree(node.right)
+            replace_node = self.get_min_node_in_subtree(node.right)
         else:
             replace_node = node
             is_replace_left = True
@@ -343,4 +412,12 @@ class AVLTree:
             to_rebalance = self.remove_node_without_left(replace_node)
         if to_rebalance is not None:
             self.rebalance_node(to_rebalance)
+
+    def remove(self, value: Any) -> bool:
+        """Search and remove value in the Tree."""
+        node = self.search(value)
+        if node is None:
+            return False
+
+        self.remove_node(node)
         return True

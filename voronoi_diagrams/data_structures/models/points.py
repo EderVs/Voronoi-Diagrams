@@ -12,4 +12,10 @@ class Point:
         self.x = x
         self.y = y
 
-# TODO: Weighted point
+    def __str__(self):
+        """Get String representation."""
+        return f"P({self.x}, {self.y})"
+
+    def __repr__(self):
+        """Get object representation."""
+        return self.__str__()
