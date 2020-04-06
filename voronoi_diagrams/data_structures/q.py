@@ -17,9 +17,9 @@ class QNode(AVLNode):
         """List L AVL Node constructor."""
         super(QNode, self).__init__(value, left, right)
 
-    # def __str__(self):
-    #     """Get string representation."""
-    #     return str(self.value)
+    def __str__(self):
+        """Get string representation."""
+        return str(self.value)
 
     def is_contained(self, value: Event, *args: Any, **kwargs: Any) -> bool:
         """Value is contained in the Node."""
