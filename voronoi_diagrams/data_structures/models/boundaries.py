@@ -1,12 +1,13 @@
 """Boundary representation."""
 
 # Standard Library
-from typing import Callable
+from typing import Callable, Optional
 from math import sqrt
 
 # Models
 from .points import Point
 from .bisectors import Bisector, PointBisector
+from .events import Intersection
 
 
 class Boundary:
@@ -14,6 +15,7 @@ class Boundary:
 
     bisector: Bisector
     sign: bool
+    intersection: Optional[Intersection]
 
     def __init__(
         self, bisector: Bisector, sign: bool,
@@ -58,6 +60,10 @@ class Boundary:
     def __repr__(self):
         """Get boundary representation."""
         return self.__str__()
+
+    def get_intersection(self, boundary: Boundary) -> Intersection:
+        """TODO: Implement this function."""
+        raise NotImplementedError
 
 
 class PointBoundary(Boundary):

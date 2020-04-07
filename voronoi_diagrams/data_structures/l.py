@@ -61,7 +61,7 @@ class LList:
         """Get representation."""
         return self.__str__()
 
-    def _search_region_node(self, region: Region) -> LNode:
+    def search_region_node(self, region: Region) -> LNode:
         """Search the node of the region where a point is located given a y coordinate."""
         node = self.t.search(region)
         if node is None:
@@ -74,7 +74,7 @@ class LList:
 
     def search_region_contained(self, region: Region) -> Region:
         """Search the region where a point is located given a y coordinate."""
-        return self._search_region_node(region).region
+        return self.search_region_node(region).region
 
     def update_neighbors(
         self, left_node: Optional[LNode], right_node: Optional[LNode]
@@ -115,7 +115,7 @@ class LList:
           site.
         - right_region is the Region that will be in the right. This region must have q as its site.
         """
-        node = self._search_region_node(center_region)
+        node = self.search_region_node(center_region)
 
         node.value = node.region = center_region
 

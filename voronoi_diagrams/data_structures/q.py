@@ -75,3 +75,7 @@ class QQueue:
         event = node.value
         self.t.remove_node(node)
         return event
+
+    def is_empty(self) -> bool:
+        """Return True if the Queue is Empty."""
+        return self.t.is_empty()

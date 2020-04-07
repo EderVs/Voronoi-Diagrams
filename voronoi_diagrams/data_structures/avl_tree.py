@@ -421,3 +421,7 @@ class AVLTree:
 
         self.remove_node(node)
         return True
+
+    def is_empty(self) -> bool:
+        """Return True if the Tree is Empty."""
+        return self.root is None
