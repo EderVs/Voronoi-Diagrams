@@ -3,6 +3,7 @@
 # Standard Library
 from typing import Callable, Optional, Any, Union
 from math import sqrt
+from abc import ABCMeta, abstractmethod
 
 # Models
 from .boundaries import Boundary
@@ -12,6 +13,8 @@ from .events import Site
 
 class Region:
     """Voronoi Cell that is * mapped."""
+
+    __metaclass__ = ABCMeta
 
     left: Optional[Boundary]
     right: Optional[Boundary]
@@ -28,6 +31,7 @@ class Region:
         self.right = right
         self.site = site
 
+    @abstractmethod
     def star(self, point: Point) -> Point:
         """Map a bisector."""
         raise NotImplementedError

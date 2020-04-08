@@ -2,6 +2,7 @@
 
 # Standar Library
 from typing import Union, Any
+from abc import ABCMeta, abstractmethod
 
 # Models
 from .points import Point
@@ -10,6 +11,8 @@ from ..avl_tree import AVLNode
 
 class Event:
     """Event Representation. It can be a Site or an Interception."""
+
+    __metaclass__ = ABCMeta
 
     is_site: bool
     point: Point

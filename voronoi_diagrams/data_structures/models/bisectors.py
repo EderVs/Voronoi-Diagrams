@@ -2,6 +2,7 @@
 
 # Standard Library
 from typing import Callable, Tuple, Optional, Any
+from abc import ABCMeta, abstractmethod
 
 # Models
 from .events import Site
@@ -14,16 +15,20 @@ class Bisector:
     It has its formula(function) associated.
     """
 
+    __metaclass__ = ABCMeta
+
     sites: Tuple[Site, Site]
 
     def __init__(self, sites: Tuple[Site, Site]):
         """Construct bisector."""
         self.sites = sites
 
+    @abstractmethod
     def formula_x(self, y: float) -> float:
         """Get x coordinate given the y coordinate."""
         raise NotImplementedError
 
+    @abstractmethod
     def formula_y(self, y: float) -> float:
         """Get y coordinate given the x coordinate."""
         raise NotImplementedError
@@ -36,6 +41,7 @@ class Bisector:
         """Get Bisector representation."""
         return self.__str__()
 
+    @abstractmethod
     def get_intersection_point(self, bisector: Any) -> Optional[Point]:
         """Get the point of intersection between two bisectors."""
         raise NotImplementedError

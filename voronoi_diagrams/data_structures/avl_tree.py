@@ -1,6 +1,7 @@
 """AVL Tree."""
 # Standard Library
 from typing import Any, Optional, Iterable
+from abc import ABCMeta, abstractmethod
 
 
 class AVLNode:
@@ -8,6 +9,8 @@ class AVLNode:
 
     Factor is used to balance the tree.
     """
+
+    __metaclass__ = ABCMeta
 
     factor: int = 0
     value: Any = None
@@ -38,14 +41,17 @@ class AVLNode:
         """Return if has right child."""
         return self.right is not None
 
+    @abstractmethod
     def is_contained(self, value: Any, *args: Any, **kwargs: Any) -> bool:
         """Value is contained in the Node."""
         raise NotImplementedError
 
+    @abstractmethod
     def is_left(self, value: Any, *args: Any, **kwargs: Any) -> bool:
         """Value is to the left of Node."""
         raise NotImplementedError
 
+    @abstractmethod
     def is_right(self, value: Any, *args: Any, **kwargs: Any) -> bool:
         """Value is to the right of Node."""
         raise NotImplementedError
