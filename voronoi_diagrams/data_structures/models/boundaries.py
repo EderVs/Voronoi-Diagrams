@@ -1,8 +1,9 @@
 """Boundary representation."""
 
 # Standard Library
-from typing import Callable, Optional
+from typing import Callable, Optional, Any
 from math import sqrt
+from abc import ABCMeta, abstractmethod
 
 # Models
 from .points import Point
@@ -12,6 +13,8 @@ from .events import Intersection
 
 class Boundary:
     """Bisector that is * mapped."""
+
+    __metaclass__ = ABCMeta
 
     bisector: Bisector
     sign: bool
@@ -24,6 +27,7 @@ class Boundary:
         self.bisector = bisector
         self.sign = sign
 
+    @abstractmethod
     def star(self, point: Point) -> Point:
         """Map a bisector."""
         raise NotImplementedError
@@ -37,6 +41,7 @@ class Boundary:
         """
         return point.x - self.formula_x(point.y)
 
+    @abstractmethod
     def formula_x(self, y: float) -> float:
         """Return the x coordinate given the y coordinate.
 
@@ -44,6 +49,7 @@ class Boundary:
         """
         raise NotImplementedError
 
+    @abstractmethod
     def formula_y(self, x: float) -> float:
         """Return the y coordinate given the x coordinate.
 
@@ -61,9 +67,20 @@ class Boundary:
         """Get boundary representation."""
         return self.__str__()
 
-    def get_intersection(self, boundary: Boundary) -> Intersection:
-        """TODO: Implement this function."""
+    @abstractmethod
+    def distance_to_site(self, point: Point) -> float:
+        """Get distance to any of the sites because it is a boundary."""
         raise NotImplementedError
+
+    def get_intersection(self, boundary: Any) -> Optional[Point]:
+        """Get intersection between two boundaries."""
+        # In boundary we have bisector and bisector has get intersection
+        intersection_point = self.bisector.get_intersection_point(boundary.bisector)
+        if intersection_point is not None:
+            intersection_point.y = intersection_point.y + self.distance_to_site(
+                intersection_point
+            )
+        return intersection_point
 
 
 class PointBoundary(Boundary):

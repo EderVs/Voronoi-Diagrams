@@ -3,7 +3,7 @@
 General Solution.
 """
 # Standard Library
-from typing import Iterable, List, Any
+from typing import Iterable, List, Any, Optional
 
 # Data structures
 from data_structures import LList, QQueue
@@ -15,6 +15,8 @@ from data_structures.models import (
     Bisector,
     Event,
     Intersection,
+    Region,
+    Boundary,
     PointBisector,
     PointBoundary,
     PointRegion,
@@ -83,32 +85,76 @@ class FortunesAlgorithm:
                 r_q_right = REGION_CLASS(r_q.site, boundary_p_q_plus, r_q.right)
                 r_p.left = boundary_p_q_minus
                 r_p.right = boundary_p_q_plus
-                l_list.update_regions(r_q_left, r_p, r_q_right)
+                # Update L list.
+                r_q_left_node, r_p_node, r_q_right_node = l_list.update_regions(
+                    r_q_left, r_p, r_q_right
+                )
                 # Step 11.
                 # Delete from Q the intersection between the left and right boundary of
                 # R_q, if any.
                 left_right_intersection = None
+                left_boundary: Optional[Boundary] = None
+                right_boundary: Optional[Boundary] = None
 
                 left_region_node = r_q_node.left_neighbor
                 if left_region_node is not None:
-                    right_boundary = left_region_node.value.right
-                    if right_boundary is not None:
-                        left_right_intersection = right_boundary.intersection
-                        if right_boundary.intersection is not None:
-                            right_boundary.intersection = None
-
-                right_region_node = r_q_node.right_neighbor
-                if right_region_node is not None:
-                    left_boundary = right_region_node.value.left
+                    left_boundary = left_region_node.value.right
                     if left_boundary is not None:
                         left_right_intersection = left_boundary.intersection
                         if left_boundary.intersection is not None:
                             left_boundary.intersection = None
 
+                right_region_node = r_q_node.right_neighbor
+                if right_region_node is not None:
+                    right_boundary = right_region_node.value.left
+                    if right_boundary is not None:
+                        left_right_intersection = right_boundary.intersection
+                        if right_boundary.intersection is not None:
+                            right_boundary.intersection = None
+
                 q_queue.delete(left_right_intersection)
 
-            # Step 13.
+                # Step 12.
+                intersections_to_add: List[Intersection] = []
+                # Left.
+                if left_boundary is not None:
+                    left_intersection_point = left_boundary.get_intersection(
+                        boundary_p_q_plus
+                    )
+                    if left_intersection_point is not None:
+                        left_intersection = Intersection(
+                            left_intersection_point.x,
+                            left_intersection_point.y,
+                            r_q_left_node,
+                        )
+                        intersections_to_add.append(left_intersection)
+
+                # Right.
+                if right_boundary is not None:
+                    right_intersection_point = right_boundary.get_intersection(
+                        boundary_p_q_minus
+                    )
+                    if right_intersection_point is not None:
+                        right_intersection = Intersection(
+                            right_intersection_point.x,
+                            right_intersection_point.y,
+                            r_q_right_node,
+                        )
+                        intersections_to_add.append(right_intersection)
+                # Add intersections to Q
+                for intersection in intersections_to_add:
+                    q_queue.enqueue(intersection)
+
+            # Step 13: p is an intersection.
             else:
-                pass
+                # Step 14.
+                p_intersection: Intersection = p
+                intersection_region_node = p_intersection.region_node
+                # Left neighbor cannot be None because p is an intersection.
+                r_q = intersection_region_node.left_neighbor.value
+                r_s = intersection_region_node.left_neighbor.value
+                # Step 15.
+                bisector_q_s = BISECTOR_CLASS(sites=(r_q.site, r_s.site))
+                voronoi_diagram.bisectors.append(bisector_q_s)
 
         return voronoi_diagram

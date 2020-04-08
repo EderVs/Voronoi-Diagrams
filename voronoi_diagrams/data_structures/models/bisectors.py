@@ -36,7 +36,7 @@ class Bisector:
         """Get Bisector representation."""
         return self.__str__()
 
-    def get_point_intersection_point(self, bisector: Any) -> Optional[Point]:
+    def get_intersection_point(self, bisector: Any) -> Optional[Point]:
         """Get the point of intersection between two bisectors."""
         raise NotImplementedError
 
