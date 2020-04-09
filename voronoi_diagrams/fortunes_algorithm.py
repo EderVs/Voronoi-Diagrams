@@ -152,9 +152,13 @@ class FortunesAlgorithm:
                 intersection_region_node = p_intersection.region_node
                 # Left neighbor cannot be None because p is an intersection.
                 r_q = intersection_region_node.left_neighbor.value
-                r_s = intersection_region_node.left_neighbor.value
+                r_s = intersection_region_node.right_neighbor.value
                 # Step 15.
                 bisector_q_s = BISECTOR_CLASS(sites=(r_q.site, r_s.site))
                 voronoi_diagram.bisectors.append(bisector_q_s)
+                # Step 16.
+                # Update list L so it contains Cqs instead of Cqr, Rr*, Crs
+                boundary_q_s = BOUNDARY_CLASS(bisector_q_s, r_q.site.y > r_s.site.y)
+                l_list.remove_region(intersection_region_node, boundary_q_s)
 
         return voronoi_diagram
