@@ -128,6 +128,9 @@ class FortunesAlgorithm:
                             r_q_left_node,
                         )
                         intersections_to_add.append(left_intersection)
+                        # Save intersection in both boundaries.
+                        left_boundary.intersection = left_intersection
+                        boundary_p_q_plus.intersection = left_intersection
 
                 # Right.
                 if right_boundary is not None:
@@ -141,6 +144,10 @@ class FortunesAlgorithm:
                             r_q_right_node,
                         )
                         intersections_to_add.append(right_intersection)
+                        # Save intersection in both boundaries.
+                        right_boundary.intersection = right_intersection
+                        boundary_p_q_minus.intersection = right_intersection
+
                 # Add intersections to Q
                 for intersection in intersections_to_add:
                     q_queue.enqueue(intersection)
@@ -160,5 +167,10 @@ class FortunesAlgorithm:
                 # Update list L so it contains Cqs instead of Cqr, Rr*, Crs
                 boundary_q_s = BOUNDARY_CLASS(bisector_q_s, r_q.site.y > r_s.site.y)
                 l_list.remove_region(intersection_region_node, boundary_q_s)
+                # Step 17.
+                # Delete from Q any intersection between Cqr and its neighbor to the
+                # left and between Crs and its neighbor to the right.
+                q_queue.delete(intersection_region_node.value.left.intersection)
+                q_queue.delete(intersection_region_node.value.right.intersection)
 
         return voronoi_diagram
