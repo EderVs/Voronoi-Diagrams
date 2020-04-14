@@ -77,7 +77,7 @@ class FortunesAlgorithm:
                 r_q = r_q_node.value
                 # Step 9.
                 bisector_p_q = BISECTOR_CLASS(sites=(p, r_q.site))
-                voronoi_diagram.bisectors.append(bisector_p_q)
+                voronoi_diagram.add_bisector(bisector_p_q)
                 # Step 10.
                 boundary_p_q_plus = BOUNDARY_CLASS(bisector_p_q, True)
                 boundary_p_q_minus = BOUNDARY_CLASS(bisector_p_q, False)
@@ -115,54 +115,49 @@ class FortunesAlgorithm:
                 q_queue.delete(left_right_intersection)
 
                 # Step 12.
-                intersections_to_add: List[Intersection] = []
                 # Left.
                 if left_boundary is not None:
-                    left_intersection_point = left_boundary.get_intersection(
+                    intersection_point = left_boundary.get_intersection(
                         boundary_p_q_plus
                     )
-                    if left_intersection_point is not None:
-                        left_intersection = Intersection(
-                            left_intersection_point.x,
-                            left_intersection_point.y,
-                            r_q_left_node,
+                    if intersection_point is not None:
+                        intersection = Intersection(
+                            intersection_point.x, intersection_point.y, r_q_left_node,
                         )
-                        intersections_to_add.append(left_intersection)
+                        # Insert intersection to Q.
+                        q_queue.enqueue(intersection)
                         # Save intersection in both boundaries.
-                        left_boundary.intersection = left_intersection
-                        boundary_p_q_plus.intersection = left_intersection
+                        left_boundary.intersection = intersection
+                        boundary_p_q_plus.intersection = intersection
 
                 # Right.
                 if right_boundary is not None:
-                    right_intersection_point = right_boundary.get_intersection(
+                    intersection_point = right_boundary.get_intersection(
                         boundary_p_q_minus
                     )
-                    if right_intersection_point is not None:
-                        right_intersection = Intersection(
-                            right_intersection_point.x,
-                            right_intersection_point.y,
-                            r_q_right_node,
+                    if intersection_point is not None:
+                        intersection = Intersection(
+                            intersection_point.x, intersection_point.y, r_q_right_node,
                         )
-                        intersections_to_add.append(right_intersection)
+                        # Insert intersection to Q.
+                        q_queue.enqueue(intersection)
                         # Save intersection in both boundaries.
-                        right_boundary.intersection = right_intersection
-                        boundary_p_q_minus.intersection = right_intersection
-
-                # Add intersections to Q
-                for intersection in intersections_to_add:
-                    q_queue.enqueue(intersection)
+                        right_boundary.intersection = intersection
+                        boundary_p_q_minus.intersection = intersection
 
             # Step 13: p is an intersection.
             else:
                 # Step 14.
                 p_intersection: Intersection = p
                 intersection_region_node = p_intersection.region_node
-                # Left neighbor cannot be None because p is an intersection.
-                r_q = intersection_region_node.left_neighbor.value
-                r_s = intersection_region_node.right_neighbor.value
+                # Left and right neighbor cannot be None because p is an intersection.
+                r_q_node = intersection_region_node.left_neighbor
+                r_q = r_q.value
+                r_s_node = intersection_region_node.right_neighbor
+                r_s = r_s_node.value
                 # Step 15.
                 bisector_q_s = BISECTOR_CLASS(sites=(r_q.site, r_s.site))
-                voronoi_diagram.bisectors.append(bisector_q_s)
+                voronoi_diagram.add_bisector(bisector_q_s)
                 # Step 16.
                 # Update list L so it contains Cqs instead of Cqr, Rr*, Crs
                 boundary_q_s = BOUNDARY_CLASS(bisector_q_s, r_q.site.y > r_s.site.y)
@@ -172,5 +167,39 @@ class FortunesAlgorithm:
                 # left and between Crs and its neighbor to the right.
                 q_queue.delete(intersection_region_node.value.left.intersection)
                 q_queue.delete(intersection_region_node.value.right.intersection)
+                # Step 18.
+                # Insert any intersections between Cqs and its neighbors to the left or right
+                # into Q.
+                # Left
+                left_boundary = r_q.left
+                if left_boundary is not None:
+                    intersection_point = boundary_q_s.get_intersection(left_boundary)
+                    if intersection_point is not None:
+                        intersection = Intersection(
+                            intersection_point.x, intersection_point.y, r_q_node,
+                        )
+                        # Insert intersection to Q.
+                        q_queue.enqueue(intersection)
+                        # Save intersection in both boundaries.
+                        left_boundary.intersection = intersection
+                        boundary_q_s.intersection = intersection
+
+                # Right
+                right_boundary = r_s.right
+                if right_boundary is not None:
+                    intersection_point = boundary_q_s.get_intersection(right_boundary)
+                    if intersection_point is not None:
+                        intersection = Intersection(
+                            intersection_point.x, intersection_point.y, r_q_node,
+                        )
+                        # Insert intersection to Q.
+                        q_queue.enqueue(intersection)
+                        # Save intersection in both boundaries.
+                        right_boundary.intersection = intersection
+                        boundary_q_s.intersection = intersection
+                # Step 19.
+                # Mark p as a vertex and as an endpoint of B*qr, B*rs and B*qs.
+                voronoi_diagram.add_vertex(p.point)
+                # TODO: Add as an endpoint of B*qr, B*rs and B*qs.
 
         return voronoi_diagram
