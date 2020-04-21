@@ -26,6 +26,7 @@ class Boundary:
         """Construct Boundary."""
         self.bisector = bisector
         self.sign = sign
+        self.intersection = None
 
     @abstractmethod
     def star(self, point: Point) -> Point:

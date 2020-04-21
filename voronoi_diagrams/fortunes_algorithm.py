@@ -6,11 +6,11 @@ General Solution.
 from typing import Iterable, List, Any, Optional, Tuple
 
 # Data structures
-from data_structures import LList, QQueue
-from data_structures.l import LNode
+from .data_structures import LList, QQueue
+from .data_structures.l import LNode
 
 # Models
-from data_structures.models import (
+from .data_structures.models import (
     Site,
     Point,
     Bisector,
@@ -46,7 +46,7 @@ class VoronoiDiagram:
 
     def add_bisector(self, bisector: Bisector) -> None:
         """Add point in the vertex list."""
-        self.bisectors.append(Bisector)
+        self.bisectors.append(bisector)
 
     def _find_region_containing_p(self, p: Site) -> Tuple[Region, Region, LNode]:
         """Find an occurrence of a region R*q on L containing p.
@@ -129,6 +129,8 @@ class VoronoiDiagram:
         # Step 8.
         # Find an occurrence of a region R*q on L containing p.
         r_p, r_q, r_q_node = self._find_region_containing_p(p)
+        left_region_node = r_q_node.left_neighbor
+        right_region_node = r_q_node.right_neighbor
 
         # Step 9.
         # Create Bisector B*pq.
@@ -153,12 +155,10 @@ class VoronoiDiagram:
         left_boundary: Optional[Boundary] = None
         right_boundary: Optional[Boundary] = None
         # Left
-        left_region_node = r_q_node.left_neighbor
         if left_region_node is not None:
             left_boundary = left_region_node.value.right
             self._delete_intersection_in_boundary_from_q(left_boundary)
         # Right
-        right_region_node = r_q_node.right_neighbor
         if right_region_node is not None:
             right_boundary = right_region_node.value.left
             self._delete_intersection_in_boundary_from_q(right_boundary)
