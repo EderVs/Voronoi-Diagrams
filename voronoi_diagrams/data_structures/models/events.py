@@ -42,6 +42,10 @@ class Site(Event):
         """Construct point."""
         super(Site, self).__init__(x, y, True)
 
+    def __eq__(self, site: Any) -> bool:
+        """Get equality between sites."""
+        return self.point.x == site.point.x and self.point.y == site.point.y
+
 
 class Intersection(Event):
     """Intersection to handle in Fortune's Algorithm."""

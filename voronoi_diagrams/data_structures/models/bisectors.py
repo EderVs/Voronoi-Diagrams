@@ -21,7 +21,16 @@ class Bisector:
 
     def __init__(self, sites: Tuple[Site, Site]):
         """Construct bisector."""
+        if sites[0].point.y < sites[1].point.y or (
+            sites[0].point.y == sites[1].point.y
+            and sites[0].point.x <= sites[1].point.x
+        ):
+            sites = (sites[1], sites[0])
         self.sites = sites
+
+    def __eq__(self, bisector: Any) -> bool:
+        """Equality between bisectors."""
+        return self.sites == bisector.sites
 
     @abstractmethod
     def formula_x(self, y: float) -> float:

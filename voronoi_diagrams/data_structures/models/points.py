@@ -1,4 +1,5 @@
 """Site Representation."""
+from typing import Any
 
 
 class Point:
@@ -19,3 +20,11 @@ class Point:
     def __repr__(self):
         """Get object representation."""
         return self.__str__()
+
+    def __eq__(self, point: Any):
+        """Get equality between points."""
+        return self.x == point.x and self.y == point.y
+
+    def get_tuple(self):
+        """Get tuple of coordinates (x, y)."""
+        return (self.x, self.y)

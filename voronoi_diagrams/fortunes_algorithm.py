@@ -3,7 +3,7 @@
 General Solution.
 """
 # Standard Library
-from typing import Iterable, List, Any, Optional, Tuple
+from typing import Iterable, List, Any, Optional, Tuple, Set
 
 # Data structures
 from .data_structures import LList, QQueue
@@ -27,12 +27,18 @@ from .data_structures.models import (
 class VoronoiDiagram:
     """Voronoi Diagram representation."""
 
-    vertex: List[Point] = []
-    bisectors: List[Bisector] = []
-    sites: List[Site] = []
+    vertex: List[Point]
+    _vertex: Set[Tuple[float, float]]
+    bisectors: List[Bisector]
+    _bisectors: Set[Tuple[Tuple[float, float], Tuple[float, float]]]
+    sites: List[Site]
 
     def __init__(self, sites: Iterable[Site], site_class: Any = Site):
         """Construct and calculate Voronoi Diagram."""
+        self.vertex = []
+        self._vertex = set()
+        self.bisectors = []
+        self._bisectors = set()
         self.sites = list(sites)
         if site_class == Site:
             self.BISECTOR_CLASS = PointBisector
@@ -42,11 +48,20 @@ class VoronoiDiagram:
 
     def add_vertex(self, point: Point) -> None:
         """Add point in the vertex list."""
-        self.vertex.append(point)
+        point_tuple = point.get_tuple()
+        if point_tuple not in self._vertex:
+            self._vertex.add(point_tuple)
+            self.vertex.append(point)
 
     def add_bisector(self, bisector: Bisector) -> None:
         """Add point in the vertex list."""
-        self.bisectors.append(bisector)
+        site_points = (
+            bisector.sites[0].point.get_tuple(),
+            bisector.sites[1].point.get_tuple(),
+        )
+        if site_points not in self._bisectors:
+            self._bisectors.add(site_points)
+            self.bisectors.append(bisector)
 
     def _find_region_containing_p(self, p: Site) -> Tuple[Region, Region, LNode]:
         """Find an occurrence of a region R*q on L containing p.
@@ -82,46 +97,67 @@ class VoronoiDiagram:
             r_q_right_node,
         )
 
-    def _delete_intersection_in_boundary_from_q(
-        self, boundary: Optional[Boundary]
+    def _delete_intersection_from_boundary(
+        self, boundary: Optional[Boundary], is_left_intersection: bool
     ) -> None:
-        if boundary is not None and boundary.intersection is not None:
-            self.q_queue.delete(boundary.intersection)
-            boundary.intersection = None
+        if boundary is None:
+            return
+
+        if is_left_intersection and boundary.left_intersection is not None:
+            self.q_queue.delete(boundary.left_intersection)
+            boundary.left_intersection = None
+        elif not is_left_intersection and boundary.right_intersection is not None:
+            self.q_queue.delete(boundary.right_intersection)
+            boundary.right_intersection = None
 
     def _insert_intersection(
         self, boundary_1: Boundary, boundary_2: Boundary, region_node: LNode
     ) -> None:
         """Look for intersections between the the boundaries."""
+        # There could be a possibility that the two boundaries are from the same bisector.
+        if boundary_1.bisector == boundary_2.bisector:
+            return
+
         intersection_point = boundary_1.get_intersection(boundary_2)
-        if intersection_point is not None:
+        if intersection_point is not None and (
+            (
+                not boundary_1.sign
+                and intersection_point.x <= region_node.value.site.point.x
+            )
+            or (
+                boundary_1.sign
+                and intersection_point.x >= region_node.value.site.point.x
+            )
+        ):
             intersection = Intersection(
                 intersection_point.x, intersection_point.y, region_node
             )
             # Insert intersection to Q.
             self.q_queue.enqueue(intersection)
             # Save intersection in both boundaries.
-            boundary_1.intersection = intersection
-            boundary_2.intersection = intersection
+            boundary_1.right_intersection = intersection
+            boundary_2.left_intersection = intersection
 
     def _insert_posible_intersections(
         self,
-        left_boundary: Boundary,
-        boundary_p_q_plus: Boundary,
-        r_q_left_node: LNode,
-        right_boundary: Boundary,
-        boundary_p_q_minus: Boundary,
-        r_q_right_node: LNode,
+        left_left_boundary: Boundary,
+        left_right_boundary: Boundary,
+        left_region_node: LNode,
+        right_left_boundary: Boundary,
+        right_right_boundary: Boundary,
+        right_region_node: LNode,
     ) -> None:
         """Insert posible intersections in Q."""
         # Left.
-        if left_boundary is not None:
-            self._insert_intersection(left_boundary, boundary_p_q_plus, r_q_left_node)
+        if left_left_boundary is not None:
+            self._insert_intersection(
+                left_left_boundary, left_right_boundary, left_region_node
+            )
 
         # Right.
-        if right_boundary is not None:
+        if right_right_boundary is not None:
             self._insert_intersection(
-                right_boundary, boundary_p_q_minus, r_q_right_node
+                right_left_boundary, right_right_boundary, right_region_node
             )
 
     def _handle_site(self, p: Site):
@@ -157,11 +193,15 @@ class VoronoiDiagram:
         # Left
         if left_region_node is not None:
             left_boundary = left_region_node.value.right
-            self._delete_intersection_in_boundary_from_q(left_boundary)
+            self._delete_intersection_from_boundary(
+                left_boundary, is_left_intersection=False
+            )
         # Right
         if right_region_node is not None:
             right_boundary = right_region_node.value.left
-            self._delete_intersection_in_boundary_from_q(right_boundary)
+            self._delete_intersection_from_boundary(
+                right_boundary, is_left_intersection=True
+            )
 
         # Step 12.
         # Insert into Q the intersection between C-pq and its neighbor to the left on L, if any, and
@@ -170,8 +210,8 @@ class VoronoiDiagram:
             left_boundary,
             boundary_p_q_plus,
             r_q_left_node,
-            right_boundary,
             boundary_p_q_minus,
+            right_boundary,
             r_q_right_node,
         )
 
@@ -191,6 +231,8 @@ class VoronoiDiagram:
         # Let p be the intersection of boundaries Cqr and Crs.
         intersection_region_node = p.region_node
         r_q, r_s, r_q_node, r_s_node = self._get_regions_and_nodes_of_intersection(p)
+        left_boundary = r_q.left
+        right_boundary = r_s.right
 
         # Step 15.
         # Create bisector B*qs.
@@ -199,26 +241,43 @@ class VoronoiDiagram:
 
         # Step 16.
         # Update list L so it contains Cqs instead of Cqr, Rr*, Crs
-        boundary_q_s = self.BOUNDARY_CLASS(bisector_q_s, r_q.site.y > r_s.site.y)
+        boundary_q_s = self.BOUNDARY_CLASS(
+            bisector_q_s, r_q.site.point.y > r_s.site.point.y
+        )
+        intersection_region_node_value_left = intersection_region_node.value.left
+        intersection_region_node_value_right = intersection_region_node.value.right
+        left_region_node = intersection_region_node.left_neighbor
+        right_region_node = intersection_region_node.left_neighbor
         self.l_list.remove_region(intersection_region_node, boundary_q_s)
 
         # Step 17.
         # Delete from Q any intersection between Cqr and its neighbor to the
         # left and between Crs and its neighbor to the right.
-        self.q_queue.delete(intersection_region_node.value.left.intersection)
-        self.q_queue.delete(intersection_region_node.value.right.intersection)
+        # TODO: Put None the intersection of the other boundaries.
+        self._delete_intersection_from_boundary(
+            intersection_region_node_value_left, is_left_intersection=True
+        )
+        if left_region_node is not None:
+            self._delete_intersection_from_boundary(
+                left_region_node.value.left, is_left_intersection=False
+            )
+        self._delete_intersection_from_boundary(
+            intersection_region_node_value_right, is_left_intersection=False
+        )
+        if right_region_node is not None:
+            self._delete_intersection_from_boundary(
+                right_region_node.value.right, is_left_intersection=True
+            )
 
         # Step 18.
         # Insert any intersections between Cqs and its neighbors to the left or right
         # into Q.
-        left_boundary = r_q.left
-        right_boundary = r_s.right
         self._insert_posible_intersections(
             left_boundary,
             boundary_q_s,
             r_q_node,
-            right_boundary,
             boundary_q_s,
+            right_boundary,
             r_q_node,
         )
 
@@ -255,9 +314,10 @@ class FortunesAlgorithm:
 
     @staticmethod
     def calculate_voronoi_diagram(
-        sites: Iterable[Point], site_class: Any = Site
+        points: Iterable[Point], site_class: Any = Site
     ) -> VoronoiDiagram:
         """Calculate Voronoi Diagram."""
+        sites = [site_class(point.x, point.y) for point in points]
         voronoi_diagram = VoronoiDiagram(sites, site_class)
 
         return voronoi_diagram

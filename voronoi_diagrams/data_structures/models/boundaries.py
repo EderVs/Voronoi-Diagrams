@@ -18,7 +18,8 @@ class Boundary:
 
     bisector: Bisector
     sign: bool
-    intersection: Optional[Intersection]
+    left_intersection: Optional[Intersection]
+    right_intersection: Optional[Intersection]
 
     def __init__(
         self, bisector: Bisector, sign: bool,
@@ -26,7 +27,8 @@ class Boundary:
         """Construct Boundary."""
         self.bisector = bisector
         self.sign = sign
-        self.intersection = None
+        self.left_intersection = None
+        self.right_intersection = None
 
     @abstractmethod
     def star(self, point: Point) -> Point:
@@ -50,7 +52,6 @@ class Boundary:
         """
         raise NotImplementedError
 
-    @abstractmethod
     def formula_y(self, x: float) -> float:
         """Return the y coordinate given the x coordinate.
 
