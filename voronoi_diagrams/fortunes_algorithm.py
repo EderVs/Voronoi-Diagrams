@@ -75,10 +75,10 @@ class VoronoiDiagram:
 
     def _update_list_l(
         self, r_p: Region, r_q: Region, bisector_p_q: Bisector,
-    ) -> Tuple[Boundary, Boundary, Region, Region, LNode, LNode, LNode]:
+    ) -> Tuple[Boundary, Boundary, LNode, LNode]:
         """Update list L so that it contains ...,R*q,C-pq,R*p,C+pq,R*q,... in place of R*q."""
-        boundary_p_q_plus = self.BOUNDARY_CLASS(bisector_p_q, True)
-        boundary_p_q_minus = self.BOUNDARY_CLASS(bisector_p_q, False)
+        boundary_p_q_plus = self.BOUNDARY_CLASS(bisector_p_q, True)  # type: ignore
+        boundary_p_q_minus = self.BOUNDARY_CLASS(bisector_p_q, False)  # type: ignore
         r_q_left = self.REGION_CLASS(r_q.site, r_q.left, boundary_p_q_minus)
         r_q_right = self.REGION_CLASS(r_q.site, boundary_p_q_plus, r_q.right)
         r_p.left = boundary_p_q_minus
@@ -90,10 +90,7 @@ class VoronoiDiagram:
         return (
             boundary_p_q_plus,
             boundary_p_q_minus,
-            r_q_left,
-            r_q_right,
             r_q_left_node,
-            r_p_node,
             r_q_right_node,
         )
 
@@ -140,11 +137,11 @@ class VoronoiDiagram:
 
     def _insert_posible_intersections(
         self,
-        left_left_boundary: Boundary,
+        left_left_boundary: Optional[Boundary],
         left_right_boundary: Boundary,
         left_region_node: LNode,
         right_left_boundary: Boundary,
-        right_right_boundary: Boundary,
+        right_right_boundary: Optional[Boundary],
         right_region_node: LNode,
     ) -> None:
         """Insert posible intersections in Q."""
@@ -179,10 +176,7 @@ class VoronoiDiagram:
         (
             boundary_p_q_plus,
             boundary_p_q_minus,
-            r_q_left,
-            r_q_right,
             r_q_left_node,
-            r_p_node,
             r_q_right_node,
         ) = self._update_list_l(r_p, r_q, bisector_p_q)
 
@@ -208,9 +202,9 @@ class VoronoiDiagram:
         # the intersection between C+pq and its neighbor to the right, if any.
         self._insert_posible_intersections(
             left_boundary,
-            boundary_p_q_plus,
-            r_q_left_node,
             boundary_p_q_minus,
+            r_q_left_node,
+            boundary_p_q_plus,
             right_boundary,
             r_q_right_node,
         )
@@ -247,7 +241,7 @@ class VoronoiDiagram:
         intersection_region_node_value_left = intersection_region_node.value.left
         intersection_region_node_value_right = intersection_region_node.value.right
         left_region_node = intersection_region_node.left_neighbor
-        right_region_node = intersection_region_node.left_neighbor
+        right_region_node = intersection_region_node.right_neighbor
         self.l_list.remove_region(intersection_region_node, boundary_q_s)
 
         # Step 17.
