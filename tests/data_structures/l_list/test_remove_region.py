@@ -29,7 +29,7 @@ def validate_l_list_with_expected_list(
     actual_node: Optional[LNode] = l_list.head
     actual_region_index = 0
     while actual_node is not None:
-        assert actual_node.region == expected_list[actual_region_index]
+        assert actual_node.value == expected_list[actual_region_index]
         if actual_node.right_neighbor is None:
             break
         actual_node = actual_node.right_neighbor  # type: ignore
@@ -40,7 +40,7 @@ def validate_l_list_with_expected_list(
         assert actual_region_index == len(expected_list) - 1
 
     while actual_node is not None:
-        assert actual_node.region == expected_list[actual_region_index]
+        assert actual_node.value == expected_list[actual_region_index]
         if actual_node.left_neighbor is None:
             break
         actual_node = actual_node.left_neighbor  # type: ignore

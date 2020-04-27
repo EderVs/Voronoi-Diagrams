@@ -29,7 +29,7 @@ def validate_l_list_with_expected_list(
     actual_node: LNode = l_list.head
     actual_region_index = 0
     while actual_node is not None:
-        assert actual_node.region == expected_list[actual_region_index]
+        assert actual_node.value == expected_list[actual_region_index]
         if actual_node.right_neighbor is None:
             break
         actual_node = actual_node.right_neighbor  # type: ignore
@@ -37,7 +37,7 @@ def validate_l_list_with_expected_list(
     assert actual_region_index == len(expected_list) - 1
 
     while actual_node is not None:
-        assert actual_node.region == expected_list[actual_region_index]
+        assert actual_node.value == expected_list[actual_region_index]
         if actual_node.left_neighbor is None:
             break
         actual_node = actual_node.left_neighbor  # type: ignore
@@ -71,7 +71,7 @@ class TestUpdateRegions:
         self.l_list.update_regions(left_region, center_region, right_region)
 
         head = self.l_list.head
-        assert head.region == left_region
+        assert head.value == left_region
 
         validate_l_list_with_expected_list(self.l_list, expected_list)
         check_if_tree_is_balanced(self.l_list.t)
@@ -104,7 +104,7 @@ class TestUpdateRegions:
         expected_list = [r_p_left, r_q_left, r_r, r_q_right, r_p_right]
 
         head = self.l_list.head
-        assert head.region == r_p_left
+        assert head.value == r_p_left
 
         validate_l_list_with_expected_list(self.l_list, expected_list)
         check_if_tree_is_balanced(self.l_list.t)
@@ -137,7 +137,7 @@ class TestUpdateRegions:
         expected_list = [r_p_left_left, r_r, r_p_left_right, r_q, r_p_right]
 
         head = self.l_list.head
-        assert head.region == r_p_left_left
+        assert head.value == r_p_left_left
 
         validate_l_list_with_expected_list(self.l_list, expected_list)
         check_if_tree_is_balanced(self.l_list.t)
@@ -170,7 +170,7 @@ class TestUpdateRegions:
         expected_list = [r_p_left, r_q, r_p_right_left, r_r, r_p_right_right]
 
         head = self.l_list.head
-        assert head.region == r_p_left
+        assert head.value == r_p_left
 
         validate_l_list_with_expected_list(self.l_list, expected_list)
         check_if_tree_is_balanced(self.l_list.t)

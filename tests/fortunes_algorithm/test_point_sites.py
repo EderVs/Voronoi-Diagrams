@@ -28,7 +28,7 @@ class TestPointSites:
         assert voronoi_diagram.bisectors[0].sites == bisector.sites
         assert len(voronoi_diagram.vertex) == 0
 
-    def test_first_intersection(self):
+    def test_intersection_in_site(self):
         """Create Diagram of 3 sites.
 
         There is going to be one intersection.
@@ -45,7 +45,7 @@ class TestPointSites:
         bisector_q_r = PointBisector(sites=(site_q, site_r))
 
         expected_bisectors = [bisector_p_q, bisector_p_r, bisector_q_r]
-        expected_vertex = [Point(2.0, 2.0)]
+        expected_vertex = [Point(2.0, 0)]
 
         voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(points)
 

@@ -1,7 +1,7 @@
 """Boundary representation."""
 
 # Standard Library
-from typing import Callable, Optional, Any
+from typing import Callable, Optional, Any, Tuple
 from math import sqrt
 from abc import ABCMeta, abstractmethod
 
@@ -74,15 +74,14 @@ class Boundary:
         """Get distance to any of the sites because it is a boundary."""
         raise NotImplementedError
 
-    def get_intersection(self, boundary: Any) -> Optional[Point]:
+    def get_intersection(self, boundary: Any) -> Optional[Tuple[Point, Point]]:
         """Get intersection between two boundaries."""
         # In boundary we have bisector and bisector has get intersection
         intersection_point = self.bisector.get_intersection_point(boundary.bisector)
         if intersection_point is not None:
-            intersection_point.y = intersection_point.y + self.distance_to_site(
-                intersection_point
-            )
-        return intersection_point
+            intersection_point_star = self.star(intersection_point)
+            return (intersection_point, intersection_point_star)
+        return None
 
 
 class PointBoundary(Boundary):

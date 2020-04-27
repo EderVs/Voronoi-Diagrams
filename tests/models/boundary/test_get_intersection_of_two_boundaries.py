@@ -25,8 +25,16 @@ class TestGetBisectorIntersectionPoint:
         boundary_pq_plus = PointBoundary(bisector_pq, True)
         boundary_pr_minus = PointBoundary(bisector_pr, False)
         intersection = boundary_pr_minus.get_intersection(boundary_pq_plus)
+        assert intersection is not None
+        intersection, intersection_star = intersection
         assert intersection.x == 2
-        assert intersection.y == 2
+        assert intersection.y == 0
+        assert intersection_star.x == 2
+        assert intersection_star.y == 2
         intersection2 = boundary_pq_plus.get_intersection(boundary_pr_minus)
+        assert intersection2 is not None
+        intersection2, intersection2_star = intersection2
         assert intersection2.x == 2
-        assert intersection2.y == 2
+        assert intersection2.y == 0
+        assert intersection2_star.x == 2
+        assert intersection2_star.y == 2

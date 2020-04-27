@@ -50,16 +50,13 @@ class Site(Event):
 class Intersection(Event):
     """Intersection to handle in Fortune's Algorithm."""
 
-    LEFT_PLACE = 1
-    RIGHT_PLACE = 2
-
+    vertex: Point
     region_node: AVLNode
 
-    def __init__(
-        self, x, y, region_node: AVLNode,
-    ):
+    def __init__(self, event: Point, vertex: Point, region_node: AVLNode):
         """Construct point."""
-        super(Intersection, self).__init__(x, y, False)
+        super(Intersection, self).__init__(event.x, event.y, False)
+        self.vertex = vertex
         self.region_node = region_node
 
 

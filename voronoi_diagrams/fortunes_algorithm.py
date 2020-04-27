@@ -115,25 +115,18 @@ class VoronoiDiagram:
         if boundary_1.bisector == boundary_2.bisector:
             return
 
-        intersection_point = boundary_1.get_intersection(boundary_2)
-        if intersection_point is not None and (
-            (
-                not boundary_1.sign
-                and intersection_point.x <= region_node.value.site.point.x
-            )
-            or (
-                boundary_1.sign
-                and intersection_point.x >= region_node.value.site.point.x
-            )
-        ):
-            intersection = Intersection(
-                intersection_point.x, intersection_point.y, region_node
-            )
-            # Insert intersection to Q.
-            self.q_queue.enqueue(intersection)
-            # Save intersection in both boundaries.
-            boundary_1.right_intersection = intersection
-            boundary_2.left_intersection = intersection
+        intersection_point_tuple = boundary_1.get_intersection(boundary_2)
+        if intersection_point_tuple is not None:
+            vertex, event = intersection_point_tuple
+            if (not boundary_1.sign and event.x <= region_node.value.site.point.x) or (
+                boundary_1.sign and event.x >= region_node.value.site.point.x
+            ):
+                intersection = Intersection(event, vertex, region_node)
+                # Insert intersection to Q.
+                self.q_queue.enqueue(intersection)
+                # Save intersection in both boundaries.
+                boundary_1.right_intersection = intersection
+                boundary_2.left_intersection = intersection
 
     def _insert_posible_intersections(
         self,
@@ -277,7 +270,7 @@ class VoronoiDiagram:
 
         # Step 19.
         # Mark p as a vertex and as an endpoint of B*qr, B*rs and B*qs.
-        self.add_vertex(p.point)
+        self.add_vertex(p.vertex)
         # TODO: Add as an endpoint of B*qr, B*rs and B*qs.
 
     def _calculate_diagram(self):
