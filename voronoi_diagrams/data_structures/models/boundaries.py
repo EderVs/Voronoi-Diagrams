@@ -106,6 +106,7 @@ class Boundary:
                 site_self.point.x == site_boundary.point.x
                 and (site_self.point.y == site_boundary.point.y)
             )
+            or (self.bisector.is_same_slope(boundary.bisector))
         ):
             is_intersection_possible = False
 

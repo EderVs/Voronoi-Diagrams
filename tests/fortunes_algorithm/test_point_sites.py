@@ -44,6 +44,24 @@ class TestPointSites:
         voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(points)
         self._check_bisectors_and_vertex(voronoi_diagram, [bisector], [])
 
+    def test_2_sites_same_x(self):
+        """Test when all sites have same x coordinate."""
+        p = Point(2, -2)
+        q = Point(2, 2)
+        site_p = Site(p.x, p.y)
+        site_q = Site(q.x, q.y)
+        points = (p, q)
+        bisector_p_q = PointBisector(sites=(site_p, site_q))
+
+        expected_bisectors = [bisector_p_q]
+        expected_vertex = []
+
+        voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(points)
+
+        self._check_bisectors_and_vertex(
+            voronoi_diagram, expected_bisectors, expected_vertex
+        )
+
     def test_intersection_right(self):
         """Create Diagram of 3 sites.
 
@@ -169,6 +187,27 @@ class TestPointSites:
             voronoi_diagram, expected_bisectors, expected_vertex
         )
 
+    def test_3_sites_same_x(self):
+        """Test when all sites have same x coordinate."""
+        p = Point(2, -2)
+        q = Point(2, 0)
+        r = Point(2, 2)
+        site_p = Site(p.x, p.y)
+        site_q = Site(q.x, q.y)
+        site_r = Site(r.x, r.y)
+        points = (p, q, r)
+        bisector_p_q = PointBisector(sites=(site_p, site_q))
+        bisector_q_r = PointBisector(sites=(site_q, site_r))
+
+        expected_bisectors = [bisector_p_q, bisector_q_r]
+        expected_vertex = []
+
+        voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(points)
+
+        self._check_bisectors_and_vertex(
+            voronoi_diagram, expected_bisectors, expected_vertex
+        )
+
     def test_4_sites(self):
         """Create Diagram of 4 sites.
 
@@ -283,3 +322,30 @@ class TestPointSites:
         self._check_bisectors_and_vertex(
             voronoi_diagram, expected_bisectors, expected_vertex
         )
+
+    def test_4_sites_same_x(self):
+        """Test when all sites have same x coordinate."""
+        p1 = Point(0, 1)
+        p2 = Point(0, -1)
+        p3 = Point(0, 0)
+        p4 = Point(0, 0.3)
+        site_p1 = Site(p1.x, p1.y)
+        site_p2 = Site(p2.x, p2.y)
+        site_p3 = Site(p3.x, p3.y)
+        site_p4 = Site(p4.x, p4.y)
+        points = (p1, p2, p3, p4)
+        bisector_p2_p3 = PointBisector(sites=(site_p2, site_p3))
+        bisector_p3_p4 = PointBisector(sites=(site_p3, site_p4))
+        bisector_p1_p4 = PointBisector(sites=(site_p1, site_p4))
+
+        expected_bisectors = [bisector_p2_p3, bisector_p3_p4, bisector_p1_p4]
+        expected_vertex = []
+
+        voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(points)
+
+        self._check_bisectors_and_vertex(
+            voronoi_diagram, expected_bisectors, expected_vertex
+        )
+
+
+TestPointSites().test_4_sites_same_x()

@@ -55,6 +55,11 @@ class Bisector:
         """Get the point of intersection between two bisectors."""
         raise NotImplementedError
 
+    @abstractmethod
+    def is_same_slope(self, bisector: Any) -> bool:
+        """Compare if the given bisector slope is the same as the slope of this bisector."""
+        raise NotImplementedError
+
 
 class PointBisector(Bisector):
     """Bisector defined by point sites."""
@@ -122,3 +127,17 @@ class PointBisector(Bisector):
 
         x = get_x(x1, x2, x3, x4, y1, y2, y3, y4)
         return Point(x, self.formula_y(x))
+
+    @abstractmethod
+    def is_same_slope(self, bisector: Any) -> bool:
+        """Compare if the given bisector slope is the same as the slope of this bisector."""
+        p_1 = self.sites[0].point
+        p_2 = self.sites[1].point
+        q_1 = bisector.sites[0].point
+        q_2 = bisector.sites[1].point
+        delta_y_is_zero = p_1.y - p_2.y == 0 and q_1.y - q_2.y == 0
+        delta_x_is_zero = p_1.x - p_2.x == 0 and q_1.x - q_2.x == 0
+        both_deltas_are_the_same = (
+            p_1.y - p_2.y == q_1.y - q_2.y and p_1.x - p_2.x == q_1.x - q_2.x
+        )
+        return delta_y_is_zero or delta_x_is_zero or both_deltas_are_the_same
