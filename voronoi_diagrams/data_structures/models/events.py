@@ -1,7 +1,7 @@
 """Event representation."""
 
 # Standar Library
-from typing import Union, Any
+from typing import Union, Any, Optional
 from abc import ABCMeta, abstractmethod
 
 # Models
@@ -16,11 +16,13 @@ class Event:
 
     is_site: bool
     point: Point
+    name: str
 
-    def __init__(self, x: float, y: float, is_site: bool):
+    def __init__(self, x: float, y: float, is_site: bool, name: str = ""):
         """Construct Event."""
         self.point = Point(x, y)
         self.is_site = is_site
+        self.name = name
 
     def __str__(self):
         """Get String representation."""
@@ -28,7 +30,7 @@ class Event:
             letter = "S"
         else:
             letter = "I"
-        return f"{letter}({self.point.x}, {self.point.y})"
+        return f"{self.name} {letter}({self.point.x}, {self.point.y})"
 
     def __repr__(self):
         """Get object representation."""
@@ -38,9 +40,9 @@ class Event:
 class Site(Event):
     """Site to handle in Fortune's Algorithm."""
 
-    def __init__(self, x, y):
+    def __init__(self, x: float, y: float, name: str = ""):
         """Construct point."""
-        super(Site, self).__init__(x, y, True)
+        super(Site, self).__init__(x, y, True, name=name)
 
     def __eq__(self, site: Any) -> bool:
         """Get equality between sites."""

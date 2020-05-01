@@ -47,10 +47,34 @@ class LList:
 
     def __str__(self):
         """Get string representation."""
-        string = f"[{self.head.value}"
+
+        def get_region_str(region: Optional[Region]) -> str:
+            """Get string representation of Region in l list."""
+            if region is not None:
+                return f"R({region.site.name})"
+            else:
+                return ""
+
+        def get_boundary_str(boundary: Optional[Boundary]) -> str:
+            """Get string representation of Boundary in l list."""
+            if boundary is not None:
+                return (
+                    f"B{'+' if boundary.sign else '-'}("
+                    f"{boundary.bisector.sites[0].name}, {boundary.bisector.sites[1].name})"
+                )
+            else:
+                return "None"
+
+        string = (
+            f"[None, {get_region_str(self.head.value)}, "
+            f"{get_boundary_str(self.head.value.right)}"
+        )
         node = self.head.right_neighbor
         while node is not None:
-            string += f", {node.value}"
+            string += (
+                f", {get_region_str(node.value)}, "
+                f"{get_boundary_str(node.value.right)}"
+            )
             node = node.right_neighbor
         string += "]"
         return string
@@ -115,7 +139,7 @@ class LList:
         """
         node = self.search_region_node(center_region)
 
-        node.value = node.value = center_region
+        node.value = center_region
 
         # Insert in AVLTree
         # Insert in the left sub tree

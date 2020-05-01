@@ -118,15 +118,12 @@ class VoronoiDiagram:
         intersection_point_tuple = boundary_1.get_intersection(boundary_2)
         if intersection_point_tuple is not None:
             vertex, event = intersection_point_tuple
-            if (not boundary_1.sign and event.x <= region_node.value.site.point.x) or (
-                boundary_1.sign and event.x >= region_node.value.site.point.x
-            ):
-                intersection = Intersection(event, vertex, region_node)
-                # Insert intersection to Q.
-                self.q_queue.enqueue(intersection)
-                # Save intersection in both boundaries.
-                boundary_1.right_intersection = intersection
-                boundary_2.left_intersection = intersection
+            intersection = Intersection(event, vertex, region_node)
+            # Insert intersection to Q.
+            self.q_queue.enqueue(intersection)
+            # Save intersection in both boundaries.
+            boundary_1.right_intersection = intersection
+            boundary_2.left_intersection = intersection
 
     def _insert_posible_intersections(
         self,
@@ -204,6 +201,7 @@ class VoronoiDiagram:
 
     def _get_regions_and_nodes_of_intersection(self, p: Intersection):
         """Get regions and their nodes of the intersection p."""
+        # TODO: The error is taken from where is the region_node
         intersection_region_node = p.region_node
         # Left and right neighbor cannot be None because p is an intersection.
         r_q_node = intersection_region_node.left_neighbor
@@ -240,7 +238,6 @@ class VoronoiDiagram:
         # Step 17.
         # Delete from Q any intersection between Cqr and its neighbor to the
         # left and between Crs and its neighbor to the right.
-        # TODO: Put None the intersection of the other boundaries.
         self._delete_intersection_from_boundary(
             intersection_region_node_value_left, is_left_intersection=True
         )
@@ -265,7 +262,7 @@ class VoronoiDiagram:
             r_q_node,
             boundary_q_s,
             right_boundary,
-            r_q_node,
+            r_s_node,
         )
 
         # Step 19.
@@ -301,10 +298,13 @@ class FortunesAlgorithm:
 
     @staticmethod
     def calculate_voronoi_diagram(
-        points: Iterable[Point], site_class: Any = Site
+        points: List[Point], site_class: Any = Site
     ) -> VoronoiDiagram:
         """Calculate Voronoi Diagram."""
-        sites = [site_class(point.x, point.y) for point in points]
+        sites = [
+            site_class(points[i].x, points[i].y, name=str(i + 1))
+            for i in range(len(points))
+        ]
         voronoi_diagram = VoronoiDiagram(sites, site_class)
 
         return voronoi_diagram
