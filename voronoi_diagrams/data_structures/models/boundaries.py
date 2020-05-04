@@ -45,13 +45,16 @@ class Boundary:
         """Map a bisector."""
         raise NotImplementedError
 
-    def get_point_comparison(self, point: Point) -> float:
+    def get_point_comparison(self, point: Point) -> Optional[float]:
         """Get the y comparison of a point based on the line y coordinate of the point.
 
         Return 0 if the point is in the boundary based on l.
         Return > 0 if the point is to the right of the boundary based on l.
         Return < 0 if the point is to the left of the boundary based on l.
         """
+        p1, q1 = (site.point for site in self.bisector.sites)
+        if p1.y == q1.y:
+            return None
         x = self.formula_x(point.y)
         if x is not None:
             return point.x - x

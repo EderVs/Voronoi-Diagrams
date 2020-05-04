@@ -60,6 +60,27 @@ class Bisector:
         """Compare if the given bisector slope is the same as the slope of this bisector."""
         raise NotImplementedError
 
+    def get_middle_between_sites(self) -> Point:
+        """Get Middle point between sites."""
+        site1, site2 = self.sites
+        point_x = (
+            site1.get_x_frontier_pointing_to_point(site2.point)
+            - (
+                site1.get_x_frontier_pointing_to_point(site2.point)
+                - site2.get_x_frontier_pointing_to_point(site1.point)
+            )
+            / 2
+        )
+        point_y = (
+            site1.get_y_frontier_pointing_to_point(site2.point)
+            - (
+                site1.get_y_frontier_pointing_to_point(site2.point)
+                - site2.get_y_frontier_pointing_to_point(site1.point)
+            )
+            / 2
+        )
+        return Point(point_x, point_y)
+
 
 class PointBisector(Bisector):
     """Bisector defined by point sites."""
@@ -125,7 +146,15 @@ class PointBisector(Bisector):
         y3 = bisector.sites[0].point.y
         y4 = bisector.sites[1].point.y
 
-        x = get_x(x1, x2, x3, x4, y1, y2, y3, y4)
+        if y1 == y2:
+            # Case where self is a vertical line.
+            x = self.get_middle_between_sites().x
+            return Point(x, bisector.formula_y(x))
+        if y3 == y4:
+            # Case where bisector is a vertical line.
+            x = bisector.get_middle_between_sites().x
+        else:
+            x = get_x(x1, x2, x3, x4, y1, y2, y3, y4)
         return Point(x, self.formula_y(x))
 
     @abstractmethod

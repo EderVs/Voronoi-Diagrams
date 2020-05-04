@@ -48,6 +48,14 @@ class Site(Event):
         """Get equality between sites."""
         return self.point.x == site.point.x and self.point.y == site.point.y
 
+    def get_x_frontier_pointing_to_point(self, point: Point) -> float:
+        """Get the last point of the site pointing to given point."""
+        return self.point.x
+
+    def get_y_frontier_pointing_to_point(self, point: Point) -> float:
+        """Get the last point of the site pointing to given point."""
+        return self.point.y
+
 
 class Intersection(Event):
     """Intersection to handle in Fortune's Algorithm."""

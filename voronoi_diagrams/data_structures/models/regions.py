@@ -41,14 +41,8 @@ class Region:
         if point.y < self.site.point.y:
             return False
 
-        is_left_contained = True
-        is_right_contained = True
-        if self.left is None and self.right is None:
-            return True
-        if self.left is not None:
-            is_left_contained = self.left.get_point_comparison(point) >= 0
-        if self.right is not None:
-            is_right_contained = self.right.get_point_comparison(point) <= 0
+        is_left_contained = not self.is_left(point)
+        is_right_contained = not self.is_right(point)
         return is_left_contained and is_right_contained
 
     def is_left(self, point: Point, *args: Any, **kwargs: Any) -> bool:
@@ -58,7 +52,12 @@ class Region:
 
         if self.left is None:
             return False
-        return self.left.get_point_comparison(point) < 0
+        comparison = self.left.get_point_comparison(point)
+        if comparison is not None:
+            return comparison < 0
+        else:
+            middle_point_x = self.left.bisector.get_middle_between_sites().x
+            return (middle_point_x <= self.site.point.x) and (middle_point_x > point.x)
 
     def is_right(self, point: Point, *args: Any, **kwargs: Any) -> bool:
         """Value is to the right of Node."""
@@ -67,7 +66,12 @@ class Region:
 
         if self.right is None:
             return False
-        return self.right.get_point_comparison(point) > 0
+        comparison = self.right.get_point_comparison(point)
+        if comparison is not None:
+            return comparison > 0
+        else:
+            middle_point_x = self.right.bisector.get_middle_between_sites().x
+            return (middle_point_x >= self.site.point.x) and (middle_point_x < point.x)
 
     def __str__(self):
         """Get Region string representation."""
