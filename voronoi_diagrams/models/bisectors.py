@@ -113,7 +113,7 @@ class PointBisector(Bisector):
 
     def get_intersection_point(self, bisector: Bisector) -> Point:
         """Get the point of intersection between two bisectors."""
-
+        # No blank spaces after docstring.
         def f_aux_1(xi: float, xj: float, yi: float, yj: float) -> float:
             """Auxiliar function."""
             return (xj ** 2 - xi ** 2 + yj ** 2 - yi ** 2) / (2 * (yj - yi))

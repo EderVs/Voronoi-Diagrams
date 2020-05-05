@@ -205,9 +205,9 @@ class VoronoiDiagram:
         intersection_region_node = p.region_node
         # Left and right neighbor cannot be None because p is an intersection.
         r_q_node = intersection_region_node.left_neighbor
-        r_q = r_q_node.value
+        r_q = r_q_node.value  # type: ignore
         r_s_node = intersection_region_node.right_neighbor
-        r_s = r_s_node.value
+        r_s = r_s_node.value  # type: ignore
         return r_q, r_s, r_q_node, r_s_node
 
     def _handle_intersection(self, p: Intersection):

@@ -47,7 +47,7 @@ class LList:
 
     def __str__(self):
         """Get string representation."""
-
+        # No blank spaces after docstring.
         def get_region_str(region: Optional[Region]) -> str:
             """Get string representation of Region in l list."""
             if region is not None:
