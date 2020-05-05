@@ -157,7 +157,6 @@ class PointBisector(Bisector):
             x = get_x(x1, x2, x3, x4, y1, y2, y3, y4)
         return Point(x, self.formula_y(x))
 
-    @abstractmethod
     def is_same_slope(self, bisector: Any) -> bool:
         """Compare if the given bisector slope is the same as the slope of this bisector."""
         p_1 = self.sites[0].point

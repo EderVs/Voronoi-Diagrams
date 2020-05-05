@@ -6,7 +6,9 @@ from abc import ABCMeta, abstractmethod
 
 # Models
 from .points import Point
-from ..avl_tree import AVLNode
+
+# Data Structures
+from ..data_structures.avl_tree import AVLNode
 
 
 class Event:

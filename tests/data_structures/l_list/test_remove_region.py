@@ -4,7 +4,10 @@ from typing import List, Optional
 
 # Data structures
 from voronoi_diagrams.data_structures import LList
-from voronoi_diagrams.data_structures.models import (
+from voronoi_diagrams.data_structures.l import LNode
+
+# Models
+from voronoi_diagrams.models import (
     Region,
     Site,
     PointBisector,
@@ -12,7 +15,7 @@ from voronoi_diagrams.data_structures.models import (
     PointBoundary,
     PointRegion,
 )
-from voronoi_diagrams.data_structures.l import LNode
+
 from tests.data_structures.avl_tree.test_insert import check_if_tree_is_balanced
 
 
@@ -54,7 +57,7 @@ class TestUpdateRegions:
     def setup(self) -> None:
         """Set up every region."""
         self.p = Site(0, 0)
-        self.r_p = Region(self.p)
+        self.r_p = PointRegion(self.p, None, None)
         self.l_list = create_l_list(self.r_p)
 
     def test_remove_last_region(self) -> None:

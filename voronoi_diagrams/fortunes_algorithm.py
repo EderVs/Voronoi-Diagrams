@@ -10,7 +10,7 @@ from .data_structures import LList, QQueue
 from .data_structures.l import LNode
 
 # Models
-from .data_structures.models import (
+from .models import (
     Site,
     Point,
     Bisector,

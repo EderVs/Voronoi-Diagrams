@@ -4,7 +4,7 @@ from typing import List, Any
 from random import randint
 
 # Models
-from voronoi_diagrams.data_structures.models import (
+from voronoi_diagrams.models import (
     PointBisector,
     Point,
     Site,

@@ -5,8 +5,9 @@ from random import shuffle
 
 # Data structures
 from voronoi_diagrams.data_structures import QQueue
-from voronoi_diagrams.data_structures.models import Event
-from voronoi_diagrams.data_structures.models import Site
+
+# Models
+from voronoi_diagrams.models import Event, Site
 
 
 def create_q_queue() -> QQueue:
