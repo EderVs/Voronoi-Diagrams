@@ -3,10 +3,14 @@
 # Standard Library
 from typing import Callable, Tuple, Optional, Any
 from abc import ABCMeta, abstractmethod
+from math import sqrt
 
 # Models
-from .events import Site
+from .events import Site, WeightedSite
 from .points import Point
+
+# Conic Sections
+from conic_sections_intersections.models import ConicSection
 
 
 class Bisector:
@@ -33,12 +37,12 @@ class Bisector:
         return self.sites == bisector.sites
 
     @abstractmethod
-    def formula_x(self, y: float) -> float:
+    def formula_x(self, y: float) -> Optional[float]:
         """Get x coordinate given the y coordinate."""
         raise NotImplementedError
 
     @abstractmethod
-    def formula_y(self, y: float) -> float:
+    def formula_y(self, y: float) -> Optional[float]:
         """Get y coordinate given the x coordinate."""
         raise NotImplementedError
 
@@ -169,3 +173,79 @@ class PointBisector(Bisector):
             p_1.y - p_2.y == q_1.y - q_2.y and p_1.x - p_2.x == q_1.x - q_2.x
         )
         return delta_y_is_zero or delta_x_is_zero or both_deltas_are_the_same
+
+
+class WeightedPointBisector(Bisector):
+    """Bisector defined by weighted sites."""
+
+    sites: Tuple[WeightedSite, WeightedSite]
+    a: float
+    b: float
+    c: float
+    d: float
+    e: float
+    conic_section: ConicSection
+
+    def __init__(self, sites: Tuple[WeightedSite, WeightedSite]):
+        """Construct bisector of weighted sites Bisector.
+
+        In this case the Sites are WeightedSites.
+        """
+        super(WeightedPointBisector, self).__init__(sites)
+        self._set_polynomial_parameters()
+        self.conic_section = ConicSection(
+            self.a, self.b, self.c, self.d, self.e, self.f
+        )
+
+    def _set_polynomial_parameters(self) -> None:
+        """Set parameters of general conic formula.
+
+        Ax^2 + Bxy + Cy^2 + Dx + Ey + F = 0
+        """
+        p = self.sites[0]
+        q = self.sites[1]
+        px = p.point.x
+        py = p.point.y
+        pw = p.weight
+        qx = q.point.x
+        qy = q.point.y
+        qw = q.weight
+        r = (qx ** 2) + (qy ** 2) - (px ** 2) - (py ** 2) - ((pw - qw) ** 2)
+        s = 4 * ((pw - qw) ** 2)
+        self.a = s - (((2 * px) - (2 * qx)) ** 2)
+        self.b = (-2) * ((2 * px) - (2 * qx)) * ((2 * py) - (2 * qy))
+        self.c = s - (((2 * py) - (2 * qy)) ** 2)
+        self.d = (-2 * px * s) - (2 * ((2 * px) - (2 * qx)) * r)
+        self.e = (-2 * py * s) - (2 * ((2 * py) - (2 * qy)) * r)
+        self.f = (s * (px ** 2)) + (s * (py ** 2)) - (r ** 2)
+
+    def formula_x(self, y: float) -> float:
+        """Get x coordinate given the y coordinate.
+
+        In this case is an hyperbola.
+        """
+        # TODO: Complete method.
+        raise NotImplementedError
+
+    def formula_y(self, x: float, sign: bool = True) -> Optional[float]:
+        """Get y coordinate given the x coordinate.
+
+        In this case is an hyperbola
+        """
+        sign_one = 1 if sign else -1
+        b = self.b * x + self.e
+        a = self.c
+        c = (self.a * (x ** 2)) + (self.d * x) + (self.f)
+        if (b ** 2 - 4 * a * c) < 0:
+            return None
+        return (-b + (sign_one) * sqrt(b ** 2 - 4 * a * c)) / (2 * a)
+
+    def get_intersection_point(self, bisector: Any) -> Optional[Point]:
+        """Get the point of intersection between two Weighted Point Bisectors."""
+        all_intersections = self.conic_section.get_intersection(bisector.conic_section)
+        return all_intersections
+
+    def is_same_slope(self, bisector: Any) -> bool:
+        """Compare if the given bisector slope is the same as the slope of this bisector."""
+        # TODO: Complete method.
+        raise NotImplementedError

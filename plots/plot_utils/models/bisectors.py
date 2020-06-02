@@ -1,0 +1,46 @@
+"""Bisectors representations in plots."""
+# Standard Library.
+from typing import Iterable, Tuple
+
+# Models.
+from voronoi_diagrams.models import WeightedPointBisector
+
+# Utils.
+from .sites import create_weighted_site, plot_point
+
+# Plot.
+from matplotlib import pyplot as plt
+import numpy as np
+
+
+def create_weighted_point_bisector(
+    x1: float, y1: float, w1: float, x2: float, y2: float, w2: float
+) -> WeightedPointBisector:
+    """Get bisector to work."""
+    p = create_weighted_site(x1, y1, w1)
+    q = create_weighted_site(x2, y2, w2)
+    return WeightedPointBisector(sites=(p, q))
+
+
+def plot_weighted_point_bisector(
+    bisector: WeightedPointBisector, x_range: Iterable,
+) -> None:
+    """Plot a WeightedPointBisector.
+
+    x_range: values of xs that will be plotted.
+    xlim: Limits of x in the plot.
+    ylim: Limits of y in the plot.
+    """
+    y_list_plus = [bisector.formula_y(x) for x in x_range]
+    y_list_minus = [bisector.formula_y(x, sign=False) for x in x_range]
+    plt.plot(x_range, y_list_plus, "k")
+    plt.plot(x_range, y_list_minus, "k")
+
+
+def plot_intersections(
+    bisector1: WeightedPointBisector, bisector2: WeightedPointBisector
+) -> None:
+    """Plot intersections between 2 bisectors."""
+    intersections = bisector1.get_intersection_point(bisector2)
+    for intersection in intersections:
+        plot_point(intersection[0], intersection[1][0])
