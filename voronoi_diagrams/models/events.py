@@ -10,6 +10,12 @@ from .points import Point
 # Data Structures
 from ..data_structures.avl_tree import AVLNode
 
+# Math
+from math import tan, atan
+
+# Conic Sections
+from conic_sections.utils.circle import get_circle_formula_x, get_circle_formula_y
+
 
 class Event:
     """Event Representation. It can be a Site or an Interception."""
@@ -58,6 +64,14 @@ class Site(Event):
         """Get the last point of the site pointing to given point."""
         return self.point.y
 
+    def get_y_frontier_formula(self, x: float) -> Tuple[float, float]:
+        """Get the frontier's y coordinates given x coordinate."""
+        return (self.point.y, self.point.y)
+
+    def get_x_frontier_formula(self, x: float) -> Tuple[float, float]:
+        """Get the frontier's x coordinates given y coordinate."""
+        return (self.point.x, self.point.x)
+
 
 class Intersection(Event):
     """Intersection to handle in Fortune's Algorithm."""
@@ -104,3 +118,11 @@ class WeightedSite(Site):
         """Get the last point of the site pointing to given point."""
         # TODO: Change this method.
         return self.point.y
+
+    def get_y_frontier_formula(self, x: float) -> Optional[Tuple[float, float]]:
+        """Get the frontier's y coordinates given x coordinate."""
+        return get_circle_formula_y(self.point.x, self.point.y, self.weight, x)
+
+    def get_x_frontier_formula(self, y: float) -> Optional[Tuple[float, float]]:
+        """Get the frontier's x coordinates given y coordinate."""
+        return get_circle_formula_x(self.point.x, self.point.y, self.weight, y)

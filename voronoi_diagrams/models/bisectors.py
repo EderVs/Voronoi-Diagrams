@@ -10,7 +10,7 @@ from .events import Site, WeightedSite
 from .points import Point
 
 # Conic Sections
-from conic_sections_intersections.models import ConicSection
+from conic_sections.models import ConicSection
 
 
 class Bisector:
