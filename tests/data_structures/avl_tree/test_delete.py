@@ -2,7 +2,7 @@
 from typing import List, Any
 from random import shuffle
 from voronoi_diagrams.data_structures import AVLTree, IntNode
-from utils import (
+from .utils import (
     create_tree,
     check_if_tree_is_balanced,
     check_if_tree_is_correct,

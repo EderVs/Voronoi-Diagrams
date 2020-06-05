@@ -6,15 +6,18 @@ from random import randint
 # Models
 from voronoi_diagrams.models import PointBisector, Point, Site
 
+# Math
+from decimal import Decimal
+
 
 class TestGetBisectorIntersectionPoint:
     """Test formula."""
 
     def test_two_bisectors(self):
         """Test point formula with 3 positive fixed sites."""
-        p = Site(0, 0)
-        q = Site(2, 2)
-        r = Site(2, -2)
+        p = Site(Decimal(0), Decimal(0))
+        q = Site(Decimal(2), Decimal(2))
+        r = Site(Decimal(2), Decimal(-2))
         bisector_pq = PointBisector(sites=(p, q))
         bisector_pr = PointBisector(sites=(p, r))
         intersection = bisector_pq.get_intersection_point(bisector_pr)

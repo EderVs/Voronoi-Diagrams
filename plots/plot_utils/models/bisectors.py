@@ -12,9 +12,12 @@ from .sites import create_weighted_site, plot_point
 from matplotlib import pyplot as plt
 import numpy as np
 
+# Math
+from decimal import Decimal
+
 
 def create_weighted_point_bisector(
-    x1: float, y1: float, w1: float, x2: float, y2: float, w2: float
+    x1: Decimal, y1: Decimal, w1: Decimal, x2: Decimal, y2: Decimal, w2: Decimal
 ) -> WeightedPointBisector:
     """Get bisector to work."""
     p = create_weighted_site(x1, y1, w1)

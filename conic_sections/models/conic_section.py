@@ -2,13 +2,15 @@
 
 # Standard Library
 from typing import Optional, Tuple, Any, List
-from math import sqrt
 
 # Numpy
 from numpy import roots, isrealobj
 
 # Utils
-from utils.numbers import are_close
+from general_utils.numbers import are_close
+
+# Math
+from decimal import Decimal
 
 
 class ConicSection:
@@ -18,15 +20,15 @@ class ConicSection:
         ax^2 + bxy + cy^2 + dx + ey + f = 0
     """
 
-    a: float
-    b: float
-    c: float
-    d: float
-    e: float
-    f: float
+    a: Decimal
+    b: Decimal
+    c: Decimal
+    d: Decimal
+    e: Decimal
+    f: Decimal
 
     def __init__(
-        self, a: float, b: float, c: float, d: float, e: float, f: float
+        self, a: Decimal, b: Decimal, c: Decimal, d: Decimal, e: Decimal, f: Decimal
     ) -> None:
         """Conic Section constructor."""
         self.a = a
@@ -36,7 +38,7 @@ class ConicSection:
         self.e = e
         self.f = f
 
-    def y_formula(self, x: float) -> Optional[Tuple[float, float]]:
+    def y_formula(self, x: Decimal) -> Optional[Tuple[Decimal, Decimal]]:
         """Get y from x.
 
         If there is no solution then None is returned.
@@ -48,11 +50,11 @@ class ConicSection:
             # The sqrt is negative.
             return None
 
-        y1 = (-x1 - sqrt(x2)) / (2 * self.c)
-        y2 = (-x1 + sqrt(x2)) / (2 * self.c)
+        y1 = (-x1 - x2.sqrt()) / (2 * self.c)
+        y2 = (-x1 + x2.sqrt()) / (2 * self.c)
         return (y1, y2)
 
-    def x_formula(self, y: float) -> Optional[Tuple[float, float]]:
+    def x_formula(self, y: Decimal) -> Optional[Tuple[Decimal, Decimal]]:
         """Get x from y.
 
         If there is no solution then None is returned.
@@ -64,13 +66,46 @@ class ConicSection:
             # The sqrt is negative.
             return None
 
-        x1 = (-y1 - sqrt(y2)) / (2 * self.a)
-        x2 = (-y1 + sqrt(y2)) / (2 * self.a)
+        x1 = (-y1 - y2.sqrt()) / (2 * self.a)
+        x2 = (-y1 + y2.sqrt()) / (2 * self.a)
         return (x1, x2)
+
+    def __get_ys_of_intersections(
+        self, x: Decimal, conic_section
+    ) -> List[Tuple[Decimal, Tuple[Decimal, Decimal]]]:
+        """Get ys of intersections."""
+        ys = self.y_formula(x)
+        other_ys = conic_section.y_formula(x)
+        intersections: List[Tuple[Decimal, Tuple[Decimal, Decimal]]] = []
+        if ys is None or other_ys is None:
+            return []
+
+        epsilon = 0.0001
+        for y in ys:
+            for other_y in other_ys:
+                if are_close(y, other_y, epsilon):
+                    intersections.append((x, (y, other_y)))
+        return intersections
+
+    def __get_intersections(
+        self,
+        p1: Decimal,
+        p2: Decimal,
+        p3: Decimal,
+        p4: Decimal,
+        p5: Decimal,
+        conic_section: Any,
+    ) -> List[Tuple[Decimal, Tuple[Decimal, Decimal]]]:
+        xs = roots([p1, p2, p3, p4, p5])
+        intersections: List[Tuple[Decimal, Tuple[Decimal, Decimal]]] = []
+        for x in xs:
+            if isrealobj(x):
+                intersections += self.__get_ys_of_intersections(x, conic_section)
+        return intersections
 
     def get_intersection(
         self, conic_section: Any
-    ) -> List[Tuple[float, Tuple[float, float]]]:
+    ) -> List[Tuple[Decimal, Tuple[Decimal, Decimal]]]:
         """Get the intersection of 2 conic sections.
 
         The solutions are returned in a list of max length 4.
@@ -145,16 +180,5 @@ class ConicSection:
         p4 = n4 - o4
         p5 = n5 - o5
 
-        intersections = []
-        xs = roots([p1, p2, p3, p4, p5])
-        for x in xs:
-            if isrealobj(x):
-                ys = self.y_formula(x)
-                other_ys = conic_section.y_formula(x)
-                if ys is not None and other_ys is not None:
-                    for y in ys:
-                        for other_y in other_ys:
-                            epsilon = 0.0001
-                            if are_close(y, other_y, epsilon):
-                                intersections.append((x, (y, other_y)))
+        intersections = self.__get_intersections(p1, p2, p3, p4, p5, conic_section)
         return intersections

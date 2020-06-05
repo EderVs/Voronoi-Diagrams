@@ -3,7 +3,6 @@
 # Standard Library
 from typing import Callable, Tuple, Optional, Any
 from abc import ABCMeta, abstractmethod
-from math import sqrt
 
 # Models
 from .events import Site, WeightedSite
@@ -11,6 +10,9 @@ from .points import Point
 
 # Conic Sections
 from conic_sections.models import ConicSection
+
+# Math
+from decimal import Decimal
 
 
 class Bisector:
@@ -37,12 +39,12 @@ class Bisector:
         return self.sites == bisector.sites
 
     @abstractmethod
-    def formula_x(self, y: float) -> Optional[float]:
+    def formula_x(self, y: Decimal) -> Optional[Decimal]:
         """Get x coordinate given the y coordinate."""
         raise NotImplementedError
 
     @abstractmethod
-    def formula_y(self, y: float) -> Optional[float]:
+    def formula_y(self, y: Decimal) -> Optional[Decimal]:
         """Get y coordinate given the x coordinate."""
         raise NotImplementedError
 
@@ -93,7 +95,7 @@ class PointBisector(Bisector):
         """Construct bisector of Point sites Bisector."""
         super(PointBisector, self).__init__(sites)
 
-    def formula_x(self, y: float) -> float:
+    def formula_x(self, y: Decimal) -> Decimal:
         """Get x coordinate given the y coordinate.
 
         In this case is a line.
@@ -104,38 +106,38 @@ class PointBisector(Bisector):
         b = 2 * p.x - 2 * q.x
         return a / b
 
-    def formula_y(self, x: float) -> float:
+    def formula_y(self, x: Decimal) -> Decimal:
         """Get y coordinate given the x coordinate.
 
         In this case is a line.
         """
         p = self.sites[0].point
         q = self.sites[1].point
-        a = -((q.x - p.x) / (q.y - p.y))
-        b = (q.x ** 2 - p.x ** 2 + q.y ** 2 - p.y ** 2) / (2 * (q.y - p.y))
+        a = Decimal(-((q.x - p.x) / (q.y - p.y)))
+        b = Decimal((q.x ** 2 - p.x ** 2 + q.y ** 2 - p.y ** 2) / (2 * (q.y - p.y)))
         return a * x + b
 
     def get_intersection_point(self, bisector: Bisector) -> Point:
         """Get the point of intersection between two bisectors."""
         # No blank spaces after docstring.
-        def f_aux_1(xi: float, xj: float, yi: float, yj: float) -> float:
+        def f_aux_1(xi: Decimal, xj: Decimal, yi: Decimal, yj: Decimal) -> Decimal:
             """Auxiliar function."""
             return (xj ** 2 - xi ** 2 + yj ** 2 - yi ** 2) / (2 * (yj - yi))
 
-        def f_aux_2(xi: float, xj: float, yi: float, yj: float) -> float:
+        def f_aux_2(xi: Decimal, xj: Decimal, yi: Decimal, yj: Decimal) -> Decimal:
             """Auxiliar function."""
             return (xj - xi) / (yj - yi)
 
         def get_x(
-            xi: float,
-            xj: float,
-            xk: float,
-            xl: float,
-            yi: float,
-            yj: float,
-            yk: float,
-            yl: float,
-        ) -> float:
+            xi: Decimal,
+            xj: Decimal,
+            xk: Decimal,
+            xl: Decimal,
+            yi: Decimal,
+            yj: Decimal,
+            yk: Decimal,
+            yl: Decimal,
+        ) -> Decimal:
             return (f_aux_1(xk, xl, yk, yl) - f_aux_1(xi, xj, yi, yj)) / (
                 f_aux_2(xk, xl, yk, yl) - f_aux_2(xi, xj, yi, yj)
             )
@@ -179,11 +181,11 @@ class WeightedPointBisector(Bisector):
     """Bisector defined by weighted sites."""
 
     sites: Tuple[WeightedSite, WeightedSite]
-    a: float
-    b: float
-    c: float
-    d: float
-    e: float
+    a: Decimal
+    b: Decimal
+    c: Decimal
+    d: Decimal
+    e: Decimal
     conic_section: ConicSection
 
     def __init__(self, sites: Tuple[WeightedSite, WeightedSite]):
@@ -219,7 +221,7 @@ class WeightedPointBisector(Bisector):
         self.e = (-2 * py * s) - (2 * ((2 * py) - (2 * qy)) * r)
         self.f = (s * (px ** 2)) + (s * (py ** 2)) - (r ** 2)
 
-    def formula_x(self, y: float) -> float:
+    def formula_x(self, y: Decimal) -> Decimal:
         """Get x coordinate given the y coordinate.
 
         In this case is an hyperbola.
@@ -227,7 +229,7 @@ class WeightedPointBisector(Bisector):
         # TODO: Complete method.
         raise NotImplementedError
 
-    def formula_y(self, x: float, sign: bool = True) -> Optional[float]:
+    def formula_y(self, x: Decimal, sign: bool = True) -> Optional[Decimal]:
         """Get y coordinate given the x coordinate.
 
         In this case is an hyperbola
@@ -238,7 +240,7 @@ class WeightedPointBisector(Bisector):
         c = (self.a * (x ** 2)) + (self.d * x) + (self.f)
         if (b ** 2 - 4 * a * c) < 0:
             return None
-        return (-b + (sign_one) * sqrt(b ** 2 - 4 * a * c)) / (2 * a)
+        return (-b + (sign_one) * Decimal(b ** 2 - 4 * a * c).sqrt()) / (2 * a)
 
     def get_intersection_point(self, bisector: Any) -> Optional[Point]:
         """Get the point of intersection between two Weighted Point Bisectors."""

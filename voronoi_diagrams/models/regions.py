@@ -2,13 +2,15 @@
 
 # Standard Library
 from typing import Callable, Optional, Any, Union
-from math import sqrt
 from abc import ABCMeta, abstractmethod
 
 # Models
 from .boundaries import Boundary
 from .points import Point
 from .events import Site
+
+# Math
+from decimal import Decimal
 
 
 class Region:
@@ -89,11 +91,11 @@ class PointRegion(Region):
         """Construct Point Region."""
         super(PointRegion, self).__init__(site, left, right)
 
-    def distance_to_site(self, point: Point) -> float:
+    def distance_to_site(self, point: Point) -> Decimal:
         """Get distance to the site."""
-        return sqrt(
+        return Decimal(
             (self.site.point.x - point.x) ** 2 + (self.site.point.y - point.y) ** 2
-        )
+        ).sqrt()
 
     def star(self, point: Point) -> Point:
         """Map a bisector."""

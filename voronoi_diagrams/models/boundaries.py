@@ -2,13 +2,15 @@
 
 # Standard Library
 from typing import Callable, Optional, Any, Tuple
-from math import sqrt
 from abc import ABCMeta, abstractmethod
 
 # Models
 from .points import Point
 from .bisectors import Bisector, PointBisector
 from .events import Intersection
+
+# Math
+from decimal import Decimal
 
 
 class Boundary:
@@ -45,7 +47,7 @@ class Boundary:
         """Map a bisector."""
         raise NotImplementedError
 
-    def get_point_comparison(self, point: Point) -> Optional[float]:
+    def get_point_comparison(self, point: Point) -> Optional[Decimal]:
         """Get the y comparison of a point based on the line y coordinate of the point.
 
         Return 0 if the point is in the boundary based on l.
@@ -62,14 +64,14 @@ class Boundary:
             return point.x - self.get_site().point.x
 
     @abstractmethod
-    def formula_x(self, y: float) -> Optional[float]:
+    def formula_x(self, y: Decimal) -> Optional[Decimal]:
         """Return the x coordinate given the y coordinate.
 
         This is the the formula of the bisector mapped with the star map.
         """
         raise NotImplementedError
 
-    def formula_y(self, x: float) -> float:
+    def formula_y(self, x: Decimal) -> Decimal:
         """Return the y coordinate given the x coordinate.
 
         This is the the formula of the bisector mapped with the star map.
@@ -87,7 +89,7 @@ class Boundary:
         return self.__str__()
 
     @abstractmethod
-    def distance_to_site(self, point: Point) -> float:
+    def distance_to_site(self, point: Point) -> Decimal:
         """Get distance to any of the sites because it is a boundary."""
         raise NotImplementedError
 
@@ -138,17 +140,19 @@ class PointBoundary(Boundary):
         super(PointBoundary, self).__init__(bisector, sign)
 
     # Used in star
-    def distance_to_site(self, point: Point) -> float:
+    def distance_to_site(self, point: Point) -> Decimal:
         """Get distance to any of the sites because it is a boundary."""
         p = self.bisector.sites[0].point
-        return sqrt((p.x - point.x) ** 2 + (p.y - point.y) ** 2)
+        return Decimal((p.x - point.x) ** 2 + (p.y - point.y) ** 2).sqrt()
 
     def star(self, point: Point) -> Point:
         """Map a bisector."""
         return Point(point.x, point.y + self.distance_to_site(point))
 
     # Used in formula_x
-    def quadratic_solution(self, a: float, b: float, c: float) -> Optional[float]:
+    def quadratic_solution(
+        self, a: Decimal, b: Decimal, c: Decimal
+    ) -> Optional[Decimal]:
         """Return the solution of the quadratic function based on the sign of the Boundary."""
         if (b ** 2 - 4 * a * c) < 0:
             return None
@@ -156,10 +160,10 @@ class PointBoundary(Boundary):
             sign_value = 1
         else:
             sign_value = -1
-        solution = (-b + (-sign_value) * sqrt(b ** 2 - 4 * a * c)) / 2 * a
+        solution = (-b + (-sign_value) * Decimal(b ** 2 - 4 * a * c).sqrt()) / 2 * a
         return solution
 
-    def formula_x(self, y: float) -> Optional[float]:
+    def formula_x(self, y: Decimal) -> Optional[Decimal]:
         """Return the x coordinate given the y coordinate.
 
         This is the the formula of the bisector mapped with the star map.
@@ -167,13 +171,13 @@ class PointBoundary(Boundary):
         """
         p = self.bisector.sites[0].point
         q = self.bisector.sites[1].point
-        a = -((q.x - p.x) / (q.y - p.y))
-        b = (q.x ** 2 - p.x ** 2 + q.y ** 2 - p.y ** 2) / (2 * (q.y - p.y))
-        c = -b + y
-        d = b - p.y
-        e = c ** 2 - d ** 2 - p.x ** 2
-        f = -1
-        g = 2 * (-a * (c + d) + p.x)
+        a = Decimal(-((q.x - p.x) / (q.y - p.y)))
+        b = Decimal((q.x ** 2 - p.x ** 2 + q.y ** 2 - p.y ** 2) / (2 * (q.y - p.y)))
+        c = Decimal(-b + y)
+        d = Decimal(b - p.y)
+        e = Decimal(c ** 2 - d ** 2 - p.x ** 2)
+        f = Decimal(-1)
+        g = Decimal(2 * (-a * (c + d) + p.x))
         x = self.quadratic_solution(f, g, e)
         return x
 
@@ -188,17 +192,19 @@ class WeightedPointBoundary(Boundary):
         super(WeightedPointBoundary, self).__init__(bisector, sign)
 
     # Used in star
-    def distance_to_site(self, point: Point) -> float:
+    def distance_to_site(self, point: Point) -> Decimal:
         """Get distance to any of the sites because it is a boundary."""
         p = self.bisector.sites[0].point
-        return sqrt((p.x - point.x) ** 2 + (p.y - point.y) ** 2)
+        return Decimal((p.x - point.x) ** 2 + (p.y - point.y) ** 2).sqrt()
 
     def star(self, point: Point) -> Point:
         """Map a bisector."""
         return Point(point.x, point.y + self.distance_to_site(point))
 
     # Used in formula_x
-    def quadratic_solution(self, a: float, b: float, c: float) -> Optional[float]:
+    def quadratic_solution(
+        self, a: Decimal, b: Decimal, c: Decimal
+    ) -> Optional[Decimal]:
         """Return the solution of the quadratic function based on the sign of the Boundary."""
         if (b ** 2 - 4 * a * c) < 0:
             return None
@@ -206,10 +212,10 @@ class WeightedPointBoundary(Boundary):
             sign_value = 1
         else:
             sign_value = -1
-        solution = (-b + (-sign_value) * sqrt(b ** 2 - 4 * a * c)) / 2 * a
+        solution = (-b + (-sign_value) * Decimal(b ** 2 - 4 * a * c).sqrt()) / 2 * a
         return solution
 
-    def formula_x(self, y: float) -> Optional[float]:
+    def formula_x(self, y: Decimal) -> Optional[Decimal]:
         """Return the x coordinate given the y coordinate.
 
         This is the the formula of the bisector mapped with the star map.
@@ -218,11 +224,11 @@ class WeightedPointBoundary(Boundary):
         p = self.bisector.sites[0].point
         q = self.bisector.sites[1].point
         a = -((q.x - p.x) / (q.y - p.y))
-        b = (q.x ** 2 - p.x ** 2 + q.y ** 2 - p.y ** 2) / (2 * (q.y - p.y))
-        c = -b + y
-        d = b - p.y
-        e = c ** 2 - d ** 2 - p.x ** 2
-        f = -1
-        g = 2 * (-a * (c + d) + p.x)
+        b = Decimal((q.x ** 2 - p.x ** 2 + q.y ** 2 - p.y ** 2) / (2 * (q.y - p.y)))
+        c = Decimal(-b + y)
+        d = Decimal(b - p.y)
+        e = Decimal(c ** 2 - d ** 2 - p.x ** 2)
+        f = Decimal(-1)
+        g = Decimal(2 * (-a * (c + d) + p.x))
         x = self.quadratic_solution(f, g, e)
         return x

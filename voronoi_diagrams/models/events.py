@@ -12,6 +12,7 @@ from ..data_structures.avl_tree import AVLNode
 
 # Math
 from math import tan, atan
+from decimal import Decimal
 
 # Conic Sections
 from conic_sections.utils.circle import get_circle_formula_x, get_circle_formula_y
@@ -26,7 +27,7 @@ class Event:
     point: Point
     name: str
 
-    def __init__(self, x: float, y: float, is_site: bool, name: str = ""):
+    def __init__(self, x: Decimal, y: Decimal, is_site: bool, name: str = ""):
         """Construct Event."""
         self.point = Point(x, y)
         self.is_site = is_site
@@ -48,7 +49,7 @@ class Event:
 class Site(Event):
     """Site to handle in Fortune's Algorithm."""
 
-    def __init__(self, x: float, y: float, name: str = ""):
+    def __init__(self, x: Decimal, y: Decimal, name: str = ""):
         """Construct point."""
         super(Site, self).__init__(x, y, True, name=name)
 
@@ -56,19 +57,19 @@ class Site(Event):
         """Get equality between sites."""
         return self.point.x == site.point.x and self.point.y == site.point.y
 
-    def get_x_frontier_pointing_to_point(self, point: Point) -> float:
+    def get_x_frontier_pointing_to_point(self, point: Point) -> Decimal:
         """Get the last point of the site pointing to given point."""
         return self.point.x
 
-    def get_y_frontier_pointing_to_point(self, point: Point) -> float:
+    def get_y_frontier_pointing_to_point(self, point: Point) -> Decimal:
         """Get the last point of the site pointing to given point."""
         return self.point.y
 
-    def get_y_frontier_formula(self, x: float) -> Tuple[float, float]:
+    def get_y_frontier_formula(self, x: Decimal) -> Tuple[Decimal, Decimal]:
         """Get the frontier's y coordinates given x coordinate."""
         return (self.point.y, self.point.y)
 
-    def get_x_frontier_formula(self, x: float) -> Tuple[float, float]:
+    def get_x_frontier_formula(self, x: Decimal) -> Tuple[Decimal, Decimal]:
         """Get the frontier's x coordinates given y coordinate."""
         return (self.point.x, self.point.x)
 
@@ -94,9 +95,9 @@ class WeightedSite(Site):
     TODO: Get frointier of the site with the weight.
     """
 
-    weight: float
+    weight: Decimal
 
-    def __init__(self, x: float, y: float, weight: float, name: str = ""):
+    def __init__(self, x: Decimal, y: Decimal, weight: Decimal, name: str = ""):
         """Construct point."""
         super(WeightedSite, self).__init__(x, y, name=name)
         self.weight = weight
@@ -109,20 +110,20 @@ class WeightedSite(Site):
             and self.weight == wsite.weight
         )
 
-    def get_x_frontier_pointing_to_point(self, point: Point) -> float:
+    def get_x_frontier_pointing_to_point(self, point: Point) -> Decimal:
         """Get the last point of the site pointing to given point."""
         # TODO: Change this method.
         return self.point.x
 
-    def get_y_frontier_pointing_to_point(self, point: Point) -> float:
+    def get_y_frontier_pointing_to_point(self, point: Point) -> Decimal:
         """Get the last point of the site pointing to given point."""
         # TODO: Change this method.
         return self.point.y
 
-    def get_y_frontier_formula(self, x: float) -> Optional[Tuple[float, float]]:
+    def get_y_frontier_formula(self, x: Decimal) -> Optional[Tuple[Decimal, Decimal]]:
         """Get the frontier's y coordinates given x coordinate."""
         return get_circle_formula_y(self.point.x, self.point.y, self.weight, x)
 
-    def get_x_frontier_formula(self, y: float) -> Optional[Tuple[float, float]]:
+    def get_x_frontier_formula(self, y: Decimal) -> Optional[Tuple[Decimal, Decimal]]:
         """Get the frontier's x coordinates given y coordinate."""
         return get_circle_formula_x(self.point.x, self.point.y, self.weight, y)

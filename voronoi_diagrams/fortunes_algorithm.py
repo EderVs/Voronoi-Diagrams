@@ -23,14 +23,17 @@ from .models import (
     PointRegion,
 )
 
+# Math
+from decimal import Decimal
+
 
 class VoronoiDiagram:
     """Voronoi Diagram representation."""
 
     vertex: List[Point]
-    _vertex: Set[Tuple[float, float]]
+    _vertex: Set[Tuple[Decimal, Decimal]]
     bisectors: List[Bisector]
-    _bisectors: Set[Tuple[Tuple[float, float], Tuple[float, float]]]
+    _bisectors: Set[Tuple[Tuple[Decimal, Decimal], Tuple[Decimal, Decimal]]]
     sites: List[Site]
 
     def __init__(self, sites: Iterable[Site], site_class: Any = Site):

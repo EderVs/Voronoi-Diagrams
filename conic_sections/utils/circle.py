@@ -4,7 +4,6 @@ from typing import Optional, Tuple
 
 # Math
 from decimal import Decimal
-from math import sqrt
 
 
 def get_circle_formula_y(
