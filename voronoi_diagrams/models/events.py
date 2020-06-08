@@ -11,7 +11,7 @@ from .points import Point
 from ..data_structures.avl_tree import AVLNode
 
 # Math
-from math import tan, atan
+from math import tan, atan, sin, cos
 from decimal import Decimal
 
 # Conic Sections
@@ -91,8 +91,6 @@ class WeightedSite(Site):
     """Weighted Site to handle in Fortune's Algorithm.
 
     Is like a site but with a weight.
-
-    TODO: Get frointier of the site with the weight.
     """
 
     weight: Decimal
@@ -112,13 +110,31 @@ class WeightedSite(Site):
 
     def get_x_frontier_pointing_to_point(self, point: Point) -> Decimal:
         """Get the last point of the site pointing to given point."""
-        # TODO: Change this method.
-        return self.point.x
+        if point.x >= self.point.x:
+            sign = Decimal(1)
+        else:
+            sign = Decimal(-1)
+
+        if point.x == self.point.x:
+            return self.point.x
+
+        angle = abs(atan((point.y - self.point.y) / (point.x - self.point.x)))
+        x = self.weight * Decimal(cos(angle))
+        return self.point.x + sign * x
 
     def get_y_frontier_pointing_to_point(self, point: Point) -> Decimal:
         """Get the last point of the site pointing to given point."""
-        # TODO: Change this method.
-        return self.point.y
+        if point.y >= self.point.y:
+            sign = Decimal(1)
+        else:
+            sign = Decimal(-1)
+
+        if point.x == self.point.x:
+            return self.point.y + sign * self.weight
+
+        angle = abs(atan((point.y - self.point.y) / (point.x - self.point.x)))
+        y = self.weight * Decimal(sin(angle))
+        return self.point.y + sign * y
 
     def get_y_frontier_formula(self, x: Decimal) -> Optional[Tuple[Decimal, Decimal]]:
         """Get the frontier's y coordinates given x coordinate."""
