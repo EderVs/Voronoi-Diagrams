@@ -1,7 +1,7 @@
 """Bisector representation."""
 
 # Standard Library
-from typing import Callable, Tuple, Optional, Any
+from typing import Callable, Tuple, Optional, Any, List
 from abc import ABCMeta, abstractmethod
 
 # Models
@@ -57,7 +57,7 @@ class Bisector:
         return self.__str__()
 
     @abstractmethod
-    def get_intersection_point(self, bisector: Any) -> Optional[Point]:
+    def get_intersection_points(self, bisector: Any) -> List[Point]:
         """Get the point of intersection between two bisectors."""
         raise NotImplementedError
 
@@ -117,7 +117,7 @@ class PointBisector(Bisector):
         b = Decimal((q.x ** 2 - p.x ** 2 + q.y ** 2 - p.y ** 2) / (2 * (q.y - p.y)))
         return a * x + b
 
-    def get_intersection_point(self, bisector: Bisector) -> Point:
+    def get_intersection_points(self, bisector: Bisector) -> List[Point]:
         """Get the point of intersection between two bisectors."""
         # No blank spaces after docstring.
         def f_aux_1(xi: Decimal, xj: Decimal, yi: Decimal, yj: Decimal) -> Decimal:
@@ -155,13 +155,13 @@ class PointBisector(Bisector):
         if y1 == y2:
             # Case where self is a vertical line.
             x = self.get_middle_between_sites().x
-            return Point(x, bisector.formula_y(x))
+            return [Point(x, bisector.formula_y(x))]
         if y3 == y4:
             # Case where bisector is a vertical line.
             x = bisector.get_middle_between_sites().x
         else:
             x = get_x(x1, x2, x3, x4, y1, y2, y3, y4)
-        return Point(x, self.formula_y(x))
+        return [Point(x, self.formula_y(x))]
 
     def is_same_slope(self, bisector: Any) -> bool:
         """Compare if the given bisector slope is the same as the slope of this bisector."""
@@ -242,10 +242,11 @@ class WeightedPointBisector(Bisector):
             return None
         return (-b + (sign_one) * Decimal(b ** 2 - 4 * a * c).sqrt()) / (2 * a)
 
-    def get_intersection_point(self, bisector: Any) -> Optional[Point]:
+    def get_intersection_points(self, bisector: Any) -> List[Point]:
         """Get the point of intersection between two Weighted Point Bisectors."""
         all_intersections = self.conic_section.get_intersection(bisector.conic_section)
-        return all_intersections
+        intersection_points = [Point(x, y) for x, y in all_intersections]
+        return intersection_points
 
     def is_same_slope(self, bisector: Any) -> bool:
         """Compare if the given bisector slope is the same as the slope of this bisector."""

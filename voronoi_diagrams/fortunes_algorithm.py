@@ -15,7 +15,7 @@ from .models import (
     Point,
     Bisector,
     Event,
-    Intersection,
+    IntersectionEvent,
     Region,
     Boundary,
     PointBisector,
@@ -118,15 +118,16 @@ class VoronoiDiagram:
         if boundary_1.bisector == boundary_2.bisector:
             return
 
-        intersection_point_tuple = boundary_1.get_intersection(boundary_2)
-        if intersection_point_tuple is not None:
-            vertex, event = intersection_point_tuple
-            intersection = Intersection(event, vertex, region_node)
-            # Insert intersection to Q.
-            self.q_queue.enqueue(intersection)
-            # Save intersection in both boundaries.
-            boundary_1.right_intersection = intersection
-            boundary_2.left_intersection = intersection
+        intersection_point_tuples = boundary_1.get_intersections(boundary_2)
+        if intersection_point_tuples:
+            # Adding all intersections.
+            for vertex, event in intersection_point_tuples:
+                intersection = IntersectionEvent(event, vertex, region_node)
+                # Insert intersection to Q.
+                self.q_queue.enqueue(intersection)
+                # Save intersection in both boundaries.
+                boundary_1.right_intersection = intersection
+                boundary_2.left_intersection = intersection
 
     def _insert_posible_intersections(
         self,
@@ -202,7 +203,7 @@ class VoronoiDiagram:
             r_q_right_node,
         )
 
-    def _get_regions_and_nodes_of_intersection(self, p: Intersection):
+    def _get_regions_and_nodes_of_intersection(self, p: IntersectionEvent):
         """Get regions and their nodes of the intersection p."""
         # TODO: The error is taken from where is the region_node
         intersection_region_node = p.region_node
@@ -213,7 +214,7 @@ class VoronoiDiagram:
         r_s = r_s_node.value  # type: ignore
         return r_q, r_s, r_q_node, r_s_node
 
-    def _handle_intersection(self, p: Intersection):
+    def _handle_intersection(self, p: IntersectionEvent):
         """Handle when event is an intersection."""
         # Step 14.
         # Let p be the intersection of boundaries Cqr and Crs.

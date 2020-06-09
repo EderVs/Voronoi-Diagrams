@@ -1,13 +1,13 @@
 """Boundary representation."""
 
 # Standard Library
-from typing import Callable, Optional, Any, Tuple
+from typing import Callable, Optional, Any, Tuple, List
 from abc import ABCMeta, abstractmethod
 
 # Models
 from .points import Point
 from .bisectors import Bisector, PointBisector
-from .events import Intersection
+from .events import IntersectionEvent
 
 # Math
 from decimal import Decimal
@@ -20,8 +20,8 @@ class Boundary:
 
     bisector: Bisector
     sign: bool
-    left_intersection: Optional[Intersection]
-    right_intersection: Optional[Intersection]
+    left_intersection: Optional[IntersectionEvent]
+    right_intersection: Optional[IntersectionEvent]
 
     def __init__(
         self, bisector: Bisector, sign: bool,
@@ -93,8 +93,8 @@ class Boundary:
         """Get distance to any of the sites because it is a boundary."""
         raise NotImplementedError
 
-    def get_intersection(self, boundary: Any) -> Optional[Tuple[Point, Point]]:
-        """Get intersection between two boundaries."""
+    def get_intersections(self, boundary: Any) -> List[Tuple[Point, Point]]:
+        """Get intersections between two boundaries."""
         site_self = self.get_site()
         site_boundary = boundary.get_site()
         is_intersection_possible = True
@@ -115,15 +115,20 @@ class Boundary:
         ):
             is_intersection_possible = False
 
+        all_intersections = []
         if is_intersection_possible:
-            intersection_point = self.bisector.get_intersection_point(boundary.bisector)
-            if intersection_point is not None:
+            intersection_points = self.bisector.get_intersection_points(
+                boundary.bisector
+            )
+            for intersection_point in intersection_points:
                 intersection_point_star = self.star(intersection_point)
                 if self.is_boundary_below(
                     intersection_point_star
                 ) and boundary.is_boundary_below(intersection_point_star):
-                    return (intersection_point, intersection_point_star)
-        return None
+                    all_intersections.append(
+                        (intersection_point, intersection_point_star)
+                    )
+        return all_intersections
 
     def is_boundary_below(self, point: Point) -> bool:
         """Get if the given point is up the boundary."""

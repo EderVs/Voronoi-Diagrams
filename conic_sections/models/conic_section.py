@@ -72,11 +72,11 @@ class ConicSection:
 
     def __get_ys_of_intersections(
         self, x: Decimal, conic_section
-    ) -> List[Tuple[Decimal, Tuple[Decimal, Decimal]]]:
+    ) -> List[Tuple[Decimal, Decimal]]:
         """Get ys of intersections."""
         ys = self.y_formula(x)
         other_ys = conic_section.y_formula(x)
-        intersections: List[Tuple[Decimal, Tuple[Decimal, Decimal]]] = []
+        intersections: List[Tuple[Decimal, Decimal]] = []
         if ys is None or other_ys is None:
             return []
 
@@ -84,7 +84,7 @@ class ConicSection:
         for y in ys:
             for other_y in other_ys:
                 if are_close(y, other_y, epsilon):
-                    intersections.append((x, (y, other_y)))
+                    intersections.append((x, y))
         return intersections
 
     def __get_intersections(
@@ -95,17 +95,15 @@ class ConicSection:
         p4: Decimal,
         p5: Decimal,
         conic_section: Any,
-    ) -> List[Tuple[Decimal, Tuple[Decimal, Decimal]]]:
+    ) -> List[Tuple[Decimal, Decimal]]:
         xs = roots([p1, p2, p3, p4, p5])
-        intersections: List[Tuple[Decimal, Tuple[Decimal, Decimal]]] = []
+        intersections: List[Tuple[Decimal, Decimal]] = []
         for x in xs:
             if isrealobj(x):
                 intersections += self.__get_ys_of_intersections(x, conic_section)
         return intersections
 
-    def get_intersection(
-        self, conic_section: Any
-    ) -> List[Tuple[Decimal, Tuple[Decimal, Decimal]]]:
+    def get_intersection(self, conic_section: Any) -> List[Tuple[Decimal, Decimal]]:
         """Get the intersection of 2 conic sections.
 
         The solutions are returned in a list of max length 4.

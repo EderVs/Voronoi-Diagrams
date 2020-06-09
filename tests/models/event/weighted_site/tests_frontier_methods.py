@@ -31,7 +31,6 @@ class TestGetFrontierPointingToPoint:
 
         x = p.get_x_frontier_pointing_to_point(point)
         y = p.get_y_frontier_pointing_to_point(point)
-        print(x)
         epsilon = Decimal(0.00001)
         assert are_close(x, Decimal(0), epsilon)
         assert are_close(y, Decimal(2), epsilon)

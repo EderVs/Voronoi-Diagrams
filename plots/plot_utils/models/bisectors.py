@@ -44,6 +44,6 @@ def plot_intersections(
     bisector1: WeightedPointBisector, bisector2: WeightedPointBisector
 ) -> None:
     """Plot intersections between 2 bisectors."""
-    intersections = bisector1.get_intersection_point(bisector2)
+    intersections = bisector1.get_intersection_points(bisector2)
     for intersection in intersections:
         plot_point(intersection[0], intersection[1][0])
