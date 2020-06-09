@@ -34,8 +34,8 @@ def plot_weighted_point_bisector(
     xlim: Limits of x in the plot.
     ylim: Limits of y in the plot.
     """
-    y_list_plus = [bisector.formula_y(x) for x in x_range]
-    y_list_minus = [bisector.formula_y(x, sign=False) for x in x_range]
+    y_list_plus = [bisector.formula_y(x)[0] for x in x_range]
+    y_list_minus = [bisector.formula_y(x)(1) for x in x_range]
     plt.plot(x_range, y_list_plus, "k")
     plt.plot(x_range, y_list_minus, "k")
 

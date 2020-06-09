@@ -39,12 +39,12 @@ class Bisector:
         return self.sites == bisector.sites
 
     @abstractmethod
-    def formula_x(self, y: Decimal) -> Optional[Decimal]:
+    def formula_x(self, y: Decimal) -> List[Decimal]:
         """Get x coordinate given the y coordinate."""
         raise NotImplementedError
 
     @abstractmethod
-    def formula_y(self, y: Decimal) -> Optional[Decimal]:
+    def formula_y(self, y: Decimal) -> List[Decimal]:
         """Get y coordinate given the x coordinate."""
         raise NotImplementedError
 
@@ -95,7 +95,7 @@ class PointBisector(Bisector):
         """Construct bisector of Point sites Bisector."""
         super(PointBisector, self).__init__(sites)
 
-    def formula_x(self, y: Decimal) -> Decimal:
+    def formula_x(self, y: Decimal) -> List[Decimal]:
         """Get x coordinate given the y coordinate.
 
         In this case is a line.
@@ -104,7 +104,7 @@ class PointBisector(Bisector):
         q = self.sites[1].point
         a = (2 * q.y - 2 * p.y) * y + (p.y ** 2 - q.y ** 2) - (q.x ** 2 - p.x ** 2)
         b = 2 * p.x - 2 * q.x
-        return a / b
+        return [a / b]
 
     def formula_y(self, x: Decimal) -> Decimal:
         """Get y coordinate given the x coordinate.
@@ -115,7 +115,7 @@ class PointBisector(Bisector):
         q = self.sites[1].point
         a = Decimal(-((q.x - p.x) / (q.y - p.y)))
         b = Decimal((q.x ** 2 - p.x ** 2 + q.y ** 2 - p.y ** 2) / (2 * (q.y - p.y)))
-        return a * x + b
+        return [a * x + b]
 
     def get_intersection_points(self, bisector: Bisector) -> List[Point]:
         """Get the point of intersection between two bisectors."""
@@ -155,13 +155,13 @@ class PointBisector(Bisector):
         if y1 == y2:
             # Case where self is a vertical line.
             x = self.get_middle_between_sites().x
-            return [Point(x, bisector.formula_y(x))]
+            return [Point(x, bisector.formula_y(x)[0])]
         if y3 == y4:
             # Case where bisector is a vertical line.
             x = bisector.get_middle_between_sites().x
         else:
             x = get_x(x1, x2, x3, x4, y1, y2, y3, y4)
-        return [Point(x, self.formula_y(x))]
+        return [Point(x, self.formula_y(x)[0])]
 
     def is_same_slope(self, bisector: Any) -> bool:
         """Compare if the given bisector slope is the same as the slope of this bisector."""
@@ -221,7 +221,7 @@ class WeightedPointBisector(Bisector):
         self.e = (-2 * py * s) - (2 * ((2 * py) - (2 * qy)) * r)
         self.f = (s * (px ** 2)) + (s * (py ** 2)) - (r ** 2)
 
-    def formula_x(self, y: Decimal) -> Decimal:
+    def formula_x(self, y: Decimal) -> List[Decimal]:
         """Get x coordinate given the y coordinate.
 
         In this case is an hyperbola.
@@ -229,18 +229,29 @@ class WeightedPointBisector(Bisector):
         # TODO: Complete method.
         raise NotImplementedError
 
-    def formula_y(self, x: Decimal, sign: bool = True) -> Optional[Decimal]:
+    def formula_y(self, x: Decimal) -> List[Decimal]:
         """Get y coordinate given the x coordinate.
 
         In this case is an hyperbola
         """
-        sign_one = 1 if sign else -1
-        b = self.b * x + self.e
-        a = self.c
-        c = (self.a * (x ** 2)) + (self.d * x) + (self.f)
-        if (b ** 2 - 4 * a * c) < 0:
-            return None
-        return (-b + (sign_one) * Decimal(b ** 2 - 4 * a * c).sqrt()) / (2 * a)
+        # One line
+        def _get_formula_given_sign(x: Decimal, sign: bool) -> Optional[Decimal]:
+            sign_one = 1 if sign else -1
+            b = self.b * x + self.e
+            a = self.c
+            c = (self.a * (x ** 2)) + (self.d * x) + (self.f)
+            if (b ** 2 - 4 * a * c) < 0:
+                return None
+            return (-b + (sign_one) * Decimal(b ** 2 - 4 * a * c).sqrt()) / (2 * a)
+
+        return_values = []
+        y_plus = _get_formula_given_sign(x, sign=True)
+        y_minus = _get_formula_given_sign(x, sign=False)
+        if y_plus is not None:
+            return_values.append(y_plus)
+        if y_minus is not None:
+            return_values.append(y_minus)
+        return return_values
 
     def get_intersection_points(self, bisector: Any) -> List[Point]:
         """Get the point of intersection between two Weighted Point Bisectors."""

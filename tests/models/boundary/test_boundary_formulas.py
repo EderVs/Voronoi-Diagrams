@@ -18,10 +18,10 @@ class TestBoundaryFormulas:
         boundary_plus = PointBoundary(bisector=bisector, sign=True)
         boundary_minus = PointBoundary(bisector=bisector, sign=False)
         y = 3
-        x = boundary_plus.formula_x(y)
-        assert (y - boundary_plus.formula_y(x)) < 0.00000000001
-        x = boundary_minus.formula_x(y)
-        assert (y - boundary_minus.formula_y(x)) < 0.00000000001
+        x = boundary_plus.formula_x(y)[0]
+        assert (y - boundary_plus.formula_y(x)[0]) < 0.00000000001
+        x = boundary_minus.formula_x(y)[0]
+        assert (y - boundary_minus.formula_y(x)[0]) < 0.00000000001
 
     def test_point_formulas_negative_fixed_values(self):
         """Test point formula with 2 positive fixed sites."""
@@ -31,10 +31,10 @@ class TestBoundaryFormulas:
         boundary_plus = PointBoundary(bisector=bisector, sign=True)
         boundary_minus = PointBoundary(bisector=bisector, sign=False)
         y = 3
-        x = boundary_plus.formula_x(y)
-        assert (y - boundary_plus.formula_y(x)) < 0.00000000001
-        x = boundary_minus.formula_x(y)
-        assert (y - boundary_minus.formula_y(x)) < 0.00000000001
+        x = boundary_plus.formula_x(y)[0]
+        assert (y - boundary_plus.formula_y(x)[0]) < 0.00000000001
+        x = boundary_minus.formula_x(y)[0]
+        assert (y - boundary_minus.formula_y(x)[0]) < 0.00000000001
 
     def test_point_formulas_random_values(self):
         """Test point formula with 2 random sites."""
@@ -51,7 +51,7 @@ class TestBoundaryFormulas:
         else:
             max_site = q
         y = max_site.point.y + delta
-        x = boundary_plus.formula_x(y)
-        assert (y - boundary_plus.formula_y(x)) < 0.00000000001
-        x = boundary_minus.formula_x(y)
-        assert (y - boundary_minus.formula_y(x)) < 0.00000000001
+        x = boundary_plus.formula_x(y)[0]
+        assert (y - boundary_plus.formula_y(x)[0]) < 0.00000000001
+        x = boundary_minus.formula_x(y)[0]
+        assert (y - boundary_minus.formula_y(x)[0]) < 0.00000000001

@@ -23,13 +23,15 @@ def test_equation(bisector1, bisector2, sign_1, sign_2, x):
     """Test equation with given x value."""
     epsilon = 0.00001
 
-    print(bisector1.formula_y(x, sign=sign_1))
-    print(bisector2.formula_y(x, sign=sign_2))
-    assert are_close(
-        bisector1.formula_y(x, sign=sign_1),
-        bisector2.formula_y(x, sign=sign_2),
-        epsilon,
-    )
+    if sign_1:
+        value1 = bisector1.formula_y(x)[0]
+    else:
+        value1 = bisector1.formula_y(x)[2]
+    if sign_2:
+        value2 = bisector2.formula_y(x)[0]
+    else:
+        value2 = bisector2.formula_y(x)[1]
+    assert are_close(value1, value2, epsilon,)
 
     # First Bisector
     cs_a = bisector1.a
