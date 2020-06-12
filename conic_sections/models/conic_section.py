@@ -80,7 +80,7 @@ class ConicSection:
         if ys is None or other_ys is None:
             return []
 
-        epsilon = 0.0001
+        epsilon = Decimal(0.0001)
         for y in ys:
             for other_y in other_ys:
                 if are_close(y, other_y, epsilon):
@@ -96,7 +96,7 @@ class ConicSection:
         p5: Decimal,
         conic_section: Any,
     ) -> List[Tuple[Decimal, Decimal]]:
-        xs = roots([p1, p2, p3, p4, p5])
+        xs = [Decimal(x) for x in roots([p1, p2, p3, p4, p5])]
         intersections: List[Tuple[Decimal, Decimal]] = []
         for x in xs:
             if isrealobj(x):

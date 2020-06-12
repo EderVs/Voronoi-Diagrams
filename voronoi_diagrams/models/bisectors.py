@@ -300,8 +300,13 @@ class WeightedPointBisector(Bisector):
     def get_intersection_points(self, bisector: Any) -> List[Point]:
         """Get the point of intersection between two Weighted Point Bisectors."""
         all_intersections = self.conic_section.get_intersection(bisector.conic_section)
-        intersection_points = [Point(x, y) for x, y in all_intersections]
-        return intersection_points
+        valid_intersections = []
+        for x, y in all_intersections:
+            if self._is_point_part_of_bisector(
+                x, y
+            ) and bisector._is_point_part_of_bisector(x, y):
+                valid_intersections.append(Point(x, y))
+        return valid_intersections
 
     def is_same_slope(self, bisector: Any) -> bool:
         """Compare if the given bisector slope is the same as the slope of this bisector."""
