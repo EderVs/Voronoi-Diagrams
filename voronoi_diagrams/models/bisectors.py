@@ -14,6 +14,9 @@ from conic_sections.models import ConicSection
 # Math
 from decimal import Decimal
 
+# Utils
+from general_utils.numbers import are_close
+
 
 class Bisector:
     """Bisector representation.
@@ -221,13 +224,50 @@ class WeightedPointBisector(Bisector):
         self.e = (-2 * py * s) - (2 * ((2 * py) - (2 * qy)) * r)
         self.f = (s * (px ** 2)) + (s * (py ** 2)) - (r ** 2)
 
+    def _is_point_part_of_bisector(self, x: Decimal, y: Decimal) -> bool:
+        """Get if the point is part of bisector.
+
+        The bisector is the open branch towards p where p is the weighted site with more weight.
+        The open branch towards p has the equality distance_to_p + w_p = distance_to_q + w_q
+        where w_p is the weight of p, q is the smallest site and w_q the weight of q.
+        """
+        big_site_index = int(self.sites[0].weight < self.sites[1].weight)
+        big_site = self.sites[big_site_index]
+        small_site = self.sites[big_site_index ^ 1]
+        epsilon = Decimal(0.00001)
+        return are_close(
+            big_site.get_distance_to_site_farthest_frontier_from_point(x, y),
+            small_site.get_distance_to_site_farthest_frontier_from_point(x, y),
+            epsilon,
+        )
+
     def formula_x(self, y: Decimal) -> List[Decimal]:
         """Get x coordinate given the y coordinate.
 
         In this case is an hyperbola.
         """
-        # TODO: Complete method.
-        raise NotImplementedError
+        # One Line.
+        def _get_formula_given_sign(y: Decimal, sign: bool) -> Optional[Decimal]:
+            sign_one = 1 if sign else -1
+            b = self.b * y + self.d
+            a = self.a
+            c = (self.c * (y ** 2)) + (self.e * y) + (self.f)
+            if (b ** 2 - 4 * a * c) < 0:
+                return None
+            return (-b + (sign_one) * Decimal(b ** 2 - 4 * a * c).sqrt()) / (2 * a)
+
+        return_values = []
+        x_plus = _get_formula_given_sign(y, sign=True)
+        x_minus = _get_formula_given_sign(y, sign=False)
+        if x_plus is not None and self._is_point_part_of_bisector(x_plus, y):
+            return_values.append(x_plus)
+        if (
+            x_minus is not None
+            and self._is_point_part_of_bisector(x_minus, y)
+            and x_minus not in return_values
+        ):
+            return_values.append(x_minus)
+        return return_values
 
     def formula_y(self, x: Decimal) -> List[Decimal]:
         """Get y coordinate given the x coordinate.
@@ -247,9 +287,13 @@ class WeightedPointBisector(Bisector):
         return_values = []
         y_plus = _get_formula_given_sign(x, sign=True)
         y_minus = _get_formula_given_sign(x, sign=False)
-        if y_plus is not None:
+        if y_plus is not None and self._is_point_part_of_bisector(x, y_plus):
             return_values.append(y_plus)
-        if y_minus is not None:
+        if (
+            y_minus is not None
+            and self._is_point_part_of_bisector(x, y_minus)
+            and y_minus not in return_values
+        ):
             return_values.append(y_minus)
         return return_values
 

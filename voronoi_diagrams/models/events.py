@@ -73,6 +73,27 @@ class Site(Event):
         """Get the frontier's x coordinates given y coordinate."""
         return (self.point.x, self.point.x)
 
+    def get_distance_to_site_point_from_point(self, x: Decimal, y: Decimal):
+        """Get distance to site point from another point."""
+        return (
+            ((self.point.x - x) ** Decimal(2)) + ((self.point.y - y) ** Decimal(2))
+        ).sqrt()
+
+    def get_distance_to_site_frontier_from_point(
+        self, x: Decimal, y: Decimal
+    ) -> Decimal:
+        """Get distance to site frontier from point."""
+        return self.get_distance_to_site_point_from_point(x, y)
+
+    def get_distance_to_site_farthest_frontier_from_point(
+        self, x: Decimal, y: Decimal
+    ) -> Decimal:
+        """Get distance to site frontier from point.
+
+        The frontier in this case is the site point itself.
+        """
+        return self.get_distance_to_site_point_from_point(x, y)
+
 
 class IntersectionEvent(Event):
     """Intersection to handle in Fortune's Algorithm."""
@@ -143,3 +164,27 @@ class WeightedSite(Site):
     def get_x_frontier_formula(self, y: Decimal) -> Optional[Tuple[Decimal, Decimal]]:
         """Get the frontier's x coordinates given y coordinate."""
         return get_circle_formula_x(self.point.x, self.point.y, self.weight, y)
+
+    def get_distance_to_site_frontier_from_point(
+        self, x: Decimal, y: Decimal
+    ) -> Decimal:
+        """Get distance to site frontier from point.
+
+        The frontier in this case is the circle given by the weight as radius.
+        """
+        return (
+            super(WeightedSite, self).get_distance_to_site_point_from_point(x, y)
+            - self.weight
+        )
+
+    def get_distance_to_site_farthest_frontier_from_point(
+        self, x: Decimal, y: Decimal
+    ) -> Decimal:
+        """Get distance to site frontier from point.
+
+        The frontier in this case is the circle given by the weight as radius.
+        """
+        return (
+            super(WeightedSite, self).get_distance_to_site_point_from_point(x, y)
+            + self.weight
+        )
