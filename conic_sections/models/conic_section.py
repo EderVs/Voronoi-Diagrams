@@ -80,7 +80,7 @@ class ConicSection:
         if ys is None or other_ys is None:
             return []
 
-        epsilon = Decimal(0.0001)
+        epsilon = Decimal("0.0001")
         for y in ys:
             for other_y in other_ys:
                 if are_close(y, other_y, epsilon):

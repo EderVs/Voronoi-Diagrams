@@ -45,7 +45,7 @@ class TestGetWeightedPointBisectorIntersectionPoints:
     """Test formula."""
 
     def test_one_intersection(self):
-        """Test point formula with 3 positive fixed sites."""
+        """Test get one intersection."""
         p = WeightedSite(Decimal("-17"), Decimal("-5"), Decimal("7"))
         q = WeightedSite(Decimal("4"), Decimal("-5"), Decimal("0.5"))
         r = WeightedSite(Decimal("5"), Decimal("15"), Decimal("3"))
@@ -77,4 +77,65 @@ class TestGetWeightedPointBisectorIntersectionPoints:
         y_values_qr = bisector_qr.formula_y(intersection_x)
         assert any(
             [are_close(y_value, intersection_y, epsilon) for y_value in y_values_qr]
+        )
+
+    def test_two_intersections(self):
+        """Test get two intersection."""
+        p = WeightedSite(Decimal("-17"), Decimal("-5"), Decimal("7"))
+        q = WeightedSite(Decimal("4"), Decimal("-5"), Decimal("0.5"))
+        r = WeightedSite(Decimal("-44"), Decimal("-5"), Decimal("3"))
+        bisector_pq = WeightedPointBisector(sites=(p, q))
+        bisector_qr = WeightedPointBisector(sites=(q, r))
+        intersection_x1 = Decimal("-22.856457178973670352206681855022907257080078125")
+        intersection_x2 = Decimal("-22.856457178973670352206681855022907257080078125")
+        intersection_y1 = Decimal("44.24693546822346538098926893")
+        intersection_y2 = Decimal("-54.24693546822346538098926893")
+        epsilon = Decimal("0.0001")
+        intersections = bisector_pq.get_intersection_points(bisector_qr)
+        assert len(intersections) == 2
+        first = 0
+        for i in range(len(intersections)):
+            if are_close(intersections[i].x, intersection_x1, epsilon) and are_close(
+                intersections[i].y, intersection_y1, epsilon
+            ):
+                first = i
+                break
+        else:
+            assert False
+        assert are_close(intersections[first ^ 1].x, intersection_x2, epsilon)
+        assert are_close(intersections[first ^ 1].y, intersection_y2, epsilon)
+        # Test in both bisectors
+        # X
+        x_values_pq = bisector_pq.formula_x(intersection_y1)
+        assert any(
+            [are_close(x_value, intersection_x1, epsilon) for x_value in x_values_pq]
+        )
+        x_values_qr = bisector_qr.formula_x(intersection_y1)
+        assert any(
+            [are_close(x_value, intersection_x1, epsilon) for x_value in x_values_qr]
+        )
+        x_values_pq = bisector_pq.formula_x(intersection_y2)
+        assert any(
+            [are_close(x_value, intersection_x2, epsilon) for x_value in x_values_pq]
+        )
+        x_values_qr = bisector_qr.formula_x(intersection_y2)
+        assert any(
+            [are_close(x_value, intersection_x2, epsilon) for x_value in x_values_qr]
+        )
+        # Y
+        y_values_pq = bisector_pq.formula_y(intersection_x1)
+        assert any(
+            [are_close(y_value, intersection_y1, epsilon) for y_value in y_values_pq]
+        )
+        y_values_qr = bisector_qr.formula_y(intersection_x1)
+        assert any(
+            [are_close(y_value, intersection_y1, epsilon) for y_value in y_values_qr]
+        )
+        y_values_pq = bisector_pq.formula_y(intersection_x2)
+        assert any(
+            [are_close(y_value, intersection_y2, epsilon) for y_value in y_values_pq]
+        )
+        y_values_qr = bisector_qr.formula_y(intersection_x2)
+        assert any(
+            [are_close(y_value, intersection_y2, epsilon) for y_value in y_values_qr]
         )

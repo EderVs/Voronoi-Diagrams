@@ -145,3 +145,42 @@ class TestWeightedPointBisectorFormulas:
         values_x = bisector.formula_x(y2)
         assert len(values_x) == 1
         assert are_close(values_x[0], x, epsilon)
+
+    def test_bisector_inside_site(self):
+        """Test point formula with 2 positive fixed sites."""
+        p = WeightedSite(Decimal(-5), Decimal(-5), Decimal(7))
+        q = WeightedSite(Decimal(4), Decimal(-5), Decimal(0.5))
+        bisector = WeightedPointBisector(sites=(p, q))
+        epsilon = Decimal(0.00001)
+        x = Decimal("-5")
+        y1 = Decimal("-2.019230769230769230769230769")
+        y2 = Decimal("-7.980769230769230769230769231")
+        values_y = bisector.formula_y(x)
+        assert len(values_y) == 2
+        assert are_close(values_y[0], y1, epsilon) or are_close(
+            values_y[0], y2, epsilon
+        )
+        assert are_close(values_y[1], y1, epsilon) or are_close(
+            values_y[1], y2, epsilon
+        )
+        values_x = bisector.formula_x(y1)
+        assert len(values_x) == 1
+        assert are_close(values_x[0], x, epsilon)
+        values_x = bisector.formula_x(y2)
+        assert len(values_x) == 1
+        assert are_close(values_x[0], x, epsilon)
+
+    def test_side_inside_site(self):
+        """In this sample there isn't a bisector"""
+        p = WeightedSite(Decimal(0), Decimal(-5), Decimal(7))
+        q = WeightedSite(Decimal(4), Decimal(-5), Decimal(0.5))
+        bisector = WeightedPointBisector(sites=(p, q))
+        x1 = Decimal("0")
+        x2 = Decimal("4")
+        y = Decimal("-5")
+        values_y = bisector.formula_y(x1)
+        assert len(values_y) == 0
+        values_y = bisector.formula_y(x2)
+        assert len(values_y) == 0
+        values_x = bisector.formula_x(y)
+        assert len(values_x) == 0

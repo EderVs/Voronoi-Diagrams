@@ -301,11 +301,18 @@ class WeightedPointBisector(Bisector):
         """Get the point of intersection between two Weighted Point Bisectors."""
         all_intersections = self.conic_section.get_intersection(bisector.conic_section)
         valid_intersections = []
+        epsilon = Decimal("0.0001")
         for x, y in all_intersections:
             if self._is_point_part_of_bisector(
                 x, y
             ) and bisector._is_point_part_of_bisector(x, y):
-                valid_intersections.append(Point(x, y))
+                for valid_intersection in valid_intersections:
+                    if are_close(valid_intersection.x, x, epsilon) and are_close(
+                        valid_intersection.y, y, epsilon
+                    ):
+                        break
+                else:
+                    valid_intersections.append(Point(x, y))
         return valid_intersections
 
     def is_same_slope(self, bisector: Any) -> bool:
