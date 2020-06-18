@@ -94,6 +94,14 @@ class Site(Event):
         """
         return self.get_distance_to_site_point_from_point(x, y)
 
+    def get_highest_site_point(self) -> Point:
+        """Get lowest point in the site."""
+        return self.point
+
+    def get_rightest_site_point(self) -> Point:
+        """Get rightest point in the site."""
+        return self.point
+
 
 class IntersectionEvent(Event):
     """Intersection to handle in Fortune's Algorithm."""
@@ -188,3 +196,11 @@ class WeightedSite(Site):
             super(WeightedSite, self).get_distance_to_site_point_from_point(x, y)
             + self.weight
         )
+
+    def get_highest_site_point(self) -> Point:
+        """Get lowest point in the site."""
+        return Point(self.point.x, self.point.y + self.weight)
+
+    def get_rightest_site_point(self) -> Point:
+        """Get rightest point in the site."""
+        return Point(self.point.x + self.weight, self.point.y)

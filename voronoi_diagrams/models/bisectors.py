@@ -47,7 +47,7 @@ class Bisector:
         raise NotImplementedError
 
     @abstractmethod
-    def formula_y(self, y: Decimal) -> List[Decimal]:
+    def formula_y(self, x: Decimal) -> List[Decimal]:
         """Get y coordinate given the x coordinate."""
         raise NotImplementedError
 
@@ -245,6 +245,7 @@ class WeightedPointBisector(Bisector):
         """Get x coordinate given the y coordinate.
 
         In this case is an hyperbola.
+        # TODO: Change to use conic_sections.x_formula
         """
         # One Line.
         def _get_formula_given_sign(y: Decimal, sign: bool) -> Optional[Decimal]:
@@ -273,6 +274,7 @@ class WeightedPointBisector(Bisector):
         """Get y coordinate given the x coordinate.
 
         In this case is an hyperbola
+        # TODO: Change to use conic_sections.y_formula
         """
         # One line
         def _get_formula_given_sign(x: Decimal, sign: bool) -> Optional[Decimal]:
@@ -317,5 +319,4 @@ class WeightedPointBisector(Bisector):
 
     def is_same_slope(self, bisector: Any) -> bool:
         """Compare if the given bisector slope is the same as the slope of this bisector."""
-        # TODO: Complete method.
-        raise NotImplementedError
+        return False

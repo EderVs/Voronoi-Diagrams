@@ -96,11 +96,12 @@ class ConicSection:
         p5: Decimal,
         conic_section: Any,
     ) -> List[Tuple[Decimal, Decimal]]:
-        xs = [Decimal(x) for x in roots([p1, p2, p3, p4, p5])]
         intersections: List[Tuple[Decimal, Decimal]] = []
-        for x in xs:
+        for x in roots([p1, p2, p3, p4, p5]):
             if isrealobj(x):
-                intersections += self.__get_ys_of_intersections(x, conic_section)
+                intersections += self.__get_ys_of_intersections(
+                    Decimal(x), conic_section
+                )
         return intersections
 
     def get_intersection(self, conic_section: Any) -> List[Tuple[Decimal, Decimal]]:
@@ -180,3 +181,14 @@ class ConicSection:
 
         intersections = self.__get_intersections(p1, p2, p3, p4, p5, conic_section)
         return intersections
+
+    def get_changes_of_sign_in_x(self) -> List[Decimal]:
+        """Get changes of sign in the y_formula."""
+        a = self.b ** 2 - 4 * self.c * self.a
+        b = 2 * self.b * self.e - 4 * self.c * self.d
+        c = self.e ** 2 - 4 * self.c * self.f
+        xs = []
+        for x in roots([a, b, c]):
+            if isrealobj(x):
+                xs.append(Decimal(x))
+        return xs

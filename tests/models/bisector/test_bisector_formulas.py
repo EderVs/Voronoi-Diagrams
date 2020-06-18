@@ -9,7 +9,6 @@ from decimal import Decimal
 # Models
 from voronoi_diagrams.models import (
     PointBisector,
-    Point,
     Site,
     WeightedPointBisector,
     WeightedSite,
