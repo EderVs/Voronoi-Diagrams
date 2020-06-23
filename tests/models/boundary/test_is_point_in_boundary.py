@@ -1,4 +1,4 @@
-"""Test is_point_in_all_region method in WeightedPointBoundary."""
+"""Test is_point_in_boundary method in WeightedPointBoundary."""
 # Standard
 from typing import List, Any
 from random import randint
@@ -42,6 +42,10 @@ class TestWeightedPointBoundaryIsPointInAllRegion:
         point = Point(Decimal("45"), Decimal("215.8749217771908888306107530"))
         assert boundary_minus.is_point_in_boundary(point)
         assert not boundary_plus.is_point_in_boundary(point)
+        x = bisector.get_changes_of_sign_in_x()[0]
+        point = Point(x, boundary_minus.formula_y(x)[0])
+        assert boundary_minus.is_point_in_boundary(point)
+        assert not boundary_plus.is_point_in_boundary(point)
         # Point in Boundary+
         point = Point(Decimal("45"), Decimal("16.12507822280910540692058362"))
         assert not boundary_minus.is_point_in_boundary(point)
@@ -62,9 +66,13 @@ class TestWeightedPointBoundaryIsPointInAllRegion:
         point = Point(Decimal("31"), Decimal("17"))
         assert not boundary_minus.is_point_in_boundary(point)
         assert not boundary_plus.is_point_in_boundary(point)
-        point = Point(Decimal("40"), Decimal("0"))
+        point = Point(Decimal("0"), Decimal("40"))
         assert not boundary_minus.is_point_in_boundary(point)
         assert not boundary_plus.is_point_in_boundary(point)
+        x = bisector.get_changes_of_sign_in_x()[0]
+        point = Point(x, boundary_minus.formula_y(x)[0] + Decimal(5))
+        assert not boundary_minus.is_point_in_boundary(point)
+        assert not boundary_minus.is_point_in_boundary(point)
 
     def test_with_normal_boundary(self):
         """Test with a boundary that is not concave to y."""

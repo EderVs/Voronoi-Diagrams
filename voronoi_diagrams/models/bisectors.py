@@ -310,6 +310,6 @@ class WeightedPointBisector(Bisector):
         xs = self.conic_section.get_changes_of_sign_in_x()
         valid_xs = []
         for x in xs:
-            if len(self.formula_y(x)) > 1:
+            if len(self.formula_y(x)) >= 1:
                 valid_xs.append(x)
         return valid_xs

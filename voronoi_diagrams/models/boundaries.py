@@ -233,6 +233,8 @@ class WeightedPointBoundary(Boundary):
         """
         # It has at most 2 values.
         ys_in_all_boundary = super(WeightedPointBoundary, self).formula_y(x)
+        if len(ys_in_all_boundary) == 0:
+            return []
         to_return = []
         if self.is_boundary_concave_to_y():
             to_return.append(max(ys_in_all_boundary))
