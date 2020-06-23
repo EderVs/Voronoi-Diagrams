@@ -292,7 +292,7 @@ class WeightedPointBoundary(Boundary):
     def _is_point_in_all_region(self, point: Point) -> bool:
         """Return True if the given point is in the region where the boundary is described."""
         # Get the projection of x in the boundary.
-        ys_in_boundary = self.formula_y(point.x)
+        ys_in_boundary = super(WeightedPointBoundary, self).formula_y(point.x)
         if len(ys_in_boundary) == 0:
             # There is no point in boundary to compare
             return False
@@ -303,7 +303,11 @@ class WeightedPointBoundary(Boundary):
             for change_of_sign_in_x in changes_of_sign_in_x:
                 if are_close(change_of_sign_in_x, point.x, Decimal(0.0000001)):
                     return are_close(
-                        self.formula_y(change_of_sign_in_x), point.y, Decimal(0.0000001)
+                        super(WeightedPointBoundary, self).formula_y(
+                            change_of_sign_in_x
+                        )[0],
+                        point.y,
+                        Decimal(0.0000001),
                     )
             else:
                 # If the the projection in the boundary is not a change of sign then we just check
