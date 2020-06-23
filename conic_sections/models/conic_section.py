@@ -38,37 +38,38 @@ class ConicSection:
         self.e = e
         self.f = f
 
-    def y_formula(self, x: Decimal) -> Optional[Tuple[Decimal, Decimal]]:
+    def y_formula(self, x: Decimal) -> List[Decimal]:
         """Get y from x.
 
         If there is no solution then None is returned.
         The solutions are in a tuple.
         """
-        x1 = self.b * x + self.e
-        x2 = (x1 ** 2) - 4 * self.c * (self.a * (x ** 2) + self.d * x + self.f)
-        if x2 < 0:
-            # The sqrt is negative.
-            return None
+        b = self.b * x + self.e
+        a = self.c
+        c = (self.a * (x ** 2)) + (self.d * x) + (self.f)
+        xs = roots([a, b, c])
+        to_return = []
+        for x in xs:
+            if isrealobj(x):
+                to_return.append(Decimal(x))
+        return to_return
 
-        y1 = (-x1 - x2.sqrt()) / (2 * self.c)
-        y2 = (-x1 + x2.sqrt()) / (2 * self.c)
-        return (y1, y2)
-
-    def x_formula(self, y: Decimal) -> Optional[Tuple[Decimal, Decimal]]:
+    def x_formula(self, y: Decimal) -> List[Decimal]:
         """Get x from y.
 
         If there is no solution then None is returned.
         The solutions are in a tuple.
         """
         y1 = self.b * y + self.d
-        y2 = (y1 ** 2) - 4 * self.a * (self.c * (y ** 2) + self.e * y + self.f)
-        if y2 < 0:
-            # The sqrt is negative.
-            return None
-
-        x1 = (-y1 - y2.sqrt()) / (2 * self.a)
-        x2 = (-y1 + y2.sqrt()) / (2 * self.a)
-        return (x1, x2)
+        b = -y1
+        a = self.a
+        c = self.c * (y ** 2) + self.e * y + self.f
+        xs = roots([a, b, c])
+        to_return = []
+        for x in xs:
+            if isrealobj(x):
+                to_return.append(Decimal(x))
+        return to_return
 
     def __get_ys_of_intersections(
         self, x: Decimal, conic_section
@@ -77,7 +78,7 @@ class ConicSection:
         ys = self.y_formula(x)
         other_ys = conic_section.y_formula(x)
         intersections: List[Tuple[Decimal, Decimal]] = []
-        if ys is None or other_ys is None:
+        if len(ys) == 0 or len(other_ys) == 0:
             return []
 
         epsilon = Decimal("0.0001")

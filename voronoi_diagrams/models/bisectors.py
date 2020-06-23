@@ -274,29 +274,13 @@ class WeightedPointBisector(Bisector):
         """Get y coordinate given the x coordinate.
 
         In this case is an hyperbola
-        # TODO: Change to use conic_sections.y_formula
         """
-        # One line
-        def _get_formula_given_sign(x: Decimal, sign: bool) -> Optional[Decimal]:
-            sign_one = 1 if sign else -1
-            b = self.b * x + self.e
-            a = self.c
-            c = (self.a * (x ** 2)) + (self.d * x) + (self.f)
-            if (b ** 2 - 4 * a * c) < 0:
-                return None
-            return (-b + (sign_one) * Decimal(b ** 2 - 4 * a * c).sqrt()) / (2 * a)
-
         return_values = []
-        y_plus = _get_formula_given_sign(x, sign=True)
-        y_minus = _get_formula_given_sign(x, sign=False)
-        if y_plus is not None and self._is_point_part_of_bisector(x, y_plus):
-            return_values.append(y_plus)
-        if (
-            y_minus is not None
-            and self._is_point_part_of_bisector(x, y_minus)
-            and y_minus not in return_values
-        ):
-            return_values.append(y_minus)
+        ys = self.conic_section.y_formula(x)
+        for y in ys:
+            if self._is_point_part_of_bisector(x, y) and y not in return_values:
+                return_values.append(y)
+
         return return_values
 
     def get_intersection_points(self, bisector: Any) -> List[Point]:
@@ -320,3 +304,12 @@ class WeightedPointBisector(Bisector):
     def is_same_slope(self, bisector: Any) -> bool:
         """Compare if the given bisector slope is the same as the slope of this bisector."""
         return False
+
+    def get_changes_of_sign_in_x(self) -> List[Decimal]:
+        """Get changes of sign in the formula y."""
+        xs = self.conic_section.get_changes_of_sign_in_x()
+        valid_xs = []
+        for x in xs:
+            if len(self.formula_y(x)) > 1:
+                valid_xs.append(x)
+        return valid_xs

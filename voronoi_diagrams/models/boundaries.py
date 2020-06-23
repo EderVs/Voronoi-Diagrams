@@ -12,6 +12,9 @@ from .events import IntersectionEvent
 # Math
 from decimal import Decimal
 
+# Generaal utils
+from general_utils.numbers import are_close
+
 
 class Boundary:
     """Bisector that is * mapped."""
@@ -206,41 +209,115 @@ class WeightedPointBoundary(Boundary):
         p = self.get_site()
         return p.get_distance_to_site_farthest_frontier_from_point(point.x, point.y)
 
-    # Used in formula_x
-    def quadratic_solution(
-        self, a: Decimal, b: Decimal, c: Decimal
-    ) -> Optional[Decimal]:
-        """Return the solution of the quadratic function based on the sign of the Boundary."""
-        if (b ** 2 - 4 * a * c) < 0:
-            return None
-        if self.sign:
-            sign_value = 1
+    def is_boundary_concave_to_y(self) -> bool:
+        """Check if the boundary is concave to y."""
+        sites = self.bisector.sites
+        if sites[0] == self.get_site():
+            max_site = sites[0]
+            min_site = sites[1]
         else:
-            sign_value = -1
-        solution = (-b + (-sign_value) * Decimal(b ** 2 - 4 * a * c).sqrt()) / 2 * a
-        return solution
+            max_site = sites[1]
+            min_site = sites[0]
+        if max_site.get_lowest_site_point().y < min_site.get_lowest_site_point().y:
+            if max_site.point.x < min_site.point.x:
+                return self.sign
+            else:
+                return not self.sign
+        else:
+            return False
 
-    def formula_x(self, y: Decimal) -> List[Decimal]:
-        """Return the x coordinate given the y coordinate.
+    def formula_y(self, x: Decimal) -> List[Decimal]:
+        """Return the y coordinate given the x coordinate.
 
         This is the the formula of the bisector mapped with the star map.
-        In this case is an hiperbola.
         """
-        p = self.bisector.sites[0].point
-        q = self.bisector.sites[1].point
-        a = -((q.x - p.x) / (q.y - p.y))
-        b = Decimal((q.x ** 2 - p.x ** 2 + q.y ** 2 - p.y ** 2) / (2 * (q.y - p.y)))
-        c = Decimal(-b + y)
-        d = Decimal(b - p.y)
-        e = Decimal(c ** 2 - d ** 2 - p.x ** 2)
-        f = Decimal(-1)
-        g = Decimal(2 * (-a * (c + d) + p.x))
-        x = self.quadratic_solution(f, g, e)
-        return [x]
+        # It has at most 2 values.
+        ys_in_all_boundary = super(WeightedPointBoundary, self).formula_y(x)
+        to_return = []
+        if self.is_boundary_concave_to_y():
+            to_return.append(max(ys_in_all_boundary))
+        if (not self.sign and x <= self.get_site().point.x) or (
+            self.sign and self.get_site().point.x <= x
+        ):
+            to_return.append(min(ys_in_all_boundary))
 
-    def is_point_in_boundary(self, point: Point) -> bool:
-        """Return True if the given point is the boundary."""
-        self.formula_y()
+        return to_return
+
+    def is_point_in_boundary(self, point) -> bool:
+        """Check if the point is in this boundary."""
+        ys_in_boundary = self.formula_y(point.x)
+        for y_in_boundary in ys_in_boundary:
+            if are_close(y_in_boundary, point.y, Decimal("0.0000001")):
+                if self.is_boundary_concave_to_y() and y_in_boundary == max(
+                    ys_in_boundary
+                ):
+                    return True
+                if not self.sign:
+                    return point.x <= self.get_site().point.x
+                else:
+                    return self.get_site().point.x <= point.x
+
+        return False
+
+    def get_point_comparison(self, point) -> Optional[Decimal]:
+        """Get the y comparison of a point based on the y coordinate of the point.
+
+        Return 0 if the point is in the boundary based on y coordinate of the point.
+        Return > 0 if the point is to the right of the boundary based on the y coordinate of the
+        point.
+        Return < 0 if the point is to the left of the boundary based on the y coordinate of the
+        point.
+        """
+        site = self.get_site()
+        if self._is_point_in_all_region(point):
+            ys_in_boundary = self.formula_y(point.x)
+            for y_in_boundary in ys_in_boundary:
+                if self.is_point_in_boundary(point):
+                    # In the boundary.
+                    return 0
+            if self.sign:
+                # To the left of Boundary+.
+                return -1
+            else:
+                # To the right of Boundary-.
+                return 1
+        else:
+            if point.x < site.point.x:
+                # To the left of Boundary+.
+                return -1
+            else:
+                # To the right of Boundary-.
+                return 1
+
+    def _is_point_in_all_region(self, point: Point) -> bool:
+        """Return True if the given point is in the region where the boundary is described."""
+        # Get the projection of x in the boundary.
+        ys_in_boundary = self.formula_y(point.x)
+        if len(ys_in_boundary) == 0:
+            # There is no point in boundary to compare
+            return False
+        elif len(ys_in_boundary) == 1:
+            # First we check that the projection in the boundary is where there is a change of sign
+            # of the whole boundary function.
+            changes_of_sign_in_x = self.bisector.get_changes_of_sign_in_x()
+            for change_of_sign_in_x in changes_of_sign_in_x:
+                if are_close(change_of_sign_in_x, point.x, Decimal(0.0000001)):
+                    return are_close(
+                        self.formula_y(change_of_sign_in_x), point.y, Decimal(0.0000001)
+                    )
+            else:
+                # If the the projection in the boundary is not a change of sign then we just check
+                # that the projection is below the point.
+                y_in_boundary = ys_in_boundary[0]
+                return y_in_boundary <= point.y
+        elif len(ys_in_boundary) == 2:
+            # there are two projection in the boundary then we one must be in above and the other
+            # below.
+            y_in_boundary_max = max(ys_in_boundary)
+            y_in_boundary_min = min(ys_in_boundary)
+            return y_in_boundary_max >= point.y and y_in_boundary_min <= point.y
+
+        return False
 
     def get_intersections(self, boundary: Any) -> List[Tuple[Point, Point]]:
         """Get intersections between two WeightePointBoundaries."""
