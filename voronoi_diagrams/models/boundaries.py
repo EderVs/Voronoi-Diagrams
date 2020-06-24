@@ -36,7 +36,10 @@ class Boundary:
         self.right_intersection = None
 
     def get_site(self):
-        """Get the site that is highest or more to the right."""
+        """Get the site that is highest or more to the right.
+
+        This is the site that defines the region of the 2 boundary sibling.
+        """
         site1 = self.bisector.sites[0]
         site2 = self.bisector.sites[1]
         if (site1.get_highest_site_point().y > site2.get_highest_site_point().y) or (
@@ -48,22 +51,32 @@ class Boundary:
             return site2
 
     def star(self, point: Point) -> Point:
-        """Map a bisector."""
+        """Map a bisector to build the region to work in."""
         return Point(point.x, point.y + self.distance_to_site(point))
 
+    @abstractmethod
     def get_point_comparison(self, point: Point) -> Optional[Decimal]:
-        """Get the y comparison of a point based on the line y coordinate of the point."""
+        """Get the y comparison of a point based on the line y coordinate of the point.
+
+        This comparison is based on this boundary with its sign.
+        Return 0 if the point is in the boundary based on l.
+        Return > 0 if the point is to the right of the boundary based on l.
+        Return < 0 if the point is to the left of the boundary based on l.
+        """
         raise NotImplementedError
 
-    @abstractmethod
     def formula_x(self, y: Decimal) -> List[Decimal]:
-        """Return the x coordinate of the boundary given the y coordinate."""
+        """Return the x coordinate of the boundary given the y coordinate.
+
+        This method is not implemented in all Boundaries.
+        """
         raise NotImplementedError
 
     def formula_y(self, x: Decimal) -> List[Decimal]:
         """Return the y coordinate given the x coordinate.
 
         This is the the formula of the bisector mapped with the star map.
+        This can also be viewed as the projection of x in the boundary.
         """
         ys = [
             self.star(Point(x, y_bisector)).y
@@ -81,11 +94,21 @@ class Boundary:
 
     @abstractmethod
     def distance_to_site(self, point: Point) -> Decimal:
-        """Get distance to any of the sites because it is a boundary."""
+        """Get distance to any of the sites.
+
+        This method is used in star.
+        The distance will be taken to to the site given in get_site because the distance to any of
+        the sites is the same.
+        """
         raise NotImplementedError
 
     def get_intersections(self, boundary: Any) -> List[Tuple[Point, Point]]:
-        """Get intersections between two boundaries."""
+        """Get intersections between two boundaries.
+
+        The return values are is a list of the intersection without the star map (the
+        bisectors of the boundaries intersections) and the intersection with the star map (the
+        boundaries intersection).
+        """
         site_self = self.get_site()
         site_boundary = boundary.get_site()
         is_intersection_possible = True
@@ -121,8 +144,9 @@ class Boundary:
                     )
         return all_intersections
 
+    @abstractmethod
     def is_boundary_below(self, point: Point) -> bool:
-        """Get if the given point is up the boundary."""
+        """Get if the given point is above the boundary."""
         raise NotImplementedError
 
 
@@ -136,9 +160,12 @@ class PointBoundary(Boundary):
     def get_point_comparison(self, point) -> Optional[Decimal]:
         """Get the y comparison of a point based on the line y coordinate of the point.
 
-        Return 0 if the point is in the boundary based on l.
-        Return > 0 if the point is to the right of the boundary based on l.
-        Return < 0 if the point is to the left of the boundary based on l.
+        This comparison is based on this boundary with its sign.
+        Return 0 if the point is in the boundary based on y coordinate of the point.
+        Return > 0 if the point is to the right of the boundary based on the y coordinate of the
+        point.
+        Return < 0 if the point is to the left of the boundary based on the y coordinate of the
+        point.
         """
         p1, q1 = (site.point for site in self.bisector.sites)
         if p1.y == q1.y:
@@ -149,9 +176,13 @@ class PointBoundary(Boundary):
         else:
             return point.x - self.get_site().point.x
 
-    # Used in star
     def distance_to_site(self, point: Point) -> Decimal:
-        """Get distance to any of the sites because it is a boundary."""
+        """Get distance to any of the sites.
+
+        This method is used in star.
+        The distance will be taken to to the site given in get_site because the distance to any of
+        the sites is the same.
+        """
         p = self.get_site()
         return p.get_distance_to_site_point_from_point(point.x, point.y)
 
@@ -203,9 +234,13 @@ class WeightedPointBoundary(Boundary):
         """Construct Boundary of a site point."""
         super(WeightedPointBoundary, self).__init__(bisector, sign)
 
-    # Used in star
     def distance_to_site(self, point: Point) -> Decimal:
-        """Get distance to any of the sites because it is a boundary."""
+        """Get distance to any of the sites.
+
+        This method is used in star.
+        The distance will be taken to to the site given in get_site because the distance to any of
+        the sites is the same.
+        """
         p = self.get_site()
         return p.get_distance_to_site_farthest_frontier_from_point(point.x, point.y)
 
@@ -264,6 +299,7 @@ class WeightedPointBoundary(Boundary):
     def get_point_comparison(self, point) -> Optional[Decimal]:
         """Get the y comparison of a point based on the y coordinate of the point.
 
+        This comparison is based on this boundary with its sign.
         Return 0 if the point is in the boundary based on y coordinate of the point.
         Return > 0 if the point is to the right of the boundary based on the y coordinate of the
         point.
@@ -272,24 +308,43 @@ class WeightedPointBoundary(Boundary):
         """
         site = self.get_site()
         if self._is_point_in_all_region(point):
-            ys_in_boundary = self.formula_y(point.x)
-            for y_in_boundary in ys_in_boundary:
-                if self.is_point_in_boundary(point):
-                    # In the boundary.
-                    return 0
+            # The point is in the boundary or inside.
+            if self.is_point_in_boundary(point):
+                # In the boundary.
+                return 0
+            # The point is inside.
             if self.sign:
-                # To the left of Boundary+.
+                # It's left to Boundary+.
                 return -1
             else:
-                # To the right of Boundary-.
+                # It's right to Boundary-.
                 return 1
+
+        # The point is outside of all the region.
+        ys_in_all_boundary = super(WeightedPointBoundary, self).formula_y(point.x)
+        if len(ys_in_all_boundary) > 1 and max(ys_in_all_boundary) < point.y:
+            # The projection to the boundary is below. This is onlly possible when one of the
+            # boundaries concave to y.
+            if self.is_boundary_concave_to_y():
+                if self.sign:
+                    return 1
+                else:
+                    return -1
+            else:
+                # The sibling Boundary is the one that is concave to y.
+                if self.sign:
+                    return -1
+                else:
+                    return 1
+
+        # The point doesn't have a x projection in the boundary or the projection is above the
+        # point.
+        if point.x < site.point.x:
+            # It's left to the site that defines the region.
+            return -1
         else:
-            if point.x < site.point.x:
-                # To the left of Boundary+.
-                return -1
-            else:
-                # To the right of Boundary-.
-                return 1
+            # It's right to the site that defines the region.
+            return 1
 
     def _is_point_in_all_region(self, point: Point) -> bool:
         """Return True if the given point is in the region where the boundary is described."""

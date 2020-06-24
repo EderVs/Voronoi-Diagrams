@@ -62,6 +62,9 @@ class TestWeightedPointBoundaryIsPointInAllRegion:
         point = Point(Decimal("0"), Decimal("40"))
         assert boundary_minus.get_point_comparison(point) < 0
         assert boundary_plus.get_point_comparison(point) < 0
+        point = Point(Decimal("50"), Decimal("300"))
+        assert boundary_minus.get_point_comparison(point) < 0
+        assert boundary_plus.get_point_comparison(point) < 0
 
     def test_with_normal_boundary(self):
         """Test with a boundary that is not concave to y."""
