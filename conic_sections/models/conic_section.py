@@ -61,7 +61,7 @@ class ConicSection:
         The solutions are in a tuple.
         """
         y1 = self.b * y + self.d
-        b = -y1
+        b = y1
         a = self.a
         c = self.c * (y ** 2) + self.e * y + self.f
         xs = roots([a, b, c])

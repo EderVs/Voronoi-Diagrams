@@ -245,29 +245,13 @@ class WeightedPointBisector(Bisector):
         """Get x coordinate given the y coordinate.
 
         In this case is an hyperbola.
-        # TODO: Change to use conic_sections.x_formula
         """
-        # One Line.
-        def _get_formula_given_sign(y: Decimal, sign: bool) -> Optional[Decimal]:
-            sign_one = 1 if sign else -1
-            b = self.b * y + self.d
-            a = self.a
-            c = (self.c * (y ** 2)) + (self.e * y) + (self.f)
-            if (b ** 2 - 4 * a * c) < 0:
-                return None
-            return (-b + (sign_one) * Decimal(b ** 2 - 4 * a * c).sqrt()) / (2 * a)
-
         return_values = []
-        x_plus = _get_formula_given_sign(y, sign=True)
-        x_minus = _get_formula_given_sign(y, sign=False)
-        if x_plus is not None and self._is_point_part_of_bisector(x_plus, y):
-            return_values.append(x_plus)
-        if (
-            x_minus is not None
-            and self._is_point_part_of_bisector(x_minus, y)
-            and x_minus not in return_values
-        ):
-            return_values.append(x_minus)
+        xs = self.conic_section.x_formula(y)
+        for x in xs:
+            if self._is_point_part_of_bisector(x, y) and x not in return_values:
+                return_values.append(x)
+
         return return_values
 
     def formula_y(self, x: Decimal) -> List[Decimal]:
