@@ -381,9 +381,9 @@ class WeightedPointBoundary(Boundary):
     def get_intersections(self, boundary: Any) -> List[Tuple[Point, Point]]:
         """Get intersections between two WeightePointBoundaries."""
         all_intersections = []
-        # bisector.get_intersection_points gives me the intersections in the bisectors.
+        # bisector.get_intersection_points gives us the intersections in the bisectors.
         intersection_points = self.bisector.get_intersection_points(boundary.bisector)
-        # Now I need to look that that the intersection point is in the boundary.
+        # Now we need to look that each mapped intersection point is in the boundary.
         for intersection_point in intersection_points:
             intersection_point_star = self.star(intersection_point)
             if self.is_point_in_boundary(

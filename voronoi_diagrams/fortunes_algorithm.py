@@ -20,7 +20,7 @@ from .models import (
     Boundary,
     PointBisector,
     PointBoundary,
-    PointRegion,
+    Region,
 )
 
 # Math
@@ -45,7 +45,7 @@ class VoronoiDiagram:
         self.sites = list(sites)
         if site_class == Site:
             self.BISECTOR_CLASS = PointBisector
-            self.REGION_CLASS = PointRegion
+            self.REGION_CLASS = Region
             self.BOUNDARY_CLASS = PointBoundary
         self._calculate_diagram()
 

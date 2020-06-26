@@ -170,7 +170,7 @@ class TestWeightedPointBisectorFormulas:
         assert are_close(values_x[0], x, epsilon)
 
     def test_side_inside_site(self):
-        """In this sample there isn't a bisector"""
+        """In this sample there isn't a bisector."""
         p = WeightedSite(Decimal(0), Decimal(-5), Decimal(7))
         q = WeightedSite(Decimal(4), Decimal(-5), Decimal(0.5))
         bisector = WeightedPointBisector(sites=(p, q))

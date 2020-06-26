@@ -33,11 +33,6 @@ class Region:
         self.right = right
         self.site = site
 
-    @abstractmethod
-    def star(self, point: Point) -> Point:
-        """Map a bisector."""
-        raise NotImplementedError
-
     def is_contained(self, point: Point, *args: Any, **kwargs: Any) -> bool:
         """Value is contained in the Node."""
         if point.y < self.site.point.y:
@@ -82,21 +77,3 @@ class Region:
     def __repr__(self):
         """Get Region representation."""
         return self.__str__()
-
-
-class PointRegion(Region):
-    """Region of a Point site."""
-
-    def __init__(self, site: Site, left: Optional[Boundary], right: Optional[Boundary]):
-        """Construct Point Region."""
-        super(PointRegion, self).__init__(site, left, right)
-
-    def distance_to_site(self, point: Point) -> Decimal:
-        """Get distance to the site."""
-        return Decimal(
-            (self.site.point.x - point.x) ** 2 + (self.site.point.y - point.y) ** 2
-        ).sqrt()
-
-    def star(self, point: Point) -> Point:
-        """Map a bisector."""
-        return Point(point.x, point.y + self.distance_to_site(point))

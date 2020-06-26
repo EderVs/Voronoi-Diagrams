@@ -8,7 +8,7 @@ from voronoi_diagrams.models import (
     Site,
     Point,
     PointBisector,
-    PointRegion,
+    Region,
     PointBoundary,
 )
 
@@ -28,7 +28,7 @@ class TestIsContained:
         boundary_minus = PointBoundary(bisector=bisector, sign=False)
 
         # Creating Region with the info above
-        region = PointRegion(q, boundary_minus, boundary_plus)
+        region = Region(q, boundary_minus, boundary_plus)
 
         # Point Inside
         point = Point(Decimal(2), Decimal(3))
@@ -51,7 +51,7 @@ class TestIsContained:
         boundary_minus = PointBoundary(bisector=bisector, sign=False)
 
         # Creating Region with the info above
-        region = PointRegion(q, boundary_minus, boundary_plus)
+        region = Region(q, boundary_minus, boundary_plus)
 
         # Points in boundaries
         point_right = Point(Decimal(5.449489742783178), Decimal(3))
@@ -68,7 +68,7 @@ class TestIsContained:
         boundary_minus = PointBoundary(bisector=bisector, sign=False)
 
         # Creating Region with the info above
-        region = PointRegion(q, boundary_minus, boundary_plus)
+        region = Region(q, boundary_minus, boundary_plus)
 
         # Points in boundaries
         point_site = Point(Decimal(2), Decimal(2))
@@ -83,7 +83,7 @@ class TestIsContained:
         boundary_minus = PointBoundary(bisector=bisector, sign=False)
 
         # Region without left
-        region_no_left = PointRegion(q, None, boundary_plus)
+        region_no_left = Region(q, None, boundary_plus)
 
         # Points inside
         point = Point(Decimal(2), Decimal(3))
@@ -97,7 +97,7 @@ class TestIsContained:
         assert not region_no_left.is_contained(point)
 
         # Region without right
-        region_no_right = PointRegion(q, boundary_minus, None)
+        region_no_right = Region(q, boundary_minus, None)
 
         # Points inside
         point = Point(Decimal(2), Decimal(3))
@@ -111,7 +111,7 @@ class TestIsContained:
         assert not region_no_right.is_contained(point)
 
         # Region without any
-        region_no_boundaries = PointRegion(q, None, None)
+        region_no_boundaries = Region(q, None, None)
 
         # Points inside
         point = Point(Decimal(2), Decimal(3))
@@ -137,7 +137,7 @@ class TestIsLeft:
         boundary_minus = PointBoundary(bisector=bisector, sign=False)
 
         # Creating Region with the info above
-        region = PointRegion(q, boundary_minus, boundary_plus)
+        region = Region(q, boundary_minus, boundary_plus)
 
         # Point Inside
         point = Point(Decimal(2), Decimal(3))
@@ -160,7 +160,7 @@ class TestIsLeft:
         boundary_minus = PointBoundary(bisector=bisector, sign=False)
 
         # Creating Region with the info above
-        region = PointRegion(q, boundary_minus, boundary_plus)
+        region = Region(q, boundary_minus, boundary_plus)
 
         # Points in boundaries
         point_right = Point(Decimal(5.449489742783178), Decimal(3))
@@ -177,7 +177,7 @@ class TestIsLeft:
         boundary_minus = PointBoundary(bisector=bisector, sign=False)
 
         # Creating Region with the info above
-        region = PointRegion(q, boundary_minus, boundary_plus)
+        region = Region(q, boundary_minus, boundary_plus)
 
         # Points in boundaries
         point_site = Point(Decimal(2), Decimal(2))
@@ -192,7 +192,7 @@ class TestIsLeft:
         boundary_minus = PointBoundary(bisector=bisector, sign=False)
 
         # Region without left
-        region_no_left = PointRegion(q, None, boundary_plus)
+        region_no_left = Region(q, None, boundary_plus)
 
         # Points inside
         point = Point(Decimal(2), Decimal(3))
@@ -206,7 +206,7 @@ class TestIsLeft:
         assert not region_no_left.is_left(point)
 
         # Region without right
-        region_no_right = PointRegion(q, boundary_minus, None)
+        region_no_right = Region(q, boundary_minus, None)
 
         # Points inside
         point = Point(Decimal(2), Decimal(3))
@@ -218,7 +218,7 @@ class TestIsLeft:
         assert not region_no_right.is_left(point)
 
         # Region without any
-        region_no_boundaries = PointRegion(q, None, None)
+        region_no_boundaries = Region(q, None, None)
 
         # Points inside
         point = Point(Decimal(2), Decimal(3))
@@ -244,7 +244,7 @@ class TestIsRight:
         boundary_minus = PointBoundary(bisector=bisector, sign=False)
 
         # Creating Region with the info above
-        region = PointRegion(q, boundary_minus, boundary_plus)
+        region = Region(q, boundary_minus, boundary_plus)
 
         # Point Inside
         point = Point(Decimal(2), Decimal(3))
@@ -267,7 +267,7 @@ class TestIsRight:
         boundary_minus = PointBoundary(bisector=bisector, sign=False)
 
         # Creating Region with the info above
-        region = PointRegion(q, boundary_minus, boundary_plus)
+        region = Region(q, boundary_minus, boundary_plus)
 
         # Points in boundaries
         point_right = Point(Decimal(5.449489742783178), Decimal(3))
@@ -284,7 +284,7 @@ class TestIsRight:
         boundary_minus = PointBoundary(bisector=bisector, sign=False)
 
         # Creating Region with the info above
-        region = PointRegion(q, boundary_minus, boundary_plus)
+        region = Region(q, boundary_minus, boundary_plus)
 
         # Points in boundaries
         point_site = Point(Decimal(2), Decimal(2))
@@ -299,7 +299,7 @@ class TestIsRight:
         boundary_minus = PointBoundary(bisector=bisector, sign=False)
 
         # Region without left
-        region_no_left = PointRegion(q, None, boundary_plus)
+        region_no_left = Region(q, None, boundary_plus)
 
         # Points inside
         point = Point(Decimal(2), Decimal(3))
@@ -313,7 +313,7 @@ class TestIsRight:
         assert not region_no_left.is_right(point)
 
         # Region without right
-        region_no_right = PointRegion(q, boundary_minus, None)
+        region_no_right = Region(q, boundary_minus, None)
 
         # Points inside
         point = Point(Decimal(2), Decimal(3))
@@ -325,7 +325,7 @@ class TestIsRight:
         assert not region_no_right.is_right(point)
 
         # Region without any
-        region_no_boundaries = PointRegion(q, None, None)
+        region_no_boundaries = Region(q, None, None)
 
         # Points inside
         point = Point(Decimal(2), Decimal(3))
