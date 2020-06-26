@@ -228,8 +228,6 @@ class PointBoundary(Boundary):
 class WeightedPointBoundary(Boundary):
     """Boundary of a weighted site point."""
 
-    # TODO: Complete class
-
     def __init__(self, bisector: WeightedPointBisector, sign: bool):
         """Construct Boundary of a site point."""
         super(WeightedPointBoundary, self).__init__(bisector, sign)
@@ -323,7 +321,7 @@ class WeightedPointBoundary(Boundary):
         # The point is outside of all the region.
         ys_in_all_boundary = super(WeightedPointBoundary, self).formula_y(point.x)
         if len(ys_in_all_boundary) > 1 and max(ys_in_all_boundary) < point.y:
-            # The projection to the boundary is below. This is onlly possible when one of the
+            # The projection to the boundary is below. This is only possible when one of the
             # boundaries concave to y.
             if self.is_boundary_concave_to_y():
                 if self.sign:
@@ -382,15 +380,14 @@ class WeightedPointBoundary(Boundary):
 
     def get_intersections(self, boundary: Any) -> List[Tuple[Point, Point]]:
         """Get intersections between two WeightePointBoundaries."""
-        # TODO: Complete method.
-        site_self = self.get_site()
-        site_boundary = boundary.get_site()
-
         all_intersections = []
         # bisector.get_intersection_points gives me the intersections in the bisectors.
         intersection_points = self.bisector.get_intersection_points(boundary.bisector)
         # Now I need to look that that the intersection point is in the boundary.
         for intersection_point in intersection_points:
             intersection_point_star = self.star(intersection_point)
-            all_intersections.append((intersection_point, intersection_point_star))
+            if self.is_point_in_boundary(
+                intersection_point_star
+            ) and boundary.is_point_in_boundary(intersection_point_star):
+                all_intersections.append((intersection_point, intersection_point_star))
         return all_intersections
