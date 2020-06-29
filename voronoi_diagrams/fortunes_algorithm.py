@@ -12,6 +12,7 @@ from .data_structures.l import LNode
 # Models
 from .models import (
     Site,
+    WeightedSite,
     Point,
     Bisector,
     Event,
@@ -20,7 +21,8 @@ from .models import (
     Boundary,
     PointBisector,
     PointBoundary,
-    Region,
+    WeightedPointBisector,
+    WeightedPointBoundary,
 )
 
 # Math
@@ -30,16 +32,16 @@ from decimal import Decimal
 class VoronoiDiagram:
     """Voronoi Diagram representation."""
 
-    vertex: List[Point]
-    _vertex: Set[Tuple[Decimal, Decimal]]
+    vertices: List[Point]
+    _vertices: Set[Tuple[Decimal, Decimal]]
     bisectors: List[Bisector]
     _bisectors: Set[Tuple[Tuple[Decimal, Decimal], Tuple[Decimal, Decimal]]]
     sites: List[Site]
 
     def __init__(self, sites: Iterable[Site], site_class: Any = Site):
         """Construct and calculate Voronoi Diagram."""
-        self.vertex = []
-        self._vertex = set()
+        self.vertices = []
+        self._vertices = set()
         self.bisectors = []
         self._bisectors = set()
         self.sites = list(sites)
@@ -47,14 +49,18 @@ class VoronoiDiagram:
             self.BISECTOR_CLASS = PointBisector
             self.REGION_CLASS = Region
             self.BOUNDARY_CLASS = PointBoundary
+        elif site_class == WeightedSite:
+            self.BISECTOR_CLASS = WeightedPointBisector
+            self.REGION_CLASS = Region
+            self.BOUNDARY_CLASS = WeightedPointBoundary
         self._calculate_diagram()
 
     def add_vertex(self, point: Point) -> None:
         """Add point in the vertex list."""
         point_tuple = point.get_tuple()
-        if point_tuple not in self._vertex:
-            self._vertex.add(point_tuple)
-            self.vertex.append(point)
+        if point_tuple not in self._vertices:
+            self._vertices.add(point_tuple)
+            self.vertices.append(point)
 
     def add_bisector(self, bisector: Bisector) -> None:
         """Add point in the vertex list."""
@@ -272,7 +278,7 @@ class VoronoiDiagram:
         # Step 19.
         # Mark p as a vertex and as an endpoint of B*qr, B*rs and B*qs.
         self.add_vertex(p.vertex)
-        # TODO: Add as an endpoint of B*qr, B*rs and B*qs.
+        # TODO: Add that this vertex is an endpoint of B*qr, B*rs and B*qs.
 
     def _calculate_diagram(self):
         """Calculate point diagram."""
@@ -301,14 +307,26 @@ class FortunesAlgorithm:
     """Fortune's Algorithm implementation."""
 
     @staticmethod
-    def calculate_voronoi_diagram(
-        points: List[Point], site_class: Any = Site
-    ) -> VoronoiDiagram:
+    def calculate_voronoi_diagram(points: List[Point]) -> VoronoiDiagram:
         """Calculate Voronoi Diagram."""
         sites = [
-            site_class(points[i].x, points[i].y, name=str(i + 1))
-            for i in range(len(points))
+            Site(points[i].x, points[i].y, name=str(i + 1)) for i in range(len(points))
         ]
-        voronoi_diagram = VoronoiDiagram(sites, site_class)
+        voronoi_diagram = VoronoiDiagram(sites, site_class=Site)
+
+        return voronoi_diagram
+
+    @staticmethod
+    def calculate_aw_voronoi_diagram(
+        points_and_weights: List[Tuple[Point, Decimal]]
+    ) -> VoronoiDiagram:
+        """Calculate AW Voronoi Diagram."""
+        sites = []
+        for i in range(len(points_and_weights)):
+            point, weight = points_and_weights[i]
+            site = WeightedSite(point.x, point.y, weight, name=str(i + 1))
+            sites.append(site)
+
+        voronoi_diagram = VoronoiDiagram(sites, site_class=WeightedSite)
 
         return voronoi_diagram

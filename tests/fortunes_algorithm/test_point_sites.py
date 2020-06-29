@@ -19,19 +19,19 @@ class TestPointSites:
         self,
         voronoi_diagram: VoronoiDiagram,
         expected_bisectors: List[PointBisector],
-        expected_vertex: List[Point],
+        expected_vertices: List[Point],
     ):
         print(voronoi_diagram.bisectors)
-        print(voronoi_diagram.vertex)
+        print(voronoi_diagram.vertices)
         # Bisectors.
         assert len(voronoi_diagram.bisectors) == len(expected_bisectors)
         for bisector in voronoi_diagram.bisectors:
             assert bisector in expected_bisectors
 
         # Vertex.
-        assert len(voronoi_diagram.vertex) == len(expected_vertex)
-        for vertex in voronoi_diagram.vertex:
-            assert vertex in expected_vertex
+        assert len(voronoi_diagram.vertices) == len(expected_vertices)
+        for vertex in voronoi_diagram.vertices:
+            assert vertex in expected_vertices
 
     def test_2_point_sites(self):
         """Test 2 point sites.
@@ -57,12 +57,12 @@ class TestPointSites:
         bisector_p_q = PointBisector(sites=(site_p, site_q))
 
         expected_bisectors = [bisector_p_q]
-        expected_vertex = []
+        expected_vertices = []
 
         voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(points)
 
         self._check_bisectors_and_vertex(
-            voronoi_diagram, expected_bisectors, expected_vertex
+            voronoi_diagram, expected_bisectors, expected_vertices
         )
 
     def test_intersection_right(self):
@@ -82,12 +82,12 @@ class TestPointSites:
         bisector_q_r = PointBisector(sites=(site_q, site_r))
 
         expected_bisectors = [bisector_p_q, bisector_p_r, bisector_q_r]
-        expected_vertex = [Point(Decimal(1.5), Decimal(0.5))]
+        expected_vertices = [Point(Decimal(1.5), Decimal(0.5))]
 
         voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(points)
 
         self._check_bisectors_and_vertex(
-            voronoi_diagram, expected_bisectors, expected_vertex
+            voronoi_diagram, expected_bisectors, expected_vertices
         )
 
     def test_intersection_left(self):
@@ -107,7 +107,7 @@ class TestPointSites:
         bisector_q_r = PointBisector(sites=(site_q, site_r))
 
         expected_bisectors = [bisector_p_q, bisector_p_r, bisector_q_r]
-        expected_vertex = [
+        expected_vertices = [
             Point(
                 Decimal("2.985714285714285657415106289"),
                 Decimal("1.985714285714285657415106289"),
@@ -117,7 +117,7 @@ class TestPointSites:
         voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(points)
 
         self._check_bisectors_and_vertex(
-            voronoi_diagram, expected_bisectors, expected_vertex
+            voronoi_diagram, expected_bisectors, expected_vertices
         )
 
     def test_intersection_middle(self):
@@ -137,7 +137,7 @@ class TestPointSites:
         bisector_q_r = PointBisector(sites=(site_q, site_r))
 
         expected_bisectors = [bisector_p_q, bisector_p_r, bisector_q_r]
-        expected_vertex = [
+        expected_vertices = [
             Point(
                 Decimal("1.499718041704442417152644862"),
                 Decimal("0.4997180417044424171526448628"),
@@ -147,7 +147,7 @@ class TestPointSites:
         voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(points)
 
         self._check_bisectors_and_vertex(
-            voronoi_diagram, expected_bisectors, expected_vertex
+            voronoi_diagram, expected_bisectors, expected_vertices
         )
 
     def test_intersection_up(self):
@@ -167,12 +167,12 @@ class TestPointSites:
         bisector_q_r = PointBisector(sites=(site_q, site_r))
 
         expected_bisectors = [bisector_p_q, bisector_p_r, bisector_q_r]
-        expected_vertex = [Point(Decimal(2), Decimal(1))]
+        expected_vertices = [Point(Decimal(2), Decimal(1))]
 
         voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(points)
 
         self._check_bisectors_and_vertex(
-            voronoi_diagram, expected_bisectors, expected_vertex
+            voronoi_diagram, expected_bisectors, expected_vertices
         )
 
     def test_intersection_in_site(self):
@@ -192,12 +192,12 @@ class TestPointSites:
         bisector_q_r = PointBisector(sites=(site_q, site_r))
 
         expected_bisectors = [bisector_p_q, bisector_p_r, bisector_q_r]
-        expected_vertex = [Point(Decimal(2.0), Decimal(0))]
+        expected_vertices = [Point(Decimal(2.0), Decimal(0))]
 
         voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(points)
 
         self._check_bisectors_and_vertex(
-            voronoi_diagram, expected_bisectors, expected_vertex
+            voronoi_diagram, expected_bisectors, expected_vertices
         )
 
     def test_3_sites_same_x(self):
@@ -213,12 +213,12 @@ class TestPointSites:
         bisector_q_r = PointBisector(sites=(site_q, site_r))
 
         expected_bisectors = [bisector_p_q, bisector_q_r]
-        expected_vertex = []
+        expected_vertices = []
 
         voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(points)
 
         self._check_bisectors_and_vertex(
-            voronoi_diagram, expected_bisectors, expected_vertex
+            voronoi_diagram, expected_bisectors, expected_vertices
         )
 
     def test_3_sites_same_y(self):
@@ -234,12 +234,12 @@ class TestPointSites:
         bisector_q_r = PointBisector(sites=(site_q, site_r))
 
         expected_bisectors = [bisector_p_q, bisector_q_r]
-        expected_vertex = []
+        expected_vertices = []
 
         voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(points)
 
         self._check_bisectors_and_vertex(
-            voronoi_diagram, expected_bisectors, expected_vertex
+            voronoi_diagram, expected_bisectors, expected_vertices
         )
 
     def test_4_sites(self):
@@ -269,7 +269,7 @@ class TestPointSites:
             bisector_p2_p4,
             bisector_p3_p4,
         ]
-        expected_vertex = [
+        expected_vertices = [
             Point(
                 Decimal("1.499718041704442417152644862"),
                 Decimal("0.4997180417044424171526448628"),
@@ -283,7 +283,7 @@ class TestPointSites:
         voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(points)
 
         self._check_bisectors_and_vertex(
-            voronoi_diagram, expected_bisectors, expected_vertex
+            voronoi_diagram, expected_bisectors, expected_vertices
         )
 
     def test_4_sites_up(self):
@@ -315,7 +315,7 @@ class TestPointSites:
             bisector_p2_p4,
             bisector_p3_p4,
         ]
-        expected_vertex = [
+        expected_vertices = [
             Point(
                 Decimal("1.486363636363636339138053920"),
                 Decimal("0.4863636363636363391380539193"),
@@ -333,7 +333,7 @@ class TestPointSites:
         voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(points)
 
         self._check_bisectors_and_vertex(
-            voronoi_diagram, expected_bisectors, expected_vertex
+            voronoi_diagram, expected_bisectors, expected_vertices
         )
 
     def test_4_sites_one_interception(self):
@@ -364,7 +364,7 @@ class TestPointSites:
             bisector_p3_p4,
         ]
         # Precision errors in operations but we agree that is almost the same point.
-        expected_vertex = [
+        expected_vertices = [
             Point(
                 Decimal("1.500000000000000022167204686"),
                 Decimal("1.000000000000000003911859650"),
@@ -378,7 +378,7 @@ class TestPointSites:
         voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(points)
 
         self._check_bisectors_and_vertex(
-            voronoi_diagram, expected_bisectors, expected_vertex
+            voronoi_diagram, expected_bisectors, expected_vertices
         )
 
     def test_4_sites_same_x(self):
@@ -397,12 +397,12 @@ class TestPointSites:
         bisector_p1_p4 = PointBisector(sites=(site_p1, site_p4))
 
         expected_bisectors = [bisector_p2_p3, bisector_p3_p4, bisector_p1_p4]
-        expected_vertex = []
+        expected_vertices = []
 
         voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(points)
 
         self._check_bisectors_and_vertex(
-            voronoi_diagram, expected_bisectors, expected_vertex
+            voronoi_diagram, expected_bisectors, expected_vertices
         )
 
     def test_4_sites_same_y(self):
@@ -421,12 +421,12 @@ class TestPointSites:
         bisector_p1_p4 = PointBisector(sites=(site_p1, site_p4))
 
         expected_bisectors = [bisector_p2_p3, bisector_p3_p4, bisector_p1_p4]
-        expected_vertex = []
+        expected_vertices = []
 
         voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(points)
 
         self._check_bisectors_and_vertex(
-            voronoi_diagram, expected_bisectors, expected_vertex
+            voronoi_diagram, expected_bisectors, expected_vertices
         )
 
     def test_4_sites_square(self):
@@ -453,12 +453,12 @@ class TestPointSites:
             bisector_p2_p4,
             bisector_p3_p4,
         ]
-        expected_vertex = [Point(Decimal(0), Decimal(0))]
+        expected_vertices = [Point(Decimal(0), Decimal(0))]
 
         voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(points)
 
         self._check_bisectors_and_vertex(
-            voronoi_diagram, expected_bisectors, expected_vertex
+            voronoi_diagram, expected_bisectors, expected_vertices
         )
 
     def test_4_sites_rhombus(self):
@@ -485,12 +485,12 @@ class TestPointSites:
             bisector_p2_p4,
             bisector_p3_p4,
         ]
-        expected_vertex = [Point(Decimal(0), Decimal(0))]
+        expected_vertices = [Point(Decimal(0), Decimal(0))]
 
         voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(points)
 
         self._check_bisectors_and_vertex(
-            voronoi_diagram, expected_bisectors, expected_vertex
+            voronoi_diagram, expected_bisectors, expected_vertices
         )
 
     def test_5_sites_square_and_one(self):
@@ -525,7 +525,7 @@ class TestPointSites:
             bisector_p3_p5,
             bisector_p4_p5,
         ]
-        expected_vertex = [
+        expected_vertices = [
             Point(Decimal(0), Decimal(0)),
             Point(Decimal(6), Decimal(0)),
             Point(Decimal(0), Decimal(6)),
@@ -534,7 +534,7 @@ class TestPointSites:
         voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(points)
 
         self._check_bisectors_and_vertex(
-            voronoi_diagram, expected_bisectors, expected_vertex
+            voronoi_diagram, expected_bisectors, expected_vertices
         )
 
     def test_5_sites_rhombus_and_one(self):
@@ -569,7 +569,7 @@ class TestPointSites:
             bisector_p3_p5,
             bisector_p4_p5,
         ]
-        expected_vertex = [
+        expected_vertices = [
             Point(Decimal(0), Decimal(0)),
             Point(Decimal(-3), Decimal(3)),
             Point(Decimal(3), Decimal(3)),
@@ -578,7 +578,7 @@ class TestPointSites:
         voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(points)
 
         self._check_bisectors_and_vertex(
-            voronoi_diagram, expected_bisectors, expected_vertex
+            voronoi_diagram, expected_bisectors, expected_vertices
         )
 
     def test_5_sites_rhombus_and_one_more_intersection(self):
@@ -611,7 +611,7 @@ class TestPointSites:
             bisector_p3_p5,
             bisector_p4_p5,
         ]
-        expected_vertex = [
+        expected_vertices = [
             Point(Decimal(0), Decimal(0)),
             Point(
                 Decimal("2.214285714285714285714285714"),
@@ -622,7 +622,7 @@ class TestPointSites:
         voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(points)
 
         self._check_bisectors_and_vertex(
-            voronoi_diagram, expected_bisectors, expected_vertex
+            voronoi_diagram, expected_bisectors, expected_vertices
         )
 
     def test_5_sites_square_in_middle(self):
@@ -657,7 +657,7 @@ class TestPointSites:
             bisector_p3_p5,
             bisector_p4_p5,
         ]
-        expected_vertex = [
+        expected_vertices = [
             Point(Decimal(-0.5), Decimal(-0.5)),
             Point(Decimal(-0.5), Decimal(0.5)),
             Point(Decimal(0.5), Decimal(-0.5)),
@@ -667,7 +667,7 @@ class TestPointSites:
         voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(points)
 
         self._check_bisectors_and_vertex(
-            voronoi_diagram, expected_bisectors, expected_vertex
+            voronoi_diagram, expected_bisectors, expected_vertices
         )
 
     def test_5_sites_rhombus_in_middle(self):
@@ -702,7 +702,7 @@ class TestPointSites:
             bisector_p3_p5,
             bisector_p4_p5,
         ]
-        expected_vertex = [
+        expected_vertices = [
             Point(Decimal(0), Decimal(-1)),
             Point(Decimal(-1), Decimal(0)),
             Point(Decimal(1), Decimal(0)),
@@ -712,5 +712,5 @@ class TestPointSites:
         voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(points)
 
         self._check_bisectors_and_vertex(
-            voronoi_diagram, expected_bisectors, expected_vertex
+            voronoi_diagram, expected_bisectors, expected_vertices
         )
