@@ -44,7 +44,7 @@ class Region:
 
     def is_left(self, point: Point, *args: Any, **kwargs: Any) -> bool:
         """Value is to the left of Node."""
-        if point.y < self.site.point.y:
+        if point.y < self.site.get_highest_site_point().y:
             return False
 
         if self.left is None:
@@ -58,11 +58,12 @@ class Region:
 
     def is_right(self, point: Point, *args: Any, **kwargs: Any) -> bool:
         """Value is to the right of Node."""
-        if point.y < self.site.point.y:
+        if point.y < self.site.get_highest_site_point().y:
             return False
 
         if self.right is None:
             return False
+
         comparison = self.right.get_point_comparison(point)
         if comparison is not None:
             return comparison > 0
