@@ -212,3 +212,7 @@ class WeightedSite(Site):
     def get_lowest_site_point(self) -> Point:
         """Get lowest point in the site."""
         return Point(self.point.x, self.point.y - self.weight)
+
+    def __str__(self):
+        """Get String representation."""
+        return f"{self.name} WS({self.point.x}, {self.point.y}, {self.weight})"
