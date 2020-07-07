@@ -13,7 +13,7 @@ from voronoi_diagrams.models import (
     PointBisector,
     Site,
     PointBoundary,
-    PointRegion,
+    Region,
 )
 
 from tests.data_structures.avl_tree.test_insert import check_if_tree_is_balanced
@@ -26,7 +26,7 @@ def create_l_list(region: Region) -> LList:
 
 
 def validate_l_list_with_expected_list(
-    l_list: LList, expected_list: List[PointRegion]
+    l_list: LList, expected_list: List[Region]
 ) -> None:
     """Validate l list with expected list."""
     actual_node: Optional[LNode] = l_list.head
@@ -57,7 +57,7 @@ class TestUpdateRegions:
     def setup(self) -> None:
         """Set up every region."""
         self.p = Site(0, 0)
-        self.r_p = PointRegion(self.p, None, None)
+        self.r_p = Region(self.p, None, None)
         self.l_list = create_l_list(self.r_p)
 
     def test_remove_last_region(self) -> None:
@@ -66,7 +66,7 @@ class TestUpdateRegions:
         assert node is not None
 
         self.l_list.remove_region(node, None)
-        expected_list: List[PointRegion] = []
+        expected_list: List[Region] = []
 
         assert self.l_list.head is None
 
@@ -86,15 +86,15 @@ class TestUpdateRegions:
         boundary_pr_minus = PointBoundary(bisector_pr, False)
         boundary_pr_plus = PointBoundary(bisector_pr, True)
 
-        r_p_left = PointRegion(self.p, None, boundary_pq_minus)
-        r_q = PointRegion(q, boundary_pq_minus, boundary_pq_plus)
-        r_p_right = PointRegion(self.p, boundary_pq_plus, None)
+        r_p_left = Region(self.p, None, boundary_pq_minus)
+        r_q = Region(q, boundary_pq_minus, boundary_pq_plus)
+        r_p_right = Region(self.p, boundary_pq_plus, None)
 
         self.l_list.update_regions(r_p_left, r_q, r_p_right)
 
-        r_p_right_left = PointRegion(self.p, boundary_pq_plus, boundary_pr_minus)
-        r_r = PointRegion(r, boundary_pr_minus, boundary_pr_plus)
-        r_p_right_right = PointRegion(q, boundary_pr_plus, None)
+        r_p_right_left = Region(self.p, boundary_pq_plus, boundary_pr_minus)
+        r_r = Region(r, boundary_pr_minus, boundary_pr_plus)
+        r_p_right_right = Region(q, boundary_pr_plus, None)
 
         (
             r_p_right_left_node,
@@ -106,7 +106,7 @@ class TestUpdateRegions:
         boundary_qr_minus = PointBoundary(bisector_qr, False)
 
         self.l_list.remove_region(r_p_right_left_node, boundary_qr_minus)
-        expected_list: List[PointRegion] = [r_p_left, r_q, r_r, r_p_right_right]
+        expected_list: List[Region] = [r_p_left, r_q, r_r, r_p_right_right]
 
         head = self.l_list.head
         assert head is not None
@@ -127,15 +127,15 @@ class TestUpdateRegions:
         boundary_pr_minus = PointBoundary(bisector_pr, False)
         boundary_pr_plus = PointBoundary(bisector_pr, True)
 
-        r_p_left = PointRegion(self.p, None, boundary_pq_minus)
-        r_q = PointRegion(q, boundary_pq_minus, boundary_pq_plus)
-        r_p_right = PointRegion(self.p, boundary_pq_plus, None)
+        r_p_left = Region(self.p, None, boundary_pq_minus)
+        r_q = Region(q, boundary_pq_minus, boundary_pq_plus)
+        r_p_right = Region(self.p, boundary_pq_plus, None)
 
         self.l_list.update_regions(r_p_left, r_q, r_p_right)
 
-        r_p_left_left = PointRegion(self.p, None, boundary_pr_minus)
-        r_r = PointRegion(r, boundary_pr_minus, boundary_pr_plus)
-        r_p_left_right = PointRegion(q, boundary_pr_plus, boundary_pq_minus)
+        r_p_left_left = Region(self.p, None, boundary_pr_minus)
+        r_r = Region(r, boundary_pr_minus, boundary_pr_plus)
+        r_p_left_right = Region(q, boundary_pr_plus, boundary_pq_minus)
 
         (
             r_p_left_left_node,
@@ -147,7 +147,7 @@ class TestUpdateRegions:
         boundary_qr_plus = PointBoundary(bisector_qr, True)
 
         self.l_list.remove_region(r_p_left_right_node, boundary_qr_plus)
-        expected_list: List[PointRegion] = [r_p_left_left, r_r, r_q, r_p_right]
+        expected_list: List[Region] = [r_p_left_left, r_r, r_q, r_p_right]
 
         head = self.l_list.head
         assert head is not None

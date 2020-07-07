@@ -14,7 +14,7 @@ from voronoi_diagrams.models import (
     PointBisector,
     Site,
     PointBoundary,
-    PointRegion,
+    Region,
 )
 
 
@@ -25,7 +25,7 @@ def create_l_list(region: Region) -> LList:
 
 
 def validate_l_list_with_expected_list(
-    l_list: LList, expected_list: List[PointRegion]
+    l_list: LList, expected_list: List[Region]
 ) -> None:
     """Validate l list with expected list."""
     actual_node: Optional[LNode] = l_list.head
@@ -53,7 +53,7 @@ class TestUpdateRegions:
     def setup(self) -> None:
         """Set up every region."""
         self.p = Site(0, 0)
-        self.r_p = PointRegion(self.p, None, None)
+        self.r_p = Region(self.p, None, None)
         self.l_list = create_l_list(self.r_p)
 
     def test_in_l_list_with_one_region(self) -> None:
@@ -65,9 +65,9 @@ class TestUpdateRegions:
         boundary_minus = PointBoundary(bisector, False)
         boundary_plus = PointBoundary(bisector, True)
 
-        left_region = PointRegion(self.p, None, boundary_minus)
-        center_region = PointRegion(q, boundary_minus, boundary_plus)
-        right_region = PointRegion(self.p, boundary_plus, None)
+        left_region = Region(self.p, None, boundary_minus)
+        center_region = Region(q, boundary_minus, boundary_plus)
+        right_region = Region(self.p, boundary_plus, None)
         expected_list = [left_region, center_region, right_region]
 
         self.l_list.update_regions(left_region, center_region, right_region)
@@ -92,15 +92,15 @@ class TestUpdateRegions:
         boundary_qr_minus = PointBoundary(bisector_qr, False)
         boundary_qr_plus = PointBoundary(bisector_qr, True)
 
-        r_p_left = PointRegion(self.p, None, boundary_pq_minus)
-        r_q = PointRegion(q, boundary_pq_minus, boundary_pq_plus)
-        r_p_right = PointRegion(self.p, boundary_pq_plus, None)
+        r_p_left = Region(self.p, None, boundary_pq_minus)
+        r_q = Region(q, boundary_pq_minus, boundary_pq_plus)
+        r_p_right = Region(self.p, boundary_pq_plus, None)
 
         self.l_list.update_regions(r_p_left, r_q, r_p_right)
 
-        r_q_left = PointRegion(q, boundary_pq_minus, boundary_qr_minus)
-        r_r = PointRegion(r, boundary_qr_minus, boundary_qr_plus)
-        r_q_right = PointRegion(q, boundary_qr_plus, boundary_pq_plus)
+        r_q_left = Region(q, boundary_pq_minus, boundary_qr_minus)
+        r_r = Region(r, boundary_qr_minus, boundary_qr_plus)
+        r_q_right = Region(q, boundary_qr_plus, boundary_pq_plus)
 
         self.l_list.update_regions(r_q_left, r_r, r_q_right)
 
@@ -126,15 +126,15 @@ class TestUpdateRegions:
         boundary_pr_minus = PointBoundary(bisector_pr, False)
         boundary_pr_plus = PointBoundary(bisector_pr, True)
 
-        r_p_left = PointRegion(self.p, None, boundary_pq_minus)
-        r_q = PointRegion(q, boundary_pq_minus, boundary_pq_plus)
-        r_p_right = PointRegion(self.p, boundary_pq_plus, None)
+        r_p_left = Region(self.p, None, boundary_pq_minus)
+        r_q = Region(q, boundary_pq_minus, boundary_pq_plus)
+        r_p_right = Region(self.p, boundary_pq_plus, None)
 
         self.l_list.update_regions(r_p_left, r_q, r_p_right)
 
-        r_p_left_left = PointRegion(self.p, None, boundary_pr_minus)
-        r_r = PointRegion(r, boundary_pr_minus, boundary_pr_plus)
-        r_p_left_right = PointRegion(self.p, boundary_pr_plus, boundary_pq_minus)
+        r_p_left_left = Region(self.p, None, boundary_pr_minus)
+        r_r = Region(r, boundary_pr_minus, boundary_pr_plus)
+        r_p_left_right = Region(self.p, boundary_pr_plus, boundary_pq_minus)
 
         self.l_list.update_regions(r_p_left_left, r_r, r_p_left_right)
 
@@ -160,15 +160,15 @@ class TestUpdateRegions:
         boundary_pr_minus = PointBoundary(bisector_pr, False)
         boundary_pr_plus = PointBoundary(bisector_pr, True)
 
-        r_p_left = PointRegion(self.p, None, boundary_pq_minus)
-        r_q = PointRegion(q, boundary_pq_minus, boundary_pq_plus)
-        r_p_right = PointRegion(self.p, boundary_pq_plus, None)
+        r_p_left = Region(self.p, None, boundary_pq_minus)
+        r_q = Region(q, boundary_pq_minus, boundary_pq_plus)
+        r_p_right = Region(self.p, boundary_pq_plus, None)
 
         self.l_list.update_regions(r_p_left, r_q, r_p_right)
 
-        r_p_right_left = PointRegion(self.p, boundary_pq_plus, boundary_pr_minus)
-        r_r = PointRegion(r, boundary_pr_minus, boundary_pr_plus)
-        r_p_right_right = PointRegion(self.p, boundary_pr_plus, None)
+        r_p_right_left = Region(self.p, boundary_pq_plus, boundary_pr_minus)
+        r_r = Region(r, boundary_pr_minus, boundary_pr_plus)
+        r_p_right_right = Region(self.p, boundary_pr_plus, None)
 
         self.l_list.update_regions(r_p_right_left, r_r, r_p_right_right)
 

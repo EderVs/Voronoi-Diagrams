@@ -2,13 +2,15 @@
 
 # Standard Library
 from typing import Callable, Optional, Any, Union
-from math import sqrt
 from abc import ABCMeta, abstractmethod
 
 # Models
 from .boundaries import Boundary
 from .points import Point
 from .events import Site
+
+# Math
+from decimal import Decimal
 
 
 class Region:
@@ -31,14 +33,9 @@ class Region:
         self.right = right
         self.site = site
 
-    @abstractmethod
-    def star(self, point: Point) -> Point:
-        """Map a bisector."""
-        raise NotImplementedError
-
     def is_contained(self, point: Point, *args: Any, **kwargs: Any) -> bool:
         """Value is contained in the Node."""
-        if point.y < self.site.point.y:
+        if point.y < self.site.get_highest_site_point().y:
             return False
 
         is_left_contained = not self.is_left(point)
@@ -47,7 +44,7 @@ class Region:
 
     def is_left(self, point: Point, *args: Any, **kwargs: Any) -> bool:
         """Value is to the left of Node."""
-        if point.y < self.site.point.y:
+        if point.y < self.site.get_highest_site_point().y:
             return False
 
         if self.left is None:
@@ -61,11 +58,12 @@ class Region:
 
     def is_right(self, point: Point, *args: Any, **kwargs: Any) -> bool:
         """Value is to the right of Node."""
-        if point.y < self.site.point.y:
+        if point.y < self.site.get_highest_site_point().y:
             return False
 
         if self.right is None:
             return False
+
         comparison = self.right.get_point_comparison(point)
         if comparison is not None:
             return comparison > 0
@@ -80,21 +78,3 @@ class Region:
     def __repr__(self):
         """Get Region representation."""
         return self.__str__()
-
-
-class PointRegion(Region):
-    """Region of a Point site."""
-
-    def __init__(self, site: Site, left: Optional[Boundary], right: Optional[Boundary]):
-        """Construct Point Region."""
-        super(PointRegion, self).__init__(site, left, right)
-
-    def distance_to_site(self, point: Point) -> float:
-        """Get distance to the site."""
-        return sqrt(
-            (self.site.point.x - point.x) ** 2 + (self.site.point.y - point.y) ** 2
-        )
-
-    def star(self, point: Point) -> Point:
-        """Map a bisector."""
-        return Point(point.x, point.y + self.distance_to_site(point))

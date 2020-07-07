@@ -292,6 +292,62 @@ class AVLTree:
 
         return node
 
+    def insert_all_left_from_node(
+        self, value: Any, from_node: AVLNode, *args: Any, **kwargs: Any,
+    ) -> AVLNode:
+        """Insert value with a Node in the left most of a Tree."""
+        self.length += 1
+        # Update length of all node above
+        actual_parent: Optional[AVLNode] = from_node.parent
+        while actual_parent is not None:
+            actual_parent.length += 1
+            actual_parent = actual_parent.parent
+
+        node = self.NODE_CLASS(value, *args, **kwargs)
+
+        actual_node: Optional[AVLNode] = from_node
+        last_node: AVLNode = from_node
+        # Get to a leaf.
+        while actual_node is not None:
+            actual_node.length += 1
+            last_node = actual_node
+            actual_node = actual_node.left
+
+        node.parent = last_node
+        last_node.left = node
+
+        self.rebalance_to_node(node, from_node)
+
+        return node
+
+    def insert_all_right_from_node(
+        self, value: Any, from_node: AVLNode, *args: Any, **kwargs: Any,
+    ) -> AVLNode:
+        """Insert value with a Node in the right most of a Tree."""
+        self.length += 1
+        # Update length of all node above
+        actual_parent: Optional[AVLNode] = from_node.parent
+        while actual_parent is not None:
+            actual_parent.length += 1
+            actual_parent = actual_parent.parent
+
+        node = self.NODE_CLASS(value, *args, **kwargs)
+
+        actual_node: Optional[AVLNode] = from_node
+        last_node: AVLNode = from_node
+        # Get to a leaf.
+        while actual_node is not None:
+            actual_node.length += 1
+            last_node = actual_node
+            actual_node = actual_node.right
+
+        node.parent = last_node
+        last_node.right = node
+
+        self.rebalance_to_node(node, from_node)
+
+        return node
+
     def insert(self, value: Any, *args: Any, **kwargs: Any) -> AVLNode:
         """Insert value with a Node in the Tree."""
         if self.root is None:
@@ -371,8 +427,10 @@ class AVLTree:
         is_left_child = node.parent.left == node
         if is_left_child:
             node.parent.left = node.left
+            node.parent.factor += 1
         else:
             node.parent.right = node.left
+            node.parent.factor -= 1
 
         if node.left is None:
             return None
@@ -388,13 +446,116 @@ class AVLTree:
         is_left_child = node.parent.left == node
         if is_left_child:
             node.parent.left = node.right
+            node.parent.factor += 1
         else:
             node.parent.right = node.right
+            node.parent.factor -= 1
 
         if node.right is None:
             return None
         node.right.parent = node.parent
         return node.right
+
+    def _swap_nodes_parented(self, node1: AVLNode, node2: AVLNode) -> None:
+        """Swap positions of 2 nodes.
+
+        value is the only thing that is not swapped.
+        """
+        if node1.parent == node2 or node2.parent == node1:
+            father = node1
+            son = node2
+            if node1.parent == node2:
+                father = node2
+                son = node1
+
+            if father.parent is None:
+                self.root = son
+                father_is_left_child = None
+            else:
+                father_is_left_child = father.parent.left == father
+
+            if father_is_left_child:
+                father.parent.left = son
+            elif father_is_left_child is not None and not father_is_left_child:
+                father.parent.right = son
+
+            if father.left == son:
+                father_right = father.right
+                father.left = son.left
+                father.right = son.right
+                son.left = father
+                son.right = father_right
+            else:
+                father_left = father.left
+                father.right = son.right
+                father.left = son.left
+                son.right = father
+                son.left = father_left
+            son.parent = father.parent
+            father.parent = son
+
+        else:
+            # Look for type of child.
+            if node1.parent is None:
+                node1_is_left_child = None
+            else:
+                node1_is_left_child = node1.parent.left == node1
+            if node2.parent is None:
+                node2_is_left_child = None
+            else:
+                node2_is_left_child = node2.parent.left == node2
+
+            # Update father child with node2
+            if node1_is_left_child is None:
+                self.root = node2
+            elif node1_is_left_child:
+                node1.parent.left = node2
+            else:
+                node1.parent.right = node2
+
+            # Update father child with node1
+            if node2_is_left_child is None:
+                self.root = node1
+            elif node2_is_left_child:
+                node2.parent.left = node1
+            else:
+                node2.parent.right = node1
+
+            node1_left = node1.left
+            node1_right = node1.right
+            node1_parent = node1.parent
+
+            # Update relations of node1.
+            node1.parent = node2.parent
+            node1.left = node2.left
+            node1.right = node2.right
+
+            # Update relations of node2.
+            node2.left = node1_left
+            node2.right = node1_right
+            node2.parent = node1_parent
+
+        if node1.left is not None:
+            node1.left.parent = node1
+        if node1.right is not None:
+            node1.right.parent = node1
+        if node2.left is not None:
+            node2.left.parent = node2
+        if node2.right is not None:
+            node2.right.parent = node2
+
+        # Update other values.
+        node1_factor = node1.factor
+        node1_length = node1.length
+        node1_level = node1.level
+
+        node1.factor = node2.factor
+        node1.length = node2.length
+        node1.level = node2.level
+
+        node2.factor = node1_factor
+        node2.length = node1_length
+        node2.level = node1_level
 
     def remove_node(self, node: AVLNode) -> None:
         """Remove node in the Tree."""
@@ -408,16 +569,19 @@ class AVLTree:
         else:
             replace_node = node
             is_replace_left = True
+            # Is not necessary to update the parent.
 
-        # Update the values
-        node.value = replace_node.value
+        if node != replace_node:
+            self._swap_nodes_parented(node, replace_node)
 
         if is_replace_left:
-            to_rebalance = self.remove_node_without_right(replace_node)
+            to_rebalance = self.remove_node_without_right(node)
         else:
-            to_rebalance = self.remove_node_without_left(replace_node)
+            to_rebalance = self.remove_node_without_left(node)
         if to_rebalance is not None:
-            self.rebalance_node(to_rebalance)
+            self.rebalance_to_root(to_rebalance)
+        elif node.parent is not None:
+            self.rebalance_to_root(node.parent)
 
     def remove(self, value: Any) -> bool:
         """Search and remove value in the Tree."""

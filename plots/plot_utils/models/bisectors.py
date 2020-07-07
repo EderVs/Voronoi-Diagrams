@@ -12,9 +12,12 @@ from .sites import create_weighted_site, plot_point
 from matplotlib import pyplot as plt
 import numpy as np
 
+# Math
+from decimal import Decimal
+
 
 def create_weighted_point_bisector(
-    x1: float, y1: float, w1: float, x2: float, y2: float, w2: float
+    x1: Decimal, y1: Decimal, w1: Decimal, x2: Decimal, y2: Decimal, w2: Decimal
 ) -> WeightedPointBisector:
     """Get bisector to work."""
     p = create_weighted_site(x1, y1, w1)
@@ -31,8 +34,8 @@ def plot_weighted_point_bisector(
     xlim: Limits of x in the plot.
     ylim: Limits of y in the plot.
     """
-    y_list_plus = [bisector.formula_y(x) for x in x_range]
-    y_list_minus = [bisector.formula_y(x, sign=False) for x in x_range]
+    y_list_plus = [bisector.formula_y(x)[0] for x in x_range]
+    y_list_minus = [bisector.formula_y(x)(1) for x in x_range]
     plt.plot(x_range, y_list_plus, "k")
     plt.plot(x_range, y_list_minus, "k")
 
@@ -41,6 +44,6 @@ def plot_intersections(
     bisector1: WeightedPointBisector, bisector2: WeightedPointBisector
 ) -> None:
     """Plot intersections between 2 bisectors."""
-    intersections = bisector1.get_intersection_point(bisector2)
+    intersections = bisector1.get_intersection_points(bisector2)
     for intersection in intersections:
         plot_point(intersection[0], intersection[1][0])

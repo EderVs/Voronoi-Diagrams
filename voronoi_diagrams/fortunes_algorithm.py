@@ -12,46 +12,55 @@ from .data_structures.l import LNode
 # Models
 from .models import (
     Site,
+    WeightedSite,
     Point,
     Bisector,
     Event,
-    Intersection,
+    IntersectionEvent,
     Region,
     Boundary,
     PointBisector,
     PointBoundary,
-    PointRegion,
+    WeightedPointBisector,
+    WeightedPointBoundary,
 )
+
+# Math
+from decimal import Decimal
 
 
 class VoronoiDiagram:
     """Voronoi Diagram representation."""
 
-    vertex: List[Point]
-    _vertex: Set[Tuple[float, float]]
+    vertices: List[Point]
+    _vertices: Set[Tuple[Decimal, Decimal]]
     bisectors: List[Bisector]
-    _bisectors: Set[Tuple[Tuple[float, float], Tuple[float, float]]]
+    _bisectors: Set[Tuple[Tuple[Decimal, Decimal], Tuple[Decimal, Decimal]]]
     sites: List[Site]
 
     def __init__(self, sites: Iterable[Site], site_class: Any = Site):
         """Construct and calculate Voronoi Diagram."""
-        self.vertex = []
-        self._vertex = set()
+        self.vertices = []
+        self._vertices = set()
         self.bisectors = []
         self._bisectors = set()
         self.sites = list(sites)
         if site_class == Site:
             self.BISECTOR_CLASS = PointBisector
-            self.REGION_CLASS = PointRegion
+            self.REGION_CLASS = Region
             self.BOUNDARY_CLASS = PointBoundary
+        elif site_class == WeightedSite:
+            self.BISECTOR_CLASS = WeightedPointBisector
+            self.REGION_CLASS = Region
+            self.BOUNDARY_CLASS = WeightedPointBoundary
         self._calculate_diagram()
 
     def add_vertex(self, point: Point) -> None:
         """Add point in the vertex list."""
         point_tuple = point.get_tuple()
-        if point_tuple not in self._vertex:
-            self._vertex.add(point_tuple)
-            self.vertex.append(point)
+        if point_tuple not in self._vertices:
+            self._vertices.add(point_tuple)
+            self.vertices.append(point)
 
     def add_bisector(self, bisector: Bisector) -> None:
         """Add point in the vertex list."""
@@ -115,15 +124,16 @@ class VoronoiDiagram:
         if boundary_1.bisector == boundary_2.bisector:
             return
 
-        intersection_point_tuple = boundary_1.get_intersection(boundary_2)
-        if intersection_point_tuple is not None:
-            vertex, event = intersection_point_tuple
-            intersection = Intersection(event, vertex, region_node)
-            # Insert intersection to Q.
-            self.q_queue.enqueue(intersection)
-            # Save intersection in both boundaries.
-            boundary_1.right_intersection = intersection
-            boundary_2.left_intersection = intersection
+        intersection_point_tuples = boundary_1.get_intersections(boundary_2)
+        if intersection_point_tuples:
+            # Adding all intersections.
+            for vertex, event in intersection_point_tuples:
+                intersection = IntersectionEvent(event, vertex, region_node)
+                # Insert intersection to Q.
+                self.q_queue.enqueue(intersection)
+                # Save intersection in both boundaries.
+                boundary_1.right_intersection = intersection
+                boundary_2.left_intersection = intersection
 
     def _insert_posible_intersections(
         self,
@@ -154,6 +164,12 @@ class VoronoiDiagram:
         r_p, r_q, r_q_node = self._find_region_containing_p(p)
         left_region_node = r_q_node.left_neighbor
         right_region_node = r_q_node.right_neighbor
+
+        # Step 8.1.
+        # Check if p is dominated by q.
+        if p.is_dominated(r_q.site):
+            # Discard this site.
+            return
 
         # Step 9.
         # Create Bisector B*pq.
@@ -199,9 +215,8 @@ class VoronoiDiagram:
             r_q_right_node,
         )
 
-    def _get_regions_and_nodes_of_intersection(self, p: Intersection):
+    def _get_regions_and_nodes_of_intersection(self, p: IntersectionEvent):
         """Get regions and their nodes of the intersection p."""
-        # TODO: The error is taken from where is the region_node
         intersection_region_node = p.region_node
         # Left and right neighbor cannot be None because p is an intersection.
         r_q_node = intersection_region_node.left_neighbor
@@ -210,7 +225,7 @@ class VoronoiDiagram:
         r_s = r_s_node.value  # type: ignore
         return r_q, r_s, r_q_node, r_s_node
 
-    def _handle_intersection(self, p: Intersection):
+    def _handle_intersection(self, p: IntersectionEvent):
         """Handle when event is an intersection."""
         # Step 14.
         # Let p be the intersection of boundaries Cqr and Crs.
@@ -227,7 +242,7 @@ class VoronoiDiagram:
         # Step 16.
         # Update list L so it contains Cqs instead of Cqr, Rr*, Crs
         boundary_q_s = self.BOUNDARY_CLASS(
-            bisector_q_s, r_q.site.point.y > r_s.site.point.y
+            bisector_q_s, r_q.site.get_event_point().y > r_s.site.get_event_point().y
         )
         intersection_region_node_value_left = intersection_region_node.value.left
         intersection_region_node_value_right = intersection_region_node.value.right
@@ -268,7 +283,7 @@ class VoronoiDiagram:
         # Step 19.
         # Mark p as a vertex and as an endpoint of B*qr, B*rs and B*qs.
         self.add_vertex(p.vertex)
-        # TODO: Add as an endpoint of B*qr, B*rs and B*qs.
+        # TODO: Add that this vertex is an endpoint of B*qr, B*rs and B*qs.
 
     def _calculate_diagram(self):
         """Calculate point diagram."""
@@ -297,14 +312,26 @@ class FortunesAlgorithm:
     """Fortune's Algorithm implementation."""
 
     @staticmethod
-    def calculate_voronoi_diagram(
-        points: List[Point], site_class: Any = Site
-    ) -> VoronoiDiagram:
+    def calculate_voronoi_diagram(points: List[Point]) -> VoronoiDiagram:
         """Calculate Voronoi Diagram."""
         sites = [
-            site_class(points[i].x, points[i].y, name=str(i + 1))
-            for i in range(len(points))
+            Site(points[i].x, points[i].y, name=str(i + 1)) for i in range(len(points))
         ]
-        voronoi_diagram = VoronoiDiagram(sites, site_class)
+        voronoi_diagram = VoronoiDiagram(sites, site_class=Site)
+
+        return voronoi_diagram
+
+    @staticmethod
+    def calculate_aw_voronoi_diagram(
+        points_and_weights: List[Tuple[Point, Decimal]]
+    ) -> VoronoiDiagram:
+        """Calculate AW Voronoi Diagram."""
+        sites = []
+        for i in range(len(points_and_weights)):
+            point, weight = points_and_weights[i]
+            site = WeightedSite(point.x, point.y, weight, name=str(i + 1))
+            sites.append(site)
+
+        voronoi_diagram = VoronoiDiagram(sites, site_class=WeightedSite)
 
         return voronoi_diagram

@@ -1,6 +1,6 @@
 """Find intersection of two hyperbolas equation"""
 # Standard Library
-from math import sqrt
+from decimal import Decimal
 
 # Models.
 from voronoi_diagrams.models import (
@@ -16,20 +16,22 @@ import numpy as np
 # Utils.
 from plots.utils.models.bisectors import plot_weighted_point_bisector
 from plots.utils.models.sites import create_weighted_site
-from utils.numbers import are_close
+from general_utils.numbers import are_close
 
 
 def test_equation(bisector1, bisector2, sign_1, sign_2, x):
     """Test equation with given x value."""
     epsilon = 0.00001
 
-    print(bisector1.formula_y(x, sign=sign_1))
-    print(bisector2.formula_y(x, sign=sign_2))
-    assert are_close(
-        bisector1.formula_y(x, sign=sign_1),
-        bisector2.formula_y(x, sign=sign_2),
-        epsilon,
-    )
+    if sign_1:
+        value1 = bisector1.formula_y(x)[0]
+    else:
+        value1 = bisector1.formula_y(x)[2]
+    if sign_2:
+        value2 = bisector2.formula_y(x)[0]
+    else:
+        value2 = bisector2.formula_y(x)[1]
+    assert are_close(value1, value2, epsilon,)
 
     # First Bisector
     cs_a = bisector1.a
@@ -53,12 +55,16 @@ def test_equation(bisector1, bisector2, sign_1, sign_2, x):
     left = (
         -(cs_b * x + cs_e)
         + one_1
-        * sqrt((cs_b * x + cs_e) ** 2 - 4 * cs_c * (cs_a * (x ** 2) + cs_d * x + cs_f))
+        * Decimal(
+            (cs_b * x + cs_e) ** 2 - 4 * cs_c * (cs_a * (x ** 2) + cs_d * x + cs_f)
+        ).sqrt()
     ) / (2 * cs_c)
     right = (
         -(cs_h * x + cs_k)
         + one_2
-        * sqrt((cs_h * x + cs_k) ** 2 - 4 * cs_i * (cs_g * (x ** 2) + cs_j * x + cs_l))
+        * Decimal(
+            (cs_h * x + cs_k) ** 2 - 4 * cs_i * (cs_g * (x ** 2) + cs_j * x + cs_l)
+        ).sqrt()
     ) / (2 * cs_i)
     print("First")
     print(left, right)
@@ -69,11 +75,16 @@ def test_equation(bisector1, bisector2, sign_1, sign_2, x):
         -a * (cs_b * x + cs_e)
         + a
         * one_1
-        * sqrt((cs_b * x + cs_e) ** 2 - 4 * cs_c * (cs_a * (x ** 2) + cs_d * x + cs_f))
+        * Decimal(
+            (cs_b * x + cs_e) ** 2 - 4 * cs_c * (cs_a * (x ** 2) + cs_d * x + cs_f)
+        ).sqrt()
         + (cs_h * x + cs_k)
     )
-    right = one_2 * sqrt(
-        (cs_h * x + cs_k) ** 2 - 4 * cs_i * (cs_g * (x ** 2) + cs_j * x + cs_l)
+    right = (
+        one_2
+        * Decimal(
+            (cs_h * x + cs_k) ** 2 - 4 * cs_i * (cs_g * (x ** 2) + cs_j * x + cs_l)
+        ).sqrt()
     )
     print("Substitute a")
     print(left, right)
@@ -86,7 +97,9 @@ def test_equation(bisector1, bisector2, sign_1, sign_2, x):
         + c
         + a
         * one_1
-        * sqrt((cs_b * x + cs_e) ** 2 - 4 * cs_c * (cs_a * (x ** 2) + cs_d * x + cs_f))
+        * Decimal(
+            (cs_b * x + cs_e) ** 2 - 4 * cs_c * (cs_a * (x ** 2) + cs_d * x + cs_f)
+        ).sqrt()
     )
     # Right is the same as before
     print("Substitute b and c")
@@ -94,9 +107,9 @@ def test_equation(bisector1, bisector2, sign_1, sign_2, x):
     assert are_close(left, right, epsilon)
     # Substitute d
     d = 4 * cs_i
-    left = (((one_1) * 2 * b * x * a) + ((one_1) * 2 * c * a)) * sqrt(
+    left = (((one_1) * 2 * b * x * a) + ((one_1) * 2 * c * a)) * Decimal(
         (cs_b * x + cs_e) ** 2 - 4 * cs_c * (cs_a * (x ** 2) + cs_d * x + cs_f)
-    )
+    ).sqrt()
     right = (
         ((cs_h * x + cs_k) ** 2)
         - (d * (cs_g * (x ** 2) + cs_j * x + cs_l))
@@ -146,16 +159,16 @@ def test_equation(bisector1, bisector2, sign_1, sign_2, x):
     right = right ** 2
     # To keep epsilon short
     print("Substitute h, i and j")
-    print(sqrt(left), sqrt(right))
-    assert are_close(sqrt(left), sqrt(right), epsilon)
+    print(Decimal(left).sqrt(), Decimal(right).sqrt())
+    assert are_close(Decimal(left).sqrt(), Decimal(right).sqrt(), epsilon)
     # Change before ln
     left = ((((i ** 2) * (x ** 2)) + (j * x) + h) * ((cs_b * x + cs_e) ** 2)) - (
         (((i ** 2) * (x ** 2)) + (j * x) + h)
         * (4 * cs_c * (cs_a * (x ** 2) + cs_d * x + cs_f))
     )
     print("Change before ln")
-    print(sqrt(left), sqrt(right))
-    assert are_close(sqrt(left), sqrt(right), epsilon)
+    print(Decimal(left).sqrt(), Decimal(right).sqrt()())
+    assert are_close(Decimal(left).sqrt(), Decimal(right).sqrt(), epsilon)
     # Step 1 l1, l2, l3, l4, l5
     s1 = (((i ** 2) * (x ** 2)) + (j * x) + h) * ((cs_b * x + cs_e) ** 2)
     print("s1")
@@ -166,7 +179,7 @@ def test_equation(bisector1, bisector2, sign_1, sign_2, x):
     )
     print("s2")
     print(s1, s2)
-    assert are_close(sqrt(s1), sqrt(s2), epsilon)
+    assert are_close(Decimal(s1).sqrt(), Decimal(s2).sqrt(), epsilon)
     # Step 3 l1, l2, l3, l4, l5
     s3 = (
         (
@@ -178,26 +191,26 @@ def test_equation(bisector1, bisector2, sign_1, sign_2, x):
     )
     print("s3")
     print(s2, s3)
-    assert are_close(sqrt(s2), sqrt(s3), epsilon)
+    assert are_close(Decimal(s2).sqrt(), Decimal(s3).sqrt(), epsilon)
     # Step 4 l1, l2, l3, l4, l5
     l1 = (cs_b ** 2) * (i ** 2)
     l2 = (2 * cs_b * cs_e * (i ** 2)) + ((cs_b ** 2) * j)
     l3 = ((cs_e ** 2) * (i ** 2)) + (2 * cs_b * cs_e * j) + ((cs_b ** 2) * h)
     l4 = ((cs_e ** 2) * j) + (2 * cs_b * cs_e * h)
     l5 = h * (cs_e ** 2)
-    l = (l1 * (x ** 4)) + (l2 * (x ** 3)) + (l3 * (x ** 2)) + (l4 * x) + l5
+    ln = (l1 * (x ** 4)) + (l2 * (x ** 3)) + (l3 * (x ** 2)) + (l4 * x) + l5
     print("s4")
-    print(s3, l)
-    assert are_close(sqrt(s3), sqrt(l), epsilon)
+    print(s3, ln)
+    assert are_close(Decimal(s3).sqrt(), Decimal(ln).sqrt(), epsilon)
     # Substitute l1, l2, l3, l4, l5
-    left = l - (
+    left = ln - (
         (((i ** 2) * (x ** 2)) + (j * x) + h)
         * (4 * cs_c * (cs_a * (x ** 2) + cs_d * x + cs_f))
     )
     # Right is the same
     print("Substitute l1, l2, l3, l4, l5")
     print(left, right)
-    assert are_close(sqrt(left), sqrt(right), epsilon)
+    assert are_close(Decimal(left).sqrt(), Decimal(right).sqrt(), epsilon)
     # Substitute m1, m2, m3, m4, m5
     m1 = -(4 * cs_c * cs_a * (i ** 2))
     m2 = -((4 * cs_c * cs_d * (i ** 2)) + (4 * cs_c * cs_a * j))
@@ -205,11 +218,11 @@ def test_equation(bisector1, bisector2, sign_1, sign_2, x):
     m4 = -((4 * cs_c * cs_f * j) + (4 * cs_c * cs_d * h))
     m5 = -(4 * cs_c * cs_f * h)
     m = (m1 * (x ** 4)) + (m2 * (x ** 3)) + (m3 * (x ** 2)) + (m4 * x) + m5
-    left = l + m
+    left = ln + m
     # Right is the same
     print("Substitute m1, m2, m3, m4, m5")
     print(left, right)
-    assert are_close(sqrt(left), sqrt(right), epsilon)
+    assert are_close(Decimal(left).sqrt(), Decimal(right).sqrt(), epsilon)
     # Substitute n1, n2, n3, n4, n5
     n1 = l1 + m1
     n2 = l2 + m2
@@ -220,7 +233,7 @@ def test_equation(bisector1, bisector2, sign_1, sign_2, x):
     # Right is the same
     print("Substitute n1, n2, n3, n4, n5")
     print(left, right)
-    assert are_close(sqrt(left), sqrt(right), epsilon)
+    assert are_close(Decimal(left).sqrt(), Decimal(right).sqrt(), epsilon)
     # Substitute o1, o2, o3, o4, o5
     o1 = f ** 2
     o2 = 2 * f * g
@@ -231,7 +244,7 @@ def test_equation(bisector1, bisector2, sign_1, sign_2, x):
     # left is the same
     print("Substitute o1, o2, o3, o4, o5")
     print(left, right)
-    assert are_close(sqrt(left), sqrt(right), epsilon)
+    assert are_close(Decimal(left).sqrt(), Decimal(right).sqrt(), epsilon)
     # Substitute p1, p2, p3, p4, p5
     p1 = n1 - o1
     p2 = n2 - o2
@@ -288,15 +301,15 @@ test_equation(p1_p2_bisector, p2_p3_bisector, True, False, x_2)
 
 x1 = -3
 y1 = 1
-w1 = 2 * sqrt(2)
+w1 = 2 * Decimal(2).sqrt()
 p1 = create_weighted_site(x1, y1, w1)
 x2 = 6
 y2 = 10
-w2 = sqrt(2)
+w2 = Decimal(2).sqrt()
 p2 = create_weighted_site(x2, y2, w2)
 x3 = -4
 y3 = 0
-w3 = 3 * sqrt(2)
+w3 = 3 * Decimal(2).sqrt()
 p3 = create_weighted_site(x3, y3, w3)
 p1_p2_bisector = WeightedPointBisector(sites=(p1, p2))
 p2_p3_bisector = WeightedPointBisector(sites=(p2, p3))
@@ -308,15 +321,15 @@ test_equation(p1_p2_bisector, p2_p3_bisector, False, False, x_3)
 
 x1 = 7
 y1 = 1
-w1 = 2 * sqrt(2)
+w1 = 2 * Decimal(2).sqrt()
 p1 = create_weighted_site(x1, y1, w1)
 x2 = 6
 y2 = 10
-w2 = sqrt(2)
+w2 = Decimal(2).sqrt()
 p2 = create_weighted_site(x2, y2, w2)
 x3 = -4
 y3 = 0
-w3 = 3 * sqrt(2)
+w3 = 3 * Decimal(2).sqrt()
 p3 = create_weighted_site(x3, y3, w3)
 p1_p2_bisector = WeightedPointBisector(sites=(p1, p2))
 p2_p3_bisector = WeightedPointBisector(sites=(p2, p3))
