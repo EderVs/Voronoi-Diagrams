@@ -27,15 +27,19 @@ class QNode(AVLNode):
 
     def is_left(self, value: Event, *args: Any, **kwargs: Any) -> bool:
         """Value is to the left of Node."""
-        if value.point.y == self.value.point.y:
-            return value.point.x < self.value.point.x
-        return value.point.y < self.value.point.y
+        event_point = self.value.get_event_point()
+        other_event_point = value.get_event_point()
+        if other_event_point.y == event_point.y:
+            return other_event_point.x < event_point.x
+        return other_event_point.y < event_point.y
 
     def is_right(self, value: Event, *args: Any, **kwargs: Any) -> bool:
         """Value is to the right of Node."""
-        if value.point.y == self.value.point.y:
-            return value.point.x > self.value.point.x
-        return value.point.y > self.value.point.y
+        event_point = self.value.get_event_point()
+        other_event_point = value.get_event_point()
+        if other_event_point.y == event_point.y:
+            return other_event_point.x > event_point.x
+        return other_event_point.y > event_point.y
 
 
 class QQueue:

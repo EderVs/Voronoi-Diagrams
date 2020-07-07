@@ -1,12 +1,16 @@
 """Site Representation."""
+# Standard Library
 from typing import Any
+
+# Math
+from decimal import Decimal
 
 
 class Point:
     """Point to handle in Fortune's Algorithm."""
 
-    x: float
-    y: float
+    x: Decimal
+    y: Decimal
 
     def __init__(self, x, y):
         """Construct point."""
