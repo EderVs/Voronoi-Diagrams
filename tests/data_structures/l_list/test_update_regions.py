@@ -1,10 +1,14 @@
 """Test update regions."""
 # Standard Library
-from typing import List
+from typing import List, Optional
 
 # Data structures
 from voronoi_diagrams.data_structures import LList
-from voronoi_diagrams.data_structures.models import (
+from voronoi_diagrams.data_structures.l import LNode
+from tests.data_structures.avl_tree.test_insert import check_if_tree_is_balanced
+
+# Models
+from voronoi_diagrams.models import (
     Region,
     Site,
     PointBisector,
@@ -12,8 +16,6 @@ from voronoi_diagrams.data_structures.models import (
     PointBoundary,
     PointRegion,
 )
-from voronoi_diagrams.data_structures.l import LNode
-from tests.data_structures.avl_tree.test_insert import check_if_tree_is_balanced
 
 
 def create_l_list(region: Region) -> LList:
@@ -26,10 +28,10 @@ def validate_l_list_with_expected_list(
     l_list: LList, expected_list: List[PointRegion]
 ) -> None:
     """Validate l list with expected list."""
-    actual_node: LNode = l_list.head
+    actual_node: Optional[LNode] = l_list.head
     actual_region_index = 0
     while actual_node is not None:
-        assert actual_node.region == expected_list[actual_region_index]
+        assert actual_node.value == expected_list[actual_region_index]
         if actual_node.right_neighbor is None:
             break
         actual_node = actual_node.right_neighbor  # type: ignore
@@ -37,7 +39,7 @@ def validate_l_list_with_expected_list(
     assert actual_region_index == len(expected_list) - 1
 
     while actual_node is not None:
-        assert actual_node.region == expected_list[actual_region_index]
+        assert actual_node.value == expected_list[actual_region_index]
         if actual_node.left_neighbor is None:
             break
         actual_node = actual_node.left_neighbor  # type: ignore
@@ -51,7 +53,7 @@ class TestUpdateRegions:
     def setup(self) -> None:
         """Set up every region."""
         self.p = Site(0, 0)
-        self.r_p = Region(self.p)
+        self.r_p = PointRegion(self.p, None, None)
         self.l_list = create_l_list(self.r_p)
 
     def test_in_l_list_with_one_region(self) -> None:
@@ -71,7 +73,8 @@ class TestUpdateRegions:
         self.l_list.update_regions(left_region, center_region, right_region)
 
         head = self.l_list.head
-        assert head.region == left_region
+        assert head is not None
+        assert head.value == left_region
 
         validate_l_list_with_expected_list(self.l_list, expected_list)
         check_if_tree_is_balanced(self.l_list.t)
@@ -104,7 +107,8 @@ class TestUpdateRegions:
         expected_list = [r_p_left, r_q_left, r_r, r_q_right, r_p_right]
 
         head = self.l_list.head
-        assert head.region == r_p_left
+        assert head is not None
+        assert head.value == r_p_left
 
         validate_l_list_with_expected_list(self.l_list, expected_list)
         check_if_tree_is_balanced(self.l_list.t)
@@ -137,7 +141,8 @@ class TestUpdateRegions:
         expected_list = [r_p_left_left, r_r, r_p_left_right, r_q, r_p_right]
 
         head = self.l_list.head
-        assert head.region == r_p_left_left
+        assert head is not None
+        assert head.value == r_p_left_left
 
         validate_l_list_with_expected_list(self.l_list, expected_list)
         check_if_tree_is_balanced(self.l_list.t)
@@ -170,7 +175,8 @@ class TestUpdateRegions:
         expected_list = [r_p_left, r_q, r_p_right_left, r_r, r_p_right_right]
 
         head = self.l_list.head
-        assert head.region == r_p_left
+        assert head is not None
+        assert head.value == r_p_left
 
         validate_l_list_with_expected_list(self.l_list, expected_list)
         check_if_tree_is_balanced(self.l_list.t)

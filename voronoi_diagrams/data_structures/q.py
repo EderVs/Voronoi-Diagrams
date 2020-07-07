@@ -7,7 +7,7 @@ from typing import Any, Optional
 from .avl_tree import AVLTree, AVLNode
 
 # Models
-from .models import Event
+from ..models import Event
 
 
 class QNode(AVLNode):
@@ -75,3 +75,7 @@ class QQueue:
         event = node.value
         self.t.remove_node(node)
         return event
+
+    def is_empty(self) -> bool:
+        """Return True if the Queue is Empty."""
+        return self.t.is_empty()

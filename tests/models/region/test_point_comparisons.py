@@ -1,8 +1,10 @@
 """Test the comparisons in Point Region."""
 
-# Models
+# Data Structures
 from voronoi_diagrams.data_structures.l import LNode
-from voronoi_diagrams.data_structures.models import (
+
+# Models
+from voronoi_diagrams.models import (
     Site,
     Point,
     PointBisector,

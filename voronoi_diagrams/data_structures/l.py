@@ -7,7 +7,7 @@ from typing import Any, Optional, Tuple
 from .avl_tree import AVLTree, AVLNode
 
 # Models
-from .models import Region, Event, Bisector, Site, Point, Boundary
+from ..models import Region, Event, Bisector, Site, Point, Boundary
 
 
 class LNode(AVLNode):
@@ -16,20 +16,18 @@ class LNode(AVLNode):
     def __init__(self, value: Region, left=None, right=None) -> None:
         """List L AVL Node constructor."""
         super(LNode, self).__init__(value, left, right)
-        # Just renaming for clarity.
-        self.region: Region = self.value
 
     def is_contained(self, value: Region, *args: Any, **kwargs: Any) -> bool:
         """Value is contained in the Node."""
-        return self.region.is_contained(value.site.point)
+        return self.value.is_contained(value.site.point)
 
     def is_left(self, value: Region, *args: Any, **kwargs: Any) -> bool:
         """Value is to the left of Node."""
-        return self.region.is_left(value.site.point)
+        return self.value.is_left(value.site.point)
 
     def is_right(self, value: Region, *args: Any, **kwargs: Any) -> bool:
         """Value is to the right of Node."""
-        return self.region.is_right(value.site.point)
+        return self.value.is_right(value.site.point)
 
 
 class LList:
@@ -49,10 +47,34 @@ class LList:
 
     def __str__(self):
         """Get string representation."""
-        string = f"[{self.head.region}"
+        # No blank spaces after docstring.
+        def get_region_str(region: Optional[Region]) -> str:
+            """Get string representation of Region in l list."""
+            if region is not None:
+                return f"R({region.site.name})"
+            else:
+                return ""
+
+        def get_boundary_str(boundary: Optional[Boundary]) -> str:
+            """Get string representation of Boundary in l list."""
+            if boundary is not None:
+                return (
+                    f"B{'+' if boundary.sign else '-'}("
+                    f"{boundary.bisector.sites[0].name}, {boundary.bisector.sites[1].name})"
+                )
+            else:
+                return "None"
+
+        string = (
+            f"[None, {get_region_str(self.head.value)}, "
+            f"{get_boundary_str(self.head.value.right)}"
+        )
         node = self.head.right_neighbor
         while node is not None:
-            string += f", {node.region}"
+            string += (
+                f", {get_region_str(node.value)}, "
+                f"{get_boundary_str(node.value.right)}"
+            )
             node = node.right_neighbor
         string += "]"
         return string
@@ -61,7 +83,7 @@ class LList:
         """Get representation."""
         return self.__str__()
 
-    def _search_region_node(self, region: Region) -> LNode:
+    def search_region_node(self, region: Region) -> LNode:
         """Search the node of the region where a point is located given a y coordinate."""
         node = self.t.search(region)
         if node is None:
@@ -74,7 +96,7 @@ class LList:
 
     def search_region_contained(self, region: Region) -> Region:
         """Search the region where a point is located given a y coordinate."""
-        return self._search_region_node(region).region
+        return self.search_region_node(region).value
 
     def update_neighbors(
         self, left_node: Optional[LNode], right_node: Optional[LNode]
@@ -100,10 +122,10 @@ class LList:
     ) -> None:
         """Update boundary in between 2 nodes."""
         if left_node is not None:
-            left_node.region.right = boundary
+            left_node.value.right = boundary
 
         if right_node is not None:
-            right_node.region.left = boundary
+            right_node.value.left = boundary
 
     def update_regions(
         self, left_region: Region, center_region: Region, right_region: Region,
@@ -115,9 +137,9 @@ class LList:
           site.
         - right_region is the Region that will be in the right. This region must have q as its site.
         """
-        node = self._search_region_node(center_region)
+        node = self.search_region_node(center_region)
 
-        node.value = node.region = center_region
+        node.value = center_region
 
         # Insert in AVLTree
         # Insert in the left sub tree
