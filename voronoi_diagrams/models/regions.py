@@ -35,7 +35,7 @@ class Region:
 
     def is_contained(self, point: Point, *args: Any, **kwargs: Any) -> bool:
         """Value is contained in the Node."""
-        if point.y < self.site.point.y:
+        if point.y < self.site.get_highest_site_point().y:
             return False
 
         is_left_contained = not self.is_left(point)

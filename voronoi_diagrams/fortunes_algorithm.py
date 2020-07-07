@@ -165,6 +165,12 @@ class VoronoiDiagram:
         left_region_node = r_q_node.left_neighbor
         right_region_node = r_q_node.right_neighbor
 
+        # Step 8.1.
+        # Check if p is dominated by q.
+        if p.is_dominated(r_q.site):
+            # Discard this site.
+            return
+
         # Step 9.
         # Create Bisector B*pq.
         # Actually we are creating Bpq.
@@ -211,7 +217,6 @@ class VoronoiDiagram:
 
     def _get_regions_and_nodes_of_intersection(self, p: IntersectionEvent):
         """Get regions and their nodes of the intersection p."""
-        # TODO: The error is taken from where is the region_node
         intersection_region_node = p.region_node
         # Left and right neighbor cannot be None because p is an intersection.
         r_q_node = intersection_region_node.left_neighbor
@@ -237,7 +242,7 @@ class VoronoiDiagram:
         # Step 16.
         # Update list L so it contains Cqs instead of Cqr, Rr*, Crs
         boundary_q_s = self.BOUNDARY_CLASS(
-            bisector_q_s, r_q.site.point.y > r_s.site.point.y
+            bisector_q_s, r_q.site.get_event_point().y > r_s.site.get_event_point().y
         )
         intersection_region_node_value_left = intersection_region_node.value.left
         intersection_region_node_value_right = intersection_region_node.value.right

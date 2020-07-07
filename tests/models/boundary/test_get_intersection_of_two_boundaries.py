@@ -473,3 +473,232 @@ class TestGetIntersectionInWeightedPointBoundary:
 
         intersections = boundary_qr_minus.get_intersections(boundary_pq_plus)
         assert len(intersections) == 0
+
+    def test_sites_without_weight(self):
+        """Test get intersection with 3 positive fixed sites."""
+        p = WeightedSite(Decimal(40), Decimal(2), Decimal(0))
+        q = WeightedSite(Decimal(38), Decimal(38), Decimal(1))
+        r = WeightedSite(Decimal(20), Decimal(0), Decimal(0))
+        bisector_pq = WeightedPointBisector(sites=(p, q))
+        bisector_qr = WeightedPointBisector(sites=(q, r))
+        boundary_pq_plus = WeightedPointBoundary(bisector_pq, True)
+        boundary_pq_minus = WeightedPointBoundary(bisector_pq, False)
+        boundary_qr_plus = WeightedPointBoundary(bisector_qr, True)
+        boundary_qr_minus = WeightedPointBoundary(bisector_qr, False)
+        intersections = boundary_qr_plus.get_intersections(boundary_pq_minus)
+        assert len(intersections) == 0
+
+        intersections = boundary_qr_plus.get_intersections(boundary_pq_plus)
+        assert len(intersections) == 0
+
+        intersections = boundary_qr_minus.get_intersections(boundary_pq_minus)
+        assert len(intersections) == 1
+        intersection = intersections[0]
+        intersection, intersection_star = intersection
+        assert intersection.x == Decimal(
+            "28.102044708167113640229217708110809326171875"
+        )
+        assert intersection.y == Decimal(
+            "19.979552926265565560015602386556565761566162109375"
+        )
+        assert intersection_star.x == Decimal(
+            "28.102044708167113640229217708110809326171875"
+        )
+        assert intersection_star.y == Decimal("41.53936887136552600734798861")
+
+        intersections = boundary_qr_minus.get_intersections(boundary_pq_plus)
+        assert len(intersections) == 0
+
+        p = WeightedSite(Decimal(40), Decimal(2), Decimal(0))
+        q = WeightedSite(Decimal(38), Decimal(38), Decimal(0))
+        r = WeightedSite(Decimal(20), Decimal(0), Decimal(0))
+        bisector_pq = WeightedPointBisector(sites=(p, q))
+        bisector_qr = WeightedPointBisector(sites=(q, r))
+        boundary_pq_plus = WeightedPointBoundary(bisector_pq, True)
+        boundary_pq_minus = WeightedPointBoundary(bisector_pq, False)
+        boundary_qr_plus = WeightedPointBoundary(bisector_qr, True)
+        boundary_qr_minus = WeightedPointBoundary(bisector_qr, False)
+        intersections = boundary_qr_plus.get_intersections(boundary_pq_minus)
+        assert len(intersections) == 0
+
+        intersections = boundary_qr_plus.get_intersections(boundary_pq_plus)
+        assert len(intersections) == 0
+
+        intersections = boundary_qr_minus.get_intersections(boundary_pq_minus)
+        assert len(intersections) == 1
+        intersection = intersections[0]
+        intersection, intersection_star = intersection
+        assert intersection.x == Decimal(
+            "28.160220994475139377755112946033477783203125"
+        )
+        assert intersection.y == Decimal(
+            "19.397790055248616880589906941168010234832763671875"
+        )
+        assert intersection_star.x == Decimal(
+            "28.160220994475139377755112946033477783203125"
+        )
+        assert intersection_star.y == Decimal("40.44211151511457928961840373")
+
+        intersections = boundary_qr_minus.get_intersections(boundary_pq_plus)
+        assert len(intersections) == 0
+
+        p = WeightedSite(Decimal(40), Decimal(2), Decimal(1))
+        q = WeightedSite(Decimal(38), Decimal(38), Decimal(0))
+        r = WeightedSite(Decimal(20), Decimal(0), Decimal(0))
+        bisector_pq = WeightedPointBisector(sites=(p, q))
+        bisector_qr = WeightedPointBisector(sites=(q, r))
+        boundary_pq_plus = WeightedPointBoundary(bisector_pq, True)
+        boundary_pq_minus = WeightedPointBoundary(bisector_pq, False)
+        boundary_qr_plus = WeightedPointBoundary(bisector_qr, True)
+        boundary_qr_minus = WeightedPointBoundary(bisector_qr, False)
+        intersections = boundary_qr_plus.get_intersections(boundary_pq_minus)
+        assert len(intersections) == 0
+
+        intersections = boundary_qr_plus.get_intersections(boundary_pq_plus)
+        assert len(intersections) == 0
+
+        intersections = boundary_qr_minus.get_intersections(boundary_pq_minus)
+        assert len(intersections) == 1
+        intersection = intersections[0]
+        intersection, intersection_star = intersection
+        assert intersection.x == Decimal(
+            "29.237523029892987125322179053910076618194580078125"
+        )
+        assert intersection.y == Decimal(
+            "18.887489091103322635945005458779633045196533203125"
+        )
+        assert intersection_star.x == Decimal(
+            "29.237523029892987125322179053910076618194580078125"
+        )
+        assert intersection_star.y == Decimal("39.91292787117044096096486319")
+
+        intersections = boundary_qr_minus.get_intersections(boundary_pq_plus)
+        assert len(intersections) == 0
+
+        p = WeightedSite(Decimal(40), Decimal(2), Decimal(1))
+        q = WeightedSite(Decimal(38), Decimal(38), Decimal(0))
+        r = WeightedSite(Decimal(20), Decimal(0), Decimal(1))
+        bisector_pq = WeightedPointBisector(sites=(p, q))
+        bisector_qr = WeightedPointBisector(sites=(q, r))
+        boundary_pq_plus = WeightedPointBoundary(bisector_pq, True)
+        boundary_pq_minus = WeightedPointBoundary(bisector_pq, False)
+        boundary_qr_plus = WeightedPointBoundary(bisector_qr, True)
+        boundary_qr_minus = WeightedPointBoundary(bisector_qr, False)
+        intersections = boundary_qr_plus.get_intersections(boundary_pq_minus)
+        assert len(intersections) == 0
+
+        intersections = boundary_qr_plus.get_intersections(boundary_pq_plus)
+        assert len(intersections) == 0
+
+        intersections = boundary_qr_minus.get_intersections(boundary_pq_minus)
+        assert len(intersections) == 1
+        intersection = intersections[0]
+        intersection, intersection_star = intersection
+        assert intersection.x == Decimal(
+            "28.218323696394005395404747105203568935394287109375"
+        )
+        assert intersection.y == Decimal(
+            "18.81676302800800471004549763165414333343505859375"
+        )
+        assert intersection_star.x == Decimal(
+            "28.218323696394005395404747105203568935394287109375"
+        )
+        assert intersection_star.y == Decimal("40.34994142860942754088607165")
+
+        intersections = boundary_qr_minus.get_intersections(boundary_pq_plus)
+        assert len(intersections) == 0
+
+    def test_horizonal_bisector(self):
+        """Test get intersection with 3 positive fixed sites."""
+        p = WeightedSite(Decimal(38), Decimal(2), Decimal(0))
+        q = WeightedSite(Decimal(38), Decimal(38), Decimal(0))
+        r = WeightedSite(Decimal(20), Decimal(0), Decimal(1))
+        bisector_pq = WeightedPointBisector(sites=(p, q))
+        bisector_qr = WeightedPointBisector(sites=(q, r))
+        boundary_pq_plus = WeightedPointBoundary(bisector_pq, True)
+        boundary_pq_minus = WeightedPointBoundary(bisector_pq, False)
+        boundary_qr_plus = WeightedPointBoundary(bisector_qr, True)
+        boundary_qr_minus = WeightedPointBoundary(bisector_qr, False)
+        intersections = boundary_qr_plus.get_intersections(boundary_pq_minus)
+        assert len(intersections) == 0
+
+        intersections = boundary_qr_plus.get_intersections(boundary_pq_plus)
+        assert len(intersections) == 0
+
+        intersections = boundary_qr_minus.get_intersections(boundary_pq_minus)
+        assert len(intersections) == 1
+        intersection = intersections[0]
+        intersection, intersection_star = intersection
+        assert intersection.x == Decimal(
+            "25.705669523894808747854767716489732265472412109375"
+        )
+        assert intersection.y == Decimal(
+            "20.000000000000046185277824406512081623077392578125"
+        )
+        assert intersection_star.x == Decimal(
+            "25.705669523894808747854767716489732265472412109375"
+        )
+        assert intersection_star.y == Decimal("41.79794856989274689184053680")
+
+        intersections = boundary_qr_minus.get_intersections(boundary_pq_plus)
+        assert len(intersections) == 0
+
+        p = WeightedSite(Decimal(38), Decimal(2), Decimal(0))
+        q = WeightedSite(Decimal(38), Decimal(38), Decimal(0))
+        r = WeightedSite(Decimal(20), Decimal(0), Decimal(0))
+        bisector_pq = WeightedPointBisector(sites=(p, q))
+        bisector_qr = WeightedPointBisector(sites=(q, r))
+        boundary_pq_plus = WeightedPointBoundary(bisector_pq, True)
+        boundary_pq_minus = WeightedPointBoundary(bisector_pq, False)
+        boundary_qr_plus = WeightedPointBoundary(bisector_qr, True)
+        boundary_qr_minus = WeightedPointBoundary(bisector_qr, False)
+        intersections = boundary_qr_plus.get_intersections(boundary_pq_minus)
+        assert len(intersections) == 0
+
+        intersections = boundary_qr_plus.get_intersections(boundary_pq_plus)
+        assert len(intersections) == 0
+
+        intersections = boundary_qr_minus.get_intersections(boundary_pq_minus)
+        assert len(intersections) == 1
+        intersection = intersections[0]
+        intersection, intersection_star = intersection
+        assert intersection.x == Decimal(
+            "26.888888888888889283634853200055658817291259765625"
+        )
+        assert intersection.y == Decimal("20")
+        assert intersection_star.x == Decimal(
+            "26.888888888888889283634853200055658817291259765625"
+        )
+        assert intersection_star.y == Decimal("41.15317446917735752620224829")
+
+        intersections = boundary_qr_minus.get_intersections(boundary_pq_plus)
+        assert len(intersections) == 0
+
+    def test_vertical_bisector(self):
+        """Test get intersection with 3 positive fixed sites."""
+        p = WeightedSite(Decimal(38), Decimal(2), Decimal(0))
+        q = WeightedSite(Decimal(20), Decimal(2), Decimal(0))
+        r = WeightedSite(Decimal(20), Decimal(0), Decimal(0))
+        bisector_pq = WeightedPointBisector(sites=(p, q))
+        bisector_qr = WeightedPointBisector(sites=(q, r))
+        boundary_pq_plus = WeightedPointBoundary(bisector_pq, True)
+        boundary_pq_minus = WeightedPointBoundary(bisector_pq, False)
+        boundary_qr_plus = WeightedPointBoundary(bisector_qr, True)
+        boundary_qr_minus = WeightedPointBoundary(bisector_qr, False)
+        intersections = boundary_qr_plus.get_intersections(boundary_pq_minus)
+        assert len(intersections) == 1
+        intersection = intersections[0]
+        intersection, intersection_star = intersection
+        assert intersection.x == Decimal("29")
+        assert intersection.y == Decimal("1")
+        assert intersection_star.x == Decimal("29")
+        assert intersection_star.y == Decimal("10.05538513813741662657380817")
+
+        intersections = boundary_qr_plus.get_intersections(boundary_pq_plus)
+        assert len(intersections) == 0
+
+        intersections = boundary_qr_minus.get_intersections(boundary_pq_minus)
+        assert len(intersections) == 0
+
+        intersections = boundary_qr_minus.get_intersections(boundary_pq_plus)
+        assert len(intersections) == 0

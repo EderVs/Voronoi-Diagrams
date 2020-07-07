@@ -33,6 +33,11 @@ class Event:
         self.is_site = is_site
         self.name = name
 
+    @abstractmethod
+    def get_event_point(self) -> Point:
+        """Get event point to evaluate."""
+        raise NotImplementedError
+
     def __str__(self):
         """Get String representation."""
         if self.is_site:
@@ -44,6 +49,10 @@ class Event:
     def __repr__(self):
         """Get object representation."""
         return self.__str__()
+
+    def is_dominated(self, event: Any) -> bool:
+        """Check if this event is dominated to other event."""
+        raise NotImplementedError
 
 
 class Site(Event):
@@ -106,6 +115,14 @@ class Site(Event):
         """Get lowest point in the site."""
         return self.point
 
+    def get_event_point(self) -> Point:
+        """Get event point to evaluate."""
+        return self.get_highest_site_point()
+
+    def is_dominated(self, site: Any) -> bool:
+        """Check if this event is dominated to other event."""
+        return False
+
 
 class IntersectionEvent(Event):
     """Intersection to handle in Fortune's Algorithm."""
@@ -118,6 +135,14 @@ class IntersectionEvent(Event):
         super(IntersectionEvent, self).__init__(event.x, event.y, False)
         self.vertex = vertex
         self.region_node = region_node
+
+    def get_event_point(self) -> Point:
+        """Get event point to evaluate."""
+        return self.point
+
+    def is_dominated(self, site: Any) -> bool:
+        """Check if this event is dominated to other event."""
+        return False
 
 
 class WeightedSite(Site):
@@ -155,12 +180,40 @@ class WeightedSite(Site):
         x = self.weight * Decimal(cos(angle))
         return self.point.x + sign * x
 
+    def get_x_farthest_frontier_pointing_to_point(self, point: Point) -> Decimal:
+        """Get the farthest point of the site pointing to given point."""
+        if point.x >= self.point.x:
+            sign = Decimal(-1)
+        else:
+            sign = Decimal(1)
+
+        if point.x == self.point.x:
+            return self.point.x
+
+        angle = abs(atan((point.y - self.point.y) / (point.x - self.point.x)))
+        x = self.weight * Decimal(cos(angle))
+        return self.point.x + sign * x
+
     def get_y_frontier_pointing_to_point(self, point: Point) -> Decimal:
         """Get the last point of the site pointing to given point."""
         if point.y >= self.point.y:
             sign = Decimal(1)
         else:
             sign = Decimal(-1)
+
+        if point.x == self.point.x:
+            return self.point.y + sign * self.weight
+
+        angle = abs(atan((point.y - self.point.y) / (point.x - self.point.x)))
+        y = self.weight * Decimal(sin(angle))
+        return self.point.y + sign * y
+
+    def get_y_farthest_frontier_pointing_to_point(self, point: Point) -> Decimal:
+        """Get the farthest point of the site pointing to given point."""
+        if point.y >= self.point.y:
+            sign = Decimal(-1)
+        else:
+            sign = Decimal(1)
 
         if point.x == self.point.x:
             return self.point.y + sign * self.weight
@@ -216,3 +269,9 @@ class WeightedSite(Site):
     def __str__(self):
         """Get String representation."""
         return f"{self.name} WS({self.point.x}, {self.point.y}, {self.weight})"
+
+    def is_dominated(self, site: Any) -> bool:
+        """Check if this event is dominated to other event."""
+        return self.weight >= site.get_distance_to_site_farthest_frontier_from_point(
+            self.point.x, self.point.y
+        )

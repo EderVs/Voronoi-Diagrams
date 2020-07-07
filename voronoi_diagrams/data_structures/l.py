@@ -19,15 +19,15 @@ class LNode(AVLNode):
 
     def is_contained(self, value: Region, *args: Any, **kwargs: Any) -> bool:
         """Value is contained in the Node."""
-        return self.value.is_contained(value.site.point)
+        return self.value.is_contained(value.site.get_event_point())
 
     def is_left(self, value: Region, *args: Any, **kwargs: Any) -> bool:
         """Value is to the left of Node."""
-        return self.value.is_left(value.site.point)
+        return self.value.is_left(value.site.get_event_point())
 
     def is_right(self, value: Region, *args: Any, **kwargs: Any) -> bool:
         """Value is to the right of Node."""
-        return self.value.is_right(value.site.point)
+        return self.value.is_right(value.site.get_event_point())
 
 
 class LList:
@@ -144,7 +144,7 @@ class LList:
         # Insert in AVLTree
         # Insert in the left sub tree
         if node.left is not None:
-            left_region_node = self.t.insert_from_node(left_region, node.left)
+            left_region_node = self.t.insert_all_right_from_node(left_region, node.left)
         else:
             self.t.length += 1
             node.length += 1
@@ -155,7 +155,9 @@ class LList:
 
         # Insert in the right sub tree
         if node.right is not None:
-            right_region_node = self.t.insert_from_node(right_region, node.right)
+            right_region_node = self.t.insert_all_left_from_node(
+                right_region, node.right
+            )
         else:
             self.t.length += 1
             node.length += 1

@@ -2,7 +2,7 @@
 from typing import List, Any
 from random import shuffle
 from voronoi_diagrams.data_structures import AVLTree, IntNode
-from .utils import (
+from tests.data_structures.avl_tree.utils import (
     create_tree,
     check_if_tree_is_balanced,
     check_if_tree_is_correct,
@@ -62,3 +62,6 @@ class TestRemove:
                 check_if_tree_is_correct(t)
                 check_if_tree_is_balanced(t)
             assert t.root is None
+
+
+TestRemove().test_random()

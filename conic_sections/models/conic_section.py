@@ -91,12 +91,25 @@ class ConicSection:
     def __get_intersections(
         self, ps: List[Decimal], conic_section: Any,
     ) -> List[Tuple[Decimal, Decimal]]:
+        """Get intersections using polinomial roots."""
         intersections: List[Tuple[Decimal, Decimal]] = []
         for x in roots(ps):
-            if x.imag == 0:
+            if Decimal(x.imag) < Decimal("0.00001"):
                 intersections += self.__get_ys_of_intersections(
                     Decimal(x.real), conic_section
                 )
+        return intersections
+
+    def __get_intersections_of_vertical(
+        self, ps: List[Decimal], conic_section: Any
+    ) -> List[Tuple[Decimal, Decimal]]:
+        """Get intersections of a vertical line."""
+        intersections = []
+        for x in roots(ps):
+            if x.imag == 0:
+                other_ys = conic_section.y_formula(Decimal(x))
+                for other_y in other_ys:
+                    intersections.append((Decimal(x), Decimal(other_y)))
         return intersections
 
     def get_intersection(self, conic_section: Any) -> List[Tuple[Decimal, Decimal]]:
@@ -118,7 +131,22 @@ class ConicSection:
         cs_j = conic_section.d
         cs_k = conic_section.e
         cs_l = conic_section.f
-        if cs_c == 0 and cs_i == 0:
+        if (cs_b == 0 and cs_c == 0 and cs_e == 0) and (
+            cs_h == 0 and cs_i == 0 and cs_k == 0
+        ):
+            return []
+        elif (cs_b == 0 and cs_c == 0 and cs_e == 0) or (
+            cs_h == 0 and cs_i == 0 and cs_k == 0
+        ):
+            if cs_h == 0 and cs_i == 0 and cs_k == 0:
+                cs_a = conic_section.a
+                cs_d = conic_section.d
+                cs_f = conic_section.f
+                conic_section = self
+            intersections = self.__get_intersections_of_vertical(
+                [cs_a, cs_d, cs_f], conic_section
+            )
+        elif cs_c == 0 and cs_i == 0:
             a1 = cs_a * cs_h
             a2 = cs_a * cs_k + cs_d * cs_h
             a3 = cs_d * cs_k + cs_f * cs_h

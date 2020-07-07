@@ -102,6 +102,7 @@ class Boundary:
         """
         raise NotImplementedError
 
+    @abstractmethod
     def get_intersections(self, boundary: Any) -> List[Tuple[Point, Point]]:
         """Get intersections between two boundaries.
 
@@ -109,40 +110,7 @@ class Boundary:
         bisectors of the boundaries intersections) and the intersection with the star map (the
         boundaries intersection).
         """
-        site_self = self.get_site()
-        site_boundary = boundary.get_site()
-        is_intersection_possible = True
-        if (
-            (
-                site_self.point.x < site_boundary.point.x
-                and (not self.sign and boundary.sign)
-            )
-            or (
-                site_self.point.x > site_boundary.point.x
-                and (self.sign and not boundary.sign)
-            )
-            or (
-                site_self.point.x == site_boundary.point.x
-                and (site_self.point.y == site_boundary.point.y)
-            )
-            or (self.bisector.is_same_slope(boundary.bisector))
-        ):
-            is_intersection_possible = False
-
-        all_intersections = []
-        if is_intersection_possible:
-            intersection_points = self.bisector.get_intersection_points(
-                boundary.bisector
-            )
-            for intersection_point in intersection_points:
-                intersection_point_star = self.star(intersection_point)
-                if self.is_boundary_below(
-                    intersection_point_star
-                ) and boundary.is_boundary_below(intersection_point_star):
-                    all_intersections.append(
-                        (intersection_point, intersection_point_star)
-                    )
-        return all_intersections
+        raise NotImplementedError
 
     @abstractmethod
     def is_boundary_below(self, point: Point) -> bool:
@@ -224,6 +192,48 @@ class PointBoundary(Boundary):
         is_up_plus_sign = self.sign and self.get_site().point.x <= point.x
         return is_up_minus_sign or is_up_plus_sign
 
+    def get_intersections(self, boundary: Any) -> List[Tuple[Point, Point]]:
+        """Get intersections between two boundaries.
+
+        The return values are is a list of the intersection without the star map (the
+        bisectors of the boundaries intersections) and the intersection with the star map (the
+        boundaries intersection).
+        """
+        site_self = self.get_site()
+        site_boundary = boundary.get_site()
+        is_intersection_possible = True
+        if (
+            (
+                site_self.point.x < site_boundary.point.x
+                and (not self.sign and boundary.sign)
+            )
+            or (
+                site_self.point.x > site_boundary.point.x
+                and (self.sign and not boundary.sign)
+            )
+            or (
+                site_self.point.x == site_boundary.point.x
+                and (site_self.point.y == site_boundary.point.y)
+            )
+            or (self.bisector.is_same_slope(boundary.bisector))
+        ):
+            is_intersection_possible = False
+
+        all_intersections = []
+        if is_intersection_possible:
+            intersection_points = self.bisector.get_intersection_points(
+                boundary.bisector
+            )
+            for intersection_point in intersection_points:
+                intersection_point_star = self.star(intersection_point)
+                if self.is_boundary_below(
+                    intersection_point_star
+                ) and boundary.is_boundary_below(intersection_point_star):
+                    all_intersections.append(
+                        (intersection_point, intersection_point_star)
+                    )
+        return all_intersections
+
 
 class WeightedPointBoundary(Boundary):
     """Boundary of a weighted site point."""
@@ -280,9 +290,21 @@ class WeightedPointBoundary(Boundary):
 
     def is_point_in_boundary(self, point) -> bool:
         """Check if the point is in this boundary."""
+        p, q = self.bisector.sites
+        if p.point.y == q.point.y and p.weight == q.weight:
+            distance = p.get_distance_to_site_point_from_point(q.point.x, q.point.y)
+            return (
+                are_close(
+                    point.x,
+                    min(p.point.x, q.point.x) + (distance / 2),
+                    Decimal(0.000001),
+                )
+                and not self.sign
+            )
+
         ys_in_boundary = self.formula_y(point.x)
         for y_in_boundary in ys_in_boundary:
-            if are_close(y_in_boundary, point.y, Decimal("0.0000001")):
+            if are_close(y_in_boundary, point.y, Decimal("0.00001")):
                 if self.is_boundary_concave_to_y() and y_in_boundary == max(
                     ys_in_boundary
                 ):
@@ -346,6 +368,11 @@ class WeightedPointBoundary(Boundary):
 
     def _is_point_in_all_region(self, point: Point) -> bool:
         """Return True if the given point is in the region where the boundary is described."""
+        p, q = self.bisector.sites
+        if p.point.y == q.point.y and p.weight == q.weight:
+            distance = p.get_distance_to_site_point_from_point(q.point.x, q.point.y)
+            return point.x >= min(p.point.x, q.point.x) + (distance / 2)
+
         # Get the projection of x in the boundary.
         ys_in_boundary = super(WeightedPointBoundary, self).formula_y(point.x)
         if len(ys_in_boundary) == 0:
