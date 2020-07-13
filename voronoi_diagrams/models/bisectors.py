@@ -18,6 +18,37 @@ from decimal import Decimal
 from general_utils.numbers import are_close
 
 
+class VoronoiDiagramBisector:
+    """Bisector representation in the Voronoi diagram."""
+
+    bisector: Any
+    vertex1: Any
+    vertex2: Any
+
+    def __init__(self, bisector: Any, vertex1: Any, vertex2: Any) -> None:
+        """Constructor."""
+        self.bisector = bisector
+        self.vertex1 = vertex1
+        self.vertex2 = vertex2
+
+    def __eq__(self, other: Any) -> bool:
+        """Equallity between VoronoiDiagramBisectors."""
+        return self.bisector == other.bisector and (
+            (self.vertex1 == other.vertex1 and self.vertex2 == other.vertex2)
+            or (self.vertex1 == other.vertex2 and self.vertex2 == other.vertex1)
+        )
+
+    def is_to_the_infinity(self) -> bool:
+        """Check if the bisector doesn't have one vertex."""
+        return self.vertex1 is None and self.vertex1 != self.vertex2
+
+    def get_vertices(self) -> Tuple[Any, Any]:
+        """Get vertices linked to this bisector."""
+        if self.vertex1 is None:
+            return (self.vertex2, self.vertex1)
+        return (self.vertex1, self.vertex2)
+
+
 class Bisector:
     """Bisector representation.
 

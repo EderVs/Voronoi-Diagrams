@@ -32,17 +32,17 @@ from decimal import Decimal
 class VoronoiDiagram:
     """Voronoi Diagram representation."""
 
-    vertices: List[Point]
+    vertices_list: List[Point]
     _vertices: Set[Tuple[Decimal, Decimal]]
-    bisectors: List[Bisector]
+    bisectors_list: List[Bisector]
     _bisectors: Set[Tuple[Tuple[Decimal, Decimal], Tuple[Decimal, Decimal]]]
     sites: List[Site]
 
     def __init__(self, sites: Iterable[Site], site_class: Any = Site):
         """Construct and calculate Voronoi Diagram."""
-        self.vertices = []
+        self.vertices_list = []
         self._vertices = set()
-        self.bisectors = []
+        self.bisectors_list = []
         self._bisectors = set()
         self.sites = list(sites)
         if site_class == Site:
@@ -60,7 +60,7 @@ class VoronoiDiagram:
         point_tuple = point.get_tuple()
         if point_tuple not in self._vertices:
             self._vertices.add(point_tuple)
-            self.vertices.append(point)
+            self.vertices_list.append(point)
 
     def add_bisector(self, bisector: Bisector) -> None:
         """Add point in the vertex list."""
@@ -70,7 +70,7 @@ class VoronoiDiagram:
         )
         if site_points not in self._bisectors:
             self._bisectors.add(site_points)
-            self.bisectors.append(bisector)
+            self.bisectors_list.append(bisector)
 
     def _find_region_containing_p(self, p: Site) -> Tuple[Region, Region, LNode]:
         """Find an occurrence of a region R*q on L containing p.
