@@ -3,7 +3,7 @@
 General Solution.
 """
 # Standard Library
-from typing import Iterable, List, Any, Optional, Tuple, Set
+from typing import Iterable, List, Any, Optional, Tuple, Set, Dict
 
 # Data structures
 from .data_structures import LList, QQueue
@@ -23,6 +23,8 @@ from .models import (
     PointBoundary,
     WeightedPointBisector,
     WeightedPointBoundary,
+    VoronoiDiagramBisector,
+    VoronoiDiagramVertex,
 )
 
 # Math
@@ -32,18 +34,27 @@ from decimal import Decimal
 class VoronoiDiagram:
     """Voronoi Diagram representation."""
 
+    vertices: List[VoronoiDiagramVertex]
     vertices_list: List[Point]
-    _vertices: Set[Tuple[Decimal, Decimal]]
+    bisectors: List[VoronoiDiagramBisector]
     bisectors_list: List[Bisector]
-    _bisectors: Set[Tuple[Tuple[Decimal, Decimal], Tuple[Decimal, Decimal]]]
+
+    _vertices_dict: Dict[Tuple[Decimal, Decimal], VoronoiDiagramVertex]
+    _bisectors: Dict[Any, Bisector]
+    _active_bisectors: Dict[Any, VoronoiDiagramBisector]
     sites: List[Site]
 
     def __init__(self, sites: Iterable[Site], site_class: Any = Site):
         """Construct and calculate Voronoi Diagram."""
+        self.vertices = []
         self.vertices_list = []
-        self._vertices = set()
+        self._vertices = dict()
+
+        self.bisectors = []
         self.bisectors_list = []
-        self._bisectors = set()
+        self._bisectors = dict()
+        self._active_bisectors = dict()
+
         self.sites = list(sites)
         if site_class == Site:
             self.BISECTOR_CLASS = PointBisector
@@ -55,22 +66,44 @@ class VoronoiDiagram:
             self.BOUNDARY_CLASS = WeightedPointBoundary
         self._calculate_diagram()
 
-    def add_vertex(self, point: Point) -> None:
+    def add_vertex(
+        self, point: Point, vd_bisectors: Optional[List[VoronoiDiagramBisector]] = None
+    ) -> None:
         """Add point in the vertex list."""
         point_tuple = point.get_tuple()
         if point_tuple not in self._vertices:
-            self._vertices.add(point_tuple)
+            vd_vertex = VoronoiDiagramVertex(point)
+            self._vertices[point_tuple] = vd_vertex
+            self.vertices.append(vd_vertex)
             self.vertices_list.append(point)
+        else:
+            vd_vertex = self._vertices[point_tuple]
+
+        if vd_bisectors is not None:
+            for vd_bisector in vd_bisectors:
+                vd_vertex.add_bisector(vd_bisector)
+                vd_bisector.add_vertex(vd_vertex)
 
     def add_bisector(self, bisector: Bisector) -> None:
         """Add point in the vertex list."""
-        site_points = (
-            bisector.sites[0].point.get_tuple(),
-            bisector.sites[1].point.get_tuple(),
-        )
-        if site_points not in self._bisectors:
-            self._bisectors.add(site_points)
+        hasheable_of_bisector = bisector.get_object_to_hash()
+        if hasheable_of_bisector not in self._bisectors:
+            self._bisectors[hasheable_of_bisector] = bisector
             self.bisectors_list.append(bisector)
+        vd_bisector = VoronoiDiagramBisector(bisector)
+        self._active_bisectors[hasheable_of_bisector] = vd_bisector
+        self.bisectors.append(vd_bisector)
+
+    def get_voronoi_diagram_bisectors(
+        self, bisectors: List[Bisector]
+    ) -> List[VoronoiDiagramBisector]:
+        """Get voronoi diagram bisectors based on the current state."""
+        vd_bisectors = []
+        for bisector in bisectors:
+            hasheable_of_bisector = bisector.get_object_to_hash()
+            vd_bisector = self._active_bisectors[hasheable_of_bisector]
+            vd_bisectors.append(vd_bisector)
+        return vd_bisectors
 
     def _find_region_containing_p(self, p: Site) -> Tuple[Region, Region, LNode]:
         """Find an occurrence of a region R*q on L containing p.
@@ -233,6 +266,10 @@ class VoronoiDiagram:
         r_q, r_s, r_q_node, r_s_node = self._get_regions_and_nodes_of_intersection(p)
         left_boundary = r_q.left
         right_boundary = r_s.right
+        intersection_region_node_value_left = intersection_region_node.value.left
+        intersection_region_node_value_right = intersection_region_node.value.right
+        intersection_left_bisector = intersection_region_node_value_left.bisector
+        intersection_right_bisector = intersection_region_node_value_right.bisector
 
         # Step 15.
         # Create bisector B*qs.
@@ -244,8 +281,6 @@ class VoronoiDiagram:
         boundary_q_s = self.BOUNDARY_CLASS(
             bisector_q_s, r_q.site.get_event_point().y > r_s.site.get_event_point().y
         )
-        intersection_region_node_value_left = intersection_region_node.value.left
-        intersection_region_node_value_right = intersection_region_node.value.right
         left_region_node = intersection_region_node.left_neighbor
         right_region_node = intersection_region_node.right_neighbor
         self.l_list.remove_region(intersection_region_node, boundary_q_s)
@@ -282,8 +317,11 @@ class VoronoiDiagram:
 
         # Step 19.
         # Mark p as a vertex and as an endpoint of B*qr, B*rs and B*qs.
-        self.add_vertex(p.vertex)
-        # TODO: Add that this vertex is an endpoint of B*qr, B*rs and B*qs.
+        # Add that this vertex is an endpoint of B*qr, B*rs and B*qs.
+        vd_bisectors = self.get_voronoi_diagram_bisectors(
+            [intersection_left_bisector, intersection_right_bisector, bisector_q_s]
+        )
+        self.add_vertex(p.vertex, vd_bisectors)
 
     def _calculate_diagram(self):
         """Calculate point diagram."""

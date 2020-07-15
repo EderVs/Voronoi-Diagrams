@@ -27,6 +27,10 @@ class VoronoiDiagramVertex:
         """Equallity between VoronoiDiagramBisectors."""
         return self.vertex == other.vertex
 
+    def __str__(self) -> str:
+        """Return string representation."""
+        return f"V({str(self.vertex)})"
+
     def add_bisector(
         self, bisector: VoronoiDiagramBisector
     ) -> List[VoronoiDiagramBisector]:

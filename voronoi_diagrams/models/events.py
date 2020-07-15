@@ -123,6 +123,10 @@ class Site(Event):
         """Check if this event is dominated to other event."""
         return False
 
+    def get_object_to_hash(self) -> Any:
+        """Get object to hash this site."""
+        return (self.point.x, self.point.y)
+
 
 class IntersectionEvent(Event):
     """Intersection to handle in Fortune's Algorithm."""
@@ -275,3 +279,7 @@ class WeightedSite(Site):
         return self.weight >= site.get_distance_to_site_farthest_frontier_from_point(
             self.point.x, self.point.y
         )
+
+    def get_object_to_hash(self) -> Any:
+        """Get object to hash this site."""
+        return (self.point.x, self.point.y, self.weight)

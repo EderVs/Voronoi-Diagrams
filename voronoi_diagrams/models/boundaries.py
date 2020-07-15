@@ -40,15 +40,7 @@ class Boundary:
 
         This is the site that defines the region of the 2 boundary sibling.
         """
-        site1 = self.bisector.sites[0]
-        site2 = self.bisector.sites[1]
-        if (site1.get_highest_site_point().y > site2.get_highest_site_point().y) or (
-            site1.get_highest_site_point().y == site2.get_highest_site_point().y
-            and site1.get_rightest_site_point().x >= site2.get_rightest_site_point().x
-        ):
-            return site1
-        else:
-            return site2
+        return self.bisector.get_site()
 
     def star(self, point: Point) -> Point:
         """Map a bisector to build the region to work in."""
