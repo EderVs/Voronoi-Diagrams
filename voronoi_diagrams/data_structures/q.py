@@ -23,7 +23,9 @@ class QNode(AVLNode):
 
     def is_contained(self, value: Event, *args: Any, **kwargs: Any) -> bool:
         """Value is contained in the Node."""
-        return value == self.value
+        if self.value.is_site == value.is_site:
+            return value == self.value
+        return False
 
     def is_left(self, value: Event, *args: Any, **kwargs: Any) -> bool:
         """Value is to the left of Node."""

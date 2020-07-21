@@ -67,12 +67,9 @@ def plot_vertices_and_bisectors(
 
 
 def plot_voronoi_diagram(
-    voronoi_diagram: VoronoiDiagram, site_class: Any = Site
+    voronoi_diagram: VoronoiDiagram, xlim, ylim, site_class: Any = Site
 ) -> None:
     """Plot voronoi diagram."""
-    ylim = (-50, 50)
-    xlim = (-50, 50)
-
     plt.figure(figsize=(12, 10))
     plt.gca().set_aspect("equal", adjustable="box")
 
