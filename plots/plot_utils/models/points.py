@@ -13,6 +13,6 @@ from conic_sections.utils.circle import get_circle_formula_y
 from decimal import Decimal
 
 
-def plot_point(x: Decimal, y: Decimal) -> None:
+def plot_point(x: Decimal, y: Decimal, color, marker) -> None:
     """Plot a Point."""
-    plt.plot(x, y, "ro")
+    plt.plot(x, y, f"{color}{marker}", markersize=5)

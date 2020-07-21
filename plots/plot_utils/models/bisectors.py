@@ -3,7 +3,12 @@
 from typing import Iterable, Tuple, Optional, Any
 
 # Models.
-from voronoi_diagrams.models import Bisector, PointBisector, WeightedPointBisector
+from voronoi_diagrams.models import (
+    Bisector,
+    PointBisector,
+    WeightedPointBisector,
+    VoronoiDiagramBisector,
+)
 
 # Utils.
 from .sites import create_weighted_site, plot_point
@@ -23,6 +28,79 @@ def create_weighted_point_bisector(
     p = create_weighted_site(x1, y1, w1)
     q = create_weighted_site(x2, y2, w2)
     return WeightedPointBisector(sites=(p, q))
+
+
+def is_plot_in_x(
+    vd_bisector: VoronoiDiagramBisector, bisector_class: Any = PointBisector
+) -> bool:
+    """Get if we are going to use formula_x or formula_y to plot.
+
+    Check depending on the sites of the bisector.
+    """
+    if bisector_class == PointBisector:
+        return True
+    elif bisector_class == WeightedPointBisector:
+        bisector: Bisector = vd_bisector.bisector
+        sites = bisector.get_sites_tuple()
+        return sites[0].get_lowest_site_point().y > sites[1].get_lowest_site_point().y
+
+
+def plot_voronoi_diagram_bisector(
+    vd_bisector: VoronoiDiagramBisector, xlim, ylim, bisector_class: Any = PointBisector
+):
+    """Plot Bisector in a Voronoi Diagram.
+
+    This bisector has 2 vertices.
+    """
+    vertices = vd_bisector.vertices
+    if is_plot_in_x(vd_bisector, bisector_class=bisector_class):
+        if len(vd_bisector.vertices) == 0:
+            x_range = np.arange(Decimal(xlim[0]), xlim[1], Decimal("0.01"))
+            plot_bisector(
+                vd_bisector.bisector, x_range=x_range, bisector_class=bisector_class
+            )
+        elif len(vd_bisector.vertices) == 1:
+            vertex = vd_bisector.vertices[0]
+            x_range = np.arange(Decimal(xlim[0]), vertex.point.x, Decimal("0.01"))
+            plot_bisector(
+                vd_bisector.bisector, x_range=x_range, bisector_class=bisector_class
+            )
+            x_range = np.arange(vertex.point.x, Decimal(xlim[1]), Decimal("0.01"))
+            plot_bisector(
+                vd_bisector.bisector, x_range=x_range, bisector_class=bisector_class
+            )
+        else:
+            bisector_vertices_x = [vertex.point.x for vertex in vertices]
+            x_range = np.arange(
+                min(bisector_vertices_x), max(bisector_vertices_x), Decimal("0.01")
+            )
+            plot_bisector(
+                vd_bisector.bisector, x_range=x_range, bisector_class=bisector_class
+            )
+    else:
+        if len(vd_bisector.vertices) == 0:
+            y_range = np.arange(Decimal(ylim[0]), ylim[1], Decimal("0.01"))
+            plot_bisector(
+                vd_bisector.bisector, y_range=y_range, bisector_class=bisector_class
+            )
+        elif len(vd_bisector.vertices) == 1:
+            vertex = vd_bisector.vertices[0]
+            y_range = np.arange(Decimal(ylim[0]), vertex.point.y, Decimal("0.01"))
+            plot_bisector(
+                vd_bisector.bisector, y_range=y_range, bisector_class=bisector_class
+            )
+            y_range = np.arange(vertex.point.y, Decimal(ylim[1]), Decimal("0.01"))
+            plot_bisector(
+                vd_bisector.bisector, y_range=y_range, bisector_class=bisector_class
+            )
+        else:
+            bisector_vertices_y = [vertex.point.y for vertex in vertices]
+            y_range = np.arange(
+                min(bisector_vertices_y), max(bisector_vertices_y), Decimal("0.01")
+            )
+            plot_bisector(
+                vd_bisector.bisector, y_range=y_range, bisector_class=bisector_class
+            )
 
 
 def plot_bisector(
@@ -61,7 +139,7 @@ def plot_bisector(
     else:
         x_lists = [[] for _ in range(num_lists)]
         for y in y_range:
-            xs = bisector.formula_y(y)
+            xs = bisector.formula_x(y)
             num_x = len(xs)
             for i in range(num_x):
                 x_lists[i].append(xs[i])

@@ -27,5 +27,5 @@ def create_weighted_site(x: Decimal, y: Decimal, w: Decimal) -> WeightedSite:
 def plot_site(site: Site, site_class=Site):
     """Plot site."""
     if site_class == WeightedSite:
-        plot_circle(site.point.x, site.point.y, site.weight)
-    plot_point(site.point.x, site.point.y)
+        plot_circle(site.point.x, site.point.y, site.weight, "r")
+    plot_point(site.point.x, site.point.y, "r", ".")

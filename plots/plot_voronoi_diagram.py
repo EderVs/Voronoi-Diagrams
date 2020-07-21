@@ -16,14 +16,16 @@ if __name__ == "__main__":
     if type_vd not in [1, 2]:
         print("bye, bye")
     else:
+        if type_vd == 1:
+            print("Insert site this way: x y")
+        elif type_vd == 2:
+            print("Insert site this way: x y w")
         for i in range(n):
             if type_vd == 1:
-                print("Insert site this way: x y")
                 x, y = list(map(Decimal, input().split()))
                 site_point = Point(x, y)
                 sites.append(site_point)
             elif type_vd == 2:
-                print("Insert site this way: x y w")
                 x, y, w = list(map(Decimal, input().split()))
                 site_point = Point(x, y)
                 sites.append((site_point, w))
