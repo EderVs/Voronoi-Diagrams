@@ -5,12 +5,14 @@ from typing import List, Any
 from voronoi_diagrams.fortunes_algorithm import FortunesAlgorithm
 from voronoi_diagrams.models import Point, WeightedSite
 
-from plots.plot_utils.voronoi_diagram import plot_voronoi_diagram
+from plots.plot_utils.voronoi_diagram import plot_voronoi_diagram, SiteToUse, Limit
 
 from decimal import Decimal
 
 
-def get_limit_sites(xlim, ylim, sites, type_vd) -> List[Any]:
+def get_limit_sites(
+    xlim: Limit, ylim: Limit, sites: List[SiteToUse], type_vd: int
+) -> List[SiteToUse]:
     """Get limit sites."""
     to_return = []
     x0, x1 = xlim
@@ -99,6 +101,19 @@ if __name__ == "__main__":
     print("1) Voronoi Diagram")
     print("2) AW Voronoi Diagram")
     type_vd = int(input())
+
+    # Get limits
+    print(
+        "Insert limits this way: x_min x_max y_min y_max (-100 100 -100 100 if blank)"
+    )
+    limits = input()
+    if not limits:
+        limits = "-100 100 -100 100"
+    x_min, x_max, y_min, y_max = list(map(Decimal, limits.split()))
+    xlim = (x_min, x_max)
+    ylim = (y_min, y_max)
+
+    # Get sites.
     n = int(input("Insert number of sites: "))
     sites = []
     if type_vd not in [1, 2]:
@@ -117,8 +132,7 @@ if __name__ == "__main__":
                 x, y, w = list(map(Decimal, input().split()))
                 site_point = Point(x, y)
                 sites.append((site_point, w))
-        ylim = (Decimal(-100), Decimal(100))
-        xlim = (Decimal(-100), Decimal(100))
+
         limit_sites = get_limit_sites(xlim, ylim, sites, type_vd)
         sites += limit_sites
         if type_vd == 1:

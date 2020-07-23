@@ -1,7 +1,7 @@
 """Voronoi Diagram representation in plot"""
 
 # Standard Library.
-from typing import Any, Tuple
+from typing import Any, Tuple, List, Type, Union
 from decimal import Decimal
 
 # Voronoi diagrams.
@@ -9,6 +9,7 @@ from voronoi_diagrams.fortunes_algorithm import VoronoiDiagram
 from voronoi_diagrams.models import (
     Site,
     WeightedSite,
+    Bisector,
     PointBisector,
     WeightedPointBisector,
     VoronoiDiagramBisector,
@@ -28,7 +29,15 @@ from plots.plot_utils.models.vertices import plot_vertex
 from plots.plot_utils.models.points import plot_point
 
 
-def is_a_limit_bisector(vd_bisector, limit_sites, bisector_class) -> None:
+SiteToUse = Union[Point, Tuple[Point, Decimal]]
+Limit = Tuple[Decimal, Decimal]
+
+
+def is_a_limit_bisector(
+    vd_bisector: VoronoiDiagramBisector,
+    limit_sites: List[SiteToUse],
+    bisector_class: Type[Bisector],
+) -> None:
     """Check if current bisector is a bisector with a limit site."""
     for site in vd_bisector.bisector.get_sites_tuple():
         for limit_site in limit_sites:
@@ -37,7 +46,9 @@ def is_a_limit_bisector(vd_bisector, limit_sites, bisector_class) -> None:
     return False
 
 
-def is_equal_limit_site(site: Any, limit_site: Any, bisector_class: Any):
+def is_equal_limit_site(
+    site: SiteToUse, limit_site: SiteToUse, bisector_class: Type[Bisector]
+) -> None:
     """Check if site is a limit site."""
     if bisector_class == PointBisector:
         return site.point.x == limit_site.x and site.point.y == limit_site.y
@@ -50,7 +61,11 @@ def is_equal_limit_site(site: Any, limit_site: Any, bisector_class: Any):
 
 
 def plot_vertices_and_bisectors(
-    voronoi_diagram: VoronoiDiagram, limit_sites, xlim, ylim, bisector_class
+    voronoi_diagram: VoronoiDiagram,
+    limit_sites: List[SiteToUse],
+    xlim: Limit,
+    ylim: Limit,
+    bisector_class: Type[Bisector],
 ) -> None:
     """Plot bisectors in diagram."""
     if len(voronoi_diagram.vertices) == 0:
@@ -81,7 +96,11 @@ def plot_vertices_and_bisectors(
 
 
 def plot_voronoi_diagram(
-    voronoi_diagram: VoronoiDiagram, limit_sites, xlim, ylim, site_class: Any = Site
+    voronoi_diagram: VoronoiDiagram,
+    limit_sites: List[SiteToUse],
+    xlim: Limit,
+    ylim: Limit,
+    site_class: Type[Site] = Site,
 ) -> None:
     """Plot voronoi diagram."""
     plt.figure(figsize=(12, 10))
