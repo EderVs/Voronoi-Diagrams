@@ -1,7 +1,7 @@
 """Voronoi Diagram representation in plot"""
 
 # Standard Library.
-from typing import Any
+from typing import Any, Tuple
 from decimal import Decimal
 
 # Voronoi diagrams.
@@ -13,6 +13,7 @@ from voronoi_diagrams.models import (
     WeightedPointBisector,
     VoronoiDiagramBisector,
     VoronoiDiagramVertex,
+    Point,
 )
 
 # Plot.
@@ -27,12 +28,33 @@ from plots.plot_utils.models.vertices import plot_vertex
 from plots.plot_utils.models.points import plot_point
 
 
+def is_a_limit_bisector(vd_bisector, limit_sites, bisector_class) -> None:
+    """Check if current bisector is a bisector with a limit site."""
+    for site in vd_bisector.bisector.get_sites_tuple():
+        for limit_site in limit_sites:
+            if is_equal_limit_site(site, limit_site, bisector_class=bisector_class):
+                return True
+    return False
+
+
+def is_equal_limit_site(site: Any, limit_site: Any, bisector_class: Any):
+    """Check if site is a limit site."""
+    if bisector_class == PointBisector:
+        return site.point.x == limit_site.x and site.point.y == limit_site.y
+    elif bisector_class == WeightedPointBisector:
+        return (
+            site.point.x == limit_site[0].x
+            and site.point.y == limit_site[0].y
+            and site.weight == limit_site[1]
+        )
+
+
 def plot_vertices_and_bisectors(
-    voronoi_diagram: VoronoiDiagram, xlim, ylim, bisector_class
+    voronoi_diagram: VoronoiDiagram, limit_sites, xlim, ylim, bisector_class
 ) -> None:
     """Plot bisectors in diagram."""
     if len(voronoi_diagram.vertices) == 0:
-        print(voronoi_diagram.bisectors)
+        # print(voronoi_diagram.bisectors)  # Debugging
         if len(voronoi_diagram.bisectors) == 1:
             plot_voronoi_diagram_bisector(
                 voronoi_diagram.bisectors[0],
@@ -42,32 +64,24 @@ def plot_vertices_and_bisectors(
             )
         return
 
-    vertices_queue = [voronoi_diagram.vertices[0]]
-    bisectors_passed = set()
-    vertices_passed = set([id(voronoi_diagram.vertices[0])])
-    while vertices_queue != []:
-        vertex = vertices_queue.pop(0)
-        print(vertex)
-        plot_vertex(vertex)
-
-        for vd_bisector in vertex.bisectors:
-            if id(vd_bisector) in bisectors_passed:
-                continue
-            print(vd_bisector)
-            bisectors_passed.add(id(vd_bisector))
-
+    vertices_passed = set()
+    for vd_bisector in voronoi_diagram.bisectors:
+        # print(vd_bisector)  # Debugging
+        if not is_a_limit_bisector(
+            vd_bisector, limit_sites, bisector_class=bisector_class
+        ):
             for bisector_vertex in vd_bisector.vertices:
                 if id(bisector_vertex) in vertices_passed:
                     continue
-                vertices_queue.append(bisector_vertex)
                 vertices_passed.add(id(bisector_vertex))
+                plot_vertex(bisector_vertex)
             plot_voronoi_diagram_bisector(
                 vd_bisector, xlim=xlim, ylim=ylim, bisector_class=bisector_class
             )
 
 
 def plot_voronoi_diagram(
-    voronoi_diagram: VoronoiDiagram, xlim, ylim, site_class: Any = Site
+    voronoi_diagram: VoronoiDiagram, limit_sites, xlim, ylim, site_class: Any = Site
 ) -> None:
     """Plot voronoi diagram."""
     plt.figure(figsize=(12, 10))
@@ -80,10 +94,16 @@ def plot_voronoi_diagram(
 
     # Sites.
     for site in voronoi_diagram.sites:
-        plot_site(site, site_class)
+        for limit_site in limit_sites:
+            if is_equal_limit_site(site, limit_site, bisector_class=bisector_class):
+                break
+        else:
+            plot_site(site, site_class)
 
     # Diagram.
-    plot_vertices_and_bisectors(voronoi_diagram, xlim, ylim, bisector_class)
+    plot_vertices_and_bisectors(
+        voronoi_diagram, limit_sites, xlim, ylim, bisector_class
+    )
 
     plt.xlim(*xlim)
     plt.ylim(*ylim)
