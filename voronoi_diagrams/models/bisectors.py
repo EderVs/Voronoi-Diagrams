@@ -1,7 +1,7 @@
 """Bisector representation."""
 
 # Standard Library
-from typing import Callable, Tuple, Optional, Any, List
+from typing import Callable, Tuple, Optional, Any, List, Set
 from abc import ABCMeta, abstractmethod
 
 # Models
@@ -16,6 +16,64 @@ from decimal import Decimal
 
 # Utils
 from general_utils.numbers import are_close
+
+
+class VoronoiDiagramBisector:
+    """Bisector representation in the Voronoi diagram."""
+
+    bisector: Any
+    vertices: List[Any]
+
+    def __init__(self, bisector: Any, vertex1: Any = None, vertex2: Any = None) -> None:
+        """Constructor."""
+        self.bisector = bisector
+        self.vertices = []
+        if vertex1 is not None:
+            self.vertices.append(vertex1)
+        if vertex2 is not None:
+            self.vertices.append(vertex2)
+
+    def __eq__(self, other: Any) -> bool:
+        """Equallity between VoronoiDiagramBisectors."""
+        return self.bisector == other.bisector and (
+            (self.vertex1 == other.vertex1 and self.vertex2 == other.vertex2)
+            or (self.vertex1 == other.vertex2 and self.vertex2 == other.vertex1)
+        )
+
+    def __str__(self) -> str:
+        """Return string representation."""
+        return f"B({str(self.bisector)}, {str(self.vertices)})"
+
+    def is_to_the_infinity(self) -> bool:
+        """Check if the bisector doesn't have one vertex."""
+        return len(self.vertices) != 2
+
+    def get_vertices(self) -> Tuple[Any, Any]:
+        """Get vertices linked to this bisector."""
+        if len(self.vertices) == 0:
+            vertex1 = None
+            vertex2 = None
+        elif len(self.vertices) == 1:
+            vertex1 = self.vertices[0]
+            vertex2 = None
+        else:
+            if self.vertices[0].vertex.y > self.vertices[1].vertex.y or (
+                self.vertices[0].vertex.y == self.vertices[1].vertex.y
+                and self.vertices[0].vertex.x > self.vertices[1].vertex.x
+            ):
+                vertex1 = self.vertices[1]
+                vertex2 = self.vertices[0]
+            else:
+                vertex1 = self.vertices[0]
+                vertex2 = self.vertices[1]
+
+        return (vertex1, vertex2)
+
+    def add_vertex(self, vertex: Any):
+        """Add vertex."""
+        if len(self.vertices) >= 2:
+            return
+        self.vertices.append(vertex)
 
 
 class Bisector:
@@ -89,6 +147,23 @@ class Bisector:
             / 2
         )
         return Point(point_x, point_y)
+
+    def get_site(self):
+        """Get the site that is highest or more to the right."""
+        return self.get_sites_tuple()[0]
+
+    @abstractmethod
+    def get_sites_tuple(self):
+        """Get sites tuple sorted."""
+        raise NotImplementedError
+
+    def get_object_to_hash(self) -> Any:
+        """Get object to hash this site."""
+        sites_tuple = self.get_sites_tuple()
+        return (
+            sites_tuple[0].get_object_to_hash(),
+            sites_tuple[1].get_object_to_hash(),
+        )
 
 
 class PointBisector(Bisector):
@@ -192,6 +267,18 @@ class PointBisector(Bisector):
             p_1.y - p_2.y == q_1.y - q_2.y and p_1.x - p_2.x == q_1.x - q_2.x
         )
         return delta_y_is_zero or delta_x_is_zero or both_deltas_are_the_same
+
+    def get_sites_tuple(self):
+        """Get the site tuple sorted."""
+        site1 = self.sites[0]
+        site2 = self.sites[1]
+        if (site1.get_highest_site_point().y > site2.get_highest_site_point().y) or (
+            site1.get_highest_site_point().y == site2.get_highest_site_point().y
+            and site1.get_rightest_site_point().x >= site2.get_rightest_site_point().x
+        ):
+            return (site1, site2)
+        else:
+            return (site2, site1)
 
 
 class WeightedPointBisector(Bisector):
@@ -339,3 +426,25 @@ class WeightedPointBisector(Bisector):
             if len(self.formula_y(x)) >= 1:
                 valid_xs.append(x)
         return valid_xs
+
+    def get_sites_tuple(self):
+        """Get site tuple sorted."""
+        site1 = self.sites[0]
+        site2 = self.sites[1]
+        if (
+            (site1.get_highest_site_point().y > site2.get_highest_site_point().y)
+            or (
+                site1.get_highest_site_point().y == site2.get_highest_site_point().y
+                and site1.get_rightest_site_point().x
+                > site2.get_rightest_site_point().x
+            )
+            or (
+                site1.get_highest_site_point().y == site2.get_highest_site_point().y
+                and site1.get_rightest_site_point().x
+                == site2.get_rightest_site_point().x
+                and site1.weight <= site2.weight
+            )
+        ):
+            return (site1, site2)
+        else:
+            return (site2, site1)

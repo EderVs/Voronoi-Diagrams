@@ -21,16 +21,16 @@ class TestPointSites:
         expected_bisectors: List[PointBisector],
         expected_vertices: List[Point],
     ):
-        print(voronoi_diagram.bisectors)
-        print(voronoi_diagram.vertices)
+        print(voronoi_diagram.bisectors_list)
+        print(voronoi_diagram.vertices_list)
         # Bisectors.
-        assert len(voronoi_diagram.bisectors) == len(expected_bisectors)
-        for bisector in voronoi_diagram.bisectors:
+        assert len(voronoi_diagram.bisectors_list) == len(expected_bisectors)
+        for bisector in voronoi_diagram.bisectors_list:
             assert bisector in expected_bisectors
 
         # Vertex.
-        assert len(voronoi_diagram.vertices) == len(expected_vertices)
-        for vertex in voronoi_diagram.vertices:
+        assert len(voronoi_diagram.vertices_list) == len(expected_vertices)
+        for vertex in voronoi_diagram.vertices_list:
             assert vertex in expected_vertices
 
     def test_2_point_sites(self):
