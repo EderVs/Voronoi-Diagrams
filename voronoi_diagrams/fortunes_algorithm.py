@@ -3,7 +3,7 @@
 General Solution.
 """
 # Standard Library
-from typing import Iterable, List, Any, Optional, Tuple, Set, Dict
+from typing import Iterable, List, Any, Optional, Tuple, Set, Dict, Type
 
 # Data structures
 from .data_structures import LList, QQueue
@@ -44,7 +44,7 @@ class VoronoiDiagram:
     _active_bisectors: Dict[Any, VoronoiDiagramBisector]
     sites: List[Site]
 
-    def __init__(self, sites: Iterable[Site], site_class: Any = Site):
+    def __init__(self, sites: Iterable[Site], site_class: Type[Site] = Site):
         """Construct and calculate Voronoi Diagram."""
         self.vertices = []
         self.vertices_list = []

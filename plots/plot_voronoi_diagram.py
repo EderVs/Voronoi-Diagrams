@@ -1,13 +1,19 @@
 """Plot voronoi diagram."""
 
-from typing import List, Any
+# Standard Library
+from typing import List, Any, Tuple, Optional
+from decimal import Decimal
 
+# Voronoi Diagrams
 from voronoi_diagrams.fortunes_algorithm import FortunesAlgorithm
 from voronoi_diagrams.models import Point, WeightedSite
 
+# Plot
 from plots.plot_utils.voronoi_diagram import plot_voronoi_diagram, SiteToUse, Limit
 
-from decimal import Decimal
+
+VORONOI_DIAGRAM_TYPE = 1
+AW_VORONOI_DIAGRAM_TYPE = 2
 
 
 def get_limit_sites(
@@ -16,14 +22,13 @@ def get_limit_sites(
     """Get limit sites."""
     to_return = []
     x0, x1 = xlim
-    mid_x = (x0 + x1) / Decimal("2")
     y0, y1 = ylim
-    mid_y = (y0 + y1) / Decimal("2")
     min_x_site = sites[0]
     max_x_site = sites[0]
     min_y_site = sites[0]
     max_y_site = sites[0]
-    if type_vd == 1:
+
+    if type_vd == VORONOI_DIAGRAM_TYPE:
         for point in sites:
             if point.x < min_x_site.x:
                 min_x_site = point
@@ -52,7 +57,8 @@ def get_limit_sites(
         else:
             y1_site = Point(max_y_site.x, y1 + (y1 - max_y_site.y))
         to_return = [x0_site, x1_site, y0_site, y1_site]
-    elif type_vd == 2:
+
+    elif type_vd == AW_VORONOI_DIAGRAM_TYPE:
         for point, weight in sites:
             if point.x + weight < min_x_site[0].x + min_x_site[1]:
                 min_x_site = (point, weight)
@@ -97,12 +103,8 @@ def get_limit_sites(
     return to_return
 
 
-if __name__ == "__main__":
-    print("1) Voronoi Diagram")
-    print("2) AW Voronoi Diagram")
-    type_vd = int(input())
-
-    # Get limits
+def get_limits() -> Tuple[Limit, Limit]:
+    """Get Limits to used in the plot."""
     print(
         "Insert limits this way: x_min x_max y_min y_max (-100 100 -100 100 if blank)"
     )
@@ -112,34 +114,69 @@ if __name__ == "__main__":
     x_min, x_max, y_min, y_max = list(map(Decimal, limits.split()))
     xlim = (x_min, x_max)
     ylim = (y_min, y_max)
+    return (xlim, ylim)
 
-    # Get sites.
+
+def get_diagram_and_plot(
+    sites: List[SiteToUse],
+    limit_sites: List[SiteToUse],
+    xlim: Limit,
+    ylim: Limit,
+    type_vd: int,
+) -> None:
+    """Get and plot Voronoi Diagram depending on the requested type."""
+    if type_vd == VORONOI_DIAGRAM_TYPE:
+        voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(sites)
+        plot_voronoi_diagram(voronoi_diagram, limit_sites, xlim, ylim)
+    elif type_vd == AW_VORONOI_DIAGRAM_TYPE:
+        voronoi_diagram = FortunesAlgorithm.calculate_aw_voronoi_diagram(sites)
+        plot_voronoi_diagram(
+            voronoi_diagram, limit_sites, xlim, ylim, site_class=WeightedSite
+        )
+
+
+def get_sites_to_use_and_limit_sites(
+    xlim: Limit, ylim: Limit, type_vd: int,
+) -> Optional[Tuple[List[SiteToUse], List[SiteToUse]]]:
+    """Get sites to use and limit_sites."""
     n = int(input("Insert number of sites: "))
     sites = []
     if type_vd not in [1, 2]:
-        print("bye, bye")
-    else:
-        if type_vd == 1:
-            print("Insert site this way: x y")
-        elif type_vd == 2:
-            print("Insert site this way: x y w")
-        for i in range(n):
-            if type_vd == 1:
-                x, y = list(map(Decimal, input().split()))
-                site_point = Point(x, y)
-                sites.append(site_point)
-            elif type_vd == 2:
-                x, y, w = list(map(Decimal, input().split()))
-                site_point = Point(x, y)
-                sites.append((site_point, w))
+        return None
 
-        limit_sites = get_limit_sites(xlim, ylim, sites, type_vd)
-        sites += limit_sites
-        if type_vd == 1:
-            voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(sites)
-            plot_voronoi_diagram(voronoi_diagram, limit_sites, xlim, ylim)
-        elif type_vd == 2:
-            voronoi_diagram = FortunesAlgorithm.calculate_aw_voronoi_diagram(sites)
-            plot_voronoi_diagram(
-                voronoi_diagram, limit_sites, xlim, ylim, site_class=WeightedSite
-            )
+    if type_vd == VORONOI_DIAGRAM_TYPE:
+        print("Insert site this way: x y")
+    elif type_vd == AW_VORONOI_DIAGRAM_TYPE:
+        print("Insert site this way: x y w")
+    for _ in range(n):
+        if type_vd == VORONOI_DIAGRAM_TYPE:
+            x, y = list(map(Decimal, input().split()))
+            site_point = Point(x, y)
+            sites.append(site_point)
+        elif type_vd == AW_VORONOI_DIAGRAM_TYPE:
+            x, y, w = list(map(Decimal, input().split()))
+            site_point = Point(x, y)
+            sites.append((site_point, w))
+
+    limit_sites = get_limit_sites(xlim, ylim, sites, type_vd)
+    return (sites, limit_sites)
+
+
+def get_type_of_voronoi_diagram() -> int:
+    """Get type of voronoi diagram."""
+    print("1) Voronoi Diagram")
+    print("2) AW Voronoi Diagram")
+    type_vd = int(input())
+    return type_vd
+
+
+if __name__ == "__main__":
+
+    type_vd = get_type_of_voronoi_diagram()
+    xlim, ylim = get_limits()
+    sites_tuple = get_sites_to_use_and_limit_sites(xlim, ylim, type_vd)
+    if sites_tuple is None:
+        print("Bye bye")
+    else:
+        sites, limit_sites = sites_tuple
+        get_diagram_and_plot(sites, limit_sites, xlim, ylim, type_vd)
