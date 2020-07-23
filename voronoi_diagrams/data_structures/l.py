@@ -7,7 +7,7 @@ from typing import Any, Optional, Tuple
 from .avl_tree import AVLTree, AVLNode
 
 # Models
-from ..models import Region, Event, Bisector, Site, Point, Boundary
+from voronoi_diagrams.models import Region, Event, Bisector, Site, Point, Boundary
 
 
 class LNode(AVLNode):

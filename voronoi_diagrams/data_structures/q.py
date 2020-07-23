@@ -7,7 +7,7 @@ from typing import Any, Optional
 from .avl_tree import AVLTree, AVLNode
 
 # Models
-from ..models import Event
+from voronoi_diagrams.models import Event
 
 
 class QNode(AVLNode):
