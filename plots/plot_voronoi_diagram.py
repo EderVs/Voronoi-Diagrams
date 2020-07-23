@@ -125,6 +125,8 @@ def get_diagram_and_plot(
     type_vd: int,
 ) -> None:
     """Get and plot Voronoi Diagram depending on the requested type."""
+    sites += limit_sites
+    print(limit_sites)  # Debugging
     if type_vd == VORONOI_DIAGRAM_TYPE:
         voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(sites)
         plot_voronoi_diagram(voronoi_diagram, limit_sites, xlim, ylim)

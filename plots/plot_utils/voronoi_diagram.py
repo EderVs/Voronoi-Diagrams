@@ -69,7 +69,7 @@ def plot_vertices_and_bisectors(
 ) -> None:
     """Plot bisectors in diagram."""
     if len(voronoi_diagram.vertices) == 0:
-        # print(voronoi_diagram.bisectors)  # Debugging
+        print(voronoi_diagram.bisectors)  # Debugging
         if len(voronoi_diagram.bisectors) == 1:
             plot_voronoi_diagram_bisector(
                 voronoi_diagram.bisectors[0],
@@ -81,7 +81,7 @@ def plot_vertices_and_bisectors(
 
     vertices_passed = set()
     for vd_bisector in voronoi_diagram.bisectors:
-        # print(vd_bisector)  # Debugging
+        print(vd_bisector)  # Debugging
         if not is_a_limit_bisector(
             vd_bisector, limit_sites, bisector_class=bisector_class
         ):
