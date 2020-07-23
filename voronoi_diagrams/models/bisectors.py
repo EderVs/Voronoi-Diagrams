@@ -351,13 +351,10 @@ class WeightedPointBisector(Bisector):
         The open branch towards p has the equality distance_to_p + w_p = distance_to_q + w_q
         where w_p is the weight of p, q is the smallest site and w_q the weight of q.
         """
-        big_site_index = int(self.sites[0].weight < self.sites[1].weight)
-        big_site = self.sites[big_site_index]
-        small_site = self.sites[big_site_index ^ 1]
         epsilon = Decimal(0.00001)
         return are_close(
-            big_site.get_distance_to_site_farthest_frontier_from_point(x, y),
-            small_site.get_distance_to_site_farthest_frontier_from_point(x, y),
+            self.sites[0].get_distance_to_site_farthest_frontier_from_point(x, y),
+            self.sites[1].get_distance_to_site_farthest_frontier_from_point(x, y),
             epsilon,
         )
 
@@ -442,7 +439,7 @@ class WeightedPointBisector(Bisector):
                 site1.get_highest_site_point().y == site2.get_highest_site_point().y
                 and site1.get_rightest_site_point().x
                 == site2.get_rightest_site_point().x
-                and site1.weight <= site2.weight
+                and site1.compare_weights(site2) >= 0
             )
         ):
             return (site1, site2)

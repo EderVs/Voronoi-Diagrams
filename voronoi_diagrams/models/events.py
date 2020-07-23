@@ -170,6 +170,13 @@ class WeightedSite(Site):
             and self.weight == wsite.weight
         )
 
+    def compare_weights(self, site: Any) -> int:
+        """Compare weight between sites"""
+        if self.weight >= 0:
+            return self.weight - site.weight
+        else:
+            return site.weight - self.weight
+
     def get_x_frontier_pointing_to_point(self, point: Point) -> Decimal:
         """Get the last point of the site pointing to given point."""
         if point.x >= self.point.x:
@@ -181,7 +188,7 @@ class WeightedSite(Site):
             return self.point.x
 
         angle = abs(atan((point.y - self.point.y) / (point.x - self.point.x)))
-        x = self.weight * Decimal(cos(angle))
+        x = abs(self.weight) * Decimal(cos(angle))
         return self.point.x + sign * x
 
     def get_x_farthest_frontier_pointing_to_point(self, point: Point) -> Decimal:
@@ -195,7 +202,7 @@ class WeightedSite(Site):
             return self.point.x
 
         angle = abs(atan((point.y - self.point.y) / (point.x - self.point.x)))
-        x = self.weight * Decimal(cos(angle))
+        x = abs(self.weight) * Decimal(cos(angle))
         return self.point.x + sign * x
 
     def get_y_frontier_pointing_to_point(self, point: Point) -> Decimal:
@@ -209,7 +216,7 @@ class WeightedSite(Site):
             return self.point.y + sign * self.weight
 
         angle = abs(atan((point.y - self.point.y) / (point.x - self.point.x)))
-        y = self.weight * Decimal(sin(angle))
+        y = abs(self.weight) * Decimal(sin(angle))
         return self.point.y + sign * y
 
     def get_y_farthest_frontier_pointing_to_point(self, point: Point) -> Decimal:
@@ -223,16 +230,16 @@ class WeightedSite(Site):
             return self.point.y + sign * self.weight
 
         angle = abs(atan((point.y - self.point.y) / (point.x - self.point.x)))
-        y = self.weight * Decimal(sin(angle))
+        y = abs(self.weight) * Decimal(sin(angle))
         return self.point.y + sign * y
 
     def get_y_frontier_formula(self, x: Decimal) -> Optional[Tuple[Decimal, Decimal]]:
         """Get the frontier's y coordinates given x coordinate."""
-        return get_circle_formula_y(self.point.x, self.point.y, self.weight, x)
+        return get_circle_formula_y(self.point.x, self.point.y, abs(self.weight), x)
 
     def get_x_frontier_formula(self, y: Decimal) -> Optional[Tuple[Decimal, Decimal]]:
         """Get the frontier's x coordinates given y coordinate."""
-        return get_circle_formula_x(self.point.x, self.point.y, self.weight, y)
+        return get_circle_formula_x(self.point.x, self.point.y, abs(self.weight), y)
 
     def get_distance_to_site_frontier_from_point(
         self, x: Decimal, y: Decimal
@@ -241,10 +248,9 @@ class WeightedSite(Site):
 
         The frontier in this case is the circle given by the weight as radius.
         """
-        return (
-            super(WeightedSite, self).get_distance_to_site_point_from_point(x, y)
-            - self.weight
-        )
+        return super(WeightedSite, self).get_distance_to_site_point_from_point(
+            x, y
+        ) - abs(self.weight)
 
     def get_distance_to_site_farthest_frontier_from_point(
         self, x: Decimal, y: Decimal
@@ -253,22 +259,21 @@ class WeightedSite(Site):
 
         The frontier in this case is the circle given by the weight as radius.
         """
-        return (
-            super(WeightedSite, self).get_distance_to_site_point_from_point(x, y)
-            + self.weight
-        )
+        return super(WeightedSite, self).get_distance_to_site_point_from_point(
+            x, y
+        ) + abs(self.weight)
 
     def get_highest_site_point(self) -> Point:
         """Get highest point in the site."""
-        return Point(self.point.x, self.point.y + self.weight)
+        return Point(self.point.x, self.point.y + abs(self.weight))
 
     def get_rightest_site_point(self) -> Point:
         """Get rightest point in the site."""
-        return Point(self.point.x + self.weight, self.point.y)
+        return Point(self.point.x + abs(self.weight), self.point.y)
 
     def get_lowest_site_point(self) -> Point:
         """Get lowest point in the site."""
-        return Point(self.point.x, self.point.y - self.weight)
+        return Point(self.point.x, self.point.y - abs(self.weight))
 
     def __str__(self):
         """Get String representation."""
@@ -276,9 +281,19 @@ class WeightedSite(Site):
 
     def is_dominated(self, site: Any) -> bool:
         """Check if this event is dominated to other event."""
-        return self.weight >= site.get_distance_to_site_farthest_frontier_from_point(
-            self.point.x, self.point.y
-        )
+        if self.weight >= 0:
+            return (
+                self.weight
+                >= site.get_distance_to_site_farthest_frontier_from_point(
+                    self.point.x, self.point.y
+                )
+            )
+        else:
+            return abs(
+                site.weight
+            ) >= self.get_distance_to_site_farthest_frontier_from_point(
+                site.point.x, self.point.y
+            )
 
     def get_object_to_hash(self) -> Any:
         """Get object to hash this site."""
