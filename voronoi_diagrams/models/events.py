@@ -82,7 +82,7 @@ class Site(Event):
         """Get the frontier's x coordinates given y coordinate."""
         return (self.point.x, self.point.x)
 
-    def get_distance_to_site_point_from_point(self, x: Decimal, y: Decimal):
+    def get_distance_to_site_point_from_point(self, x: Decimal, y: Decimal) -> Decimal:
         """Get distance to site point from another point."""
         return (
             ((self.point.x - x) ** Decimal(2)) + ((self.point.y - y) ** Decimal(2))

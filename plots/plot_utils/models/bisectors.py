@@ -42,7 +42,7 @@ def is_plot_in_x(
     elif bisector_class == WeightedPointBisector:
         bisector: Bisector = vd_bisector.bisector
         sites = bisector.get_sites_tuple()
-        return sites[0].get_lowest_site_point().y > sites[1].get_lowest_site_point().y
+        return sites[0].get_lowest_site_point().y >= sites[1].get_lowest_site_point().y
 
 
 def plot_voronoi_diagram_bisector(

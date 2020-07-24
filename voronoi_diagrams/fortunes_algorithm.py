@@ -84,24 +84,28 @@ class VoronoiDiagram:
                 vd_vertex.add_bisector(vd_bisector)
                 vd_bisector.add_vertex(vd_vertex)
 
-    def add_bisector(self, bisector: Bisector) -> None:
+    def add_bisector(self, bisector: Bisector, sign: Optional[bool] = True) -> None:
         """Add point in the vertex list."""
         hasheable_of_bisector = bisector.get_object_to_hash()
         if hasheable_of_bisector not in self._bisectors:
             self._bisectors[hasheable_of_bisector] = bisector
             self.bisectors_list.append(bisector)
         vd_bisector = VoronoiDiagramBisector(bisector)
-        self._active_bisectors[hasheable_of_bisector] = vd_bisector
         self.bisectors.append(vd_bisector)
+        if sign is None:
+            self._active_bisectors[(hasheable_of_bisector, False)] = vd_bisector
+            self._active_bisectors[(hasheable_of_bisector, True)] = vd_bisector
+        else:
+            self._active_bisectors[(hasheable_of_bisector, sign)] = vd_bisector
 
     def get_voronoi_diagram_bisectors(
-        self, bisectors: List[Bisector]
+        self, bisectors: List[Tuple[Bisector, bool]]
     ) -> List[VoronoiDiagramBisector]:
         """Get voronoi diagram bisectors based on the current state."""
         vd_bisectors = []
-        for bisector in bisectors:
+        for bisector, sign in bisectors:
             hasheable_of_bisector = bisector.get_object_to_hash()
-            vd_bisector = self._active_bisectors[hasheable_of_bisector]
+            vd_bisector = self._active_bisectors[(hasheable_of_bisector, sign)]
             vd_bisectors.append(vd_bisector)
         return vd_bisectors
 
@@ -208,7 +212,7 @@ class VoronoiDiagram:
         # Create Bisector B*pq.
         # Actually we are creating Bpq.
         bisector_p_q = self.BISECTOR_CLASS(sites=(p, r_q.site))
-        self.add_bisector(bisector_p_q)
+        self.add_bisector(bisector_p_q, sign=None)
 
         # Step 10.
         # Update list L so that it contains ...,R*q,C-pq,R*p,C+pq,R*q,... in place of R*q.
@@ -269,18 +273,19 @@ class VoronoiDiagram:
         intersection_region_node_value_left = intersection_region_node.value.left
         intersection_region_node_value_right = intersection_region_node.value.right
         intersection_left_bisector = intersection_region_node_value_left.bisector
+        intersection_left_bisector_sign = intersection_region_node_value_left.sign
         intersection_right_bisector = intersection_region_node_value_right.bisector
+        intersection_right_bisector_sign = intersection_region_node_value_right.sign
 
         # Step 15.
         # Create bisector B*qs.
         bisector_q_s = self.BISECTOR_CLASS(sites=(r_q.site, r_s.site))
-        self.add_bisector(bisector_q_s)
 
         # Step 16.
         # Update list L so it contains Cqs instead of Cqr, Rr*, Crs
-        boundary_q_s = self.BOUNDARY_CLASS(
-            bisector_q_s, r_q.site.get_event_point().y > r_s.site.get_event_point().y
-        )
+        boundary_q_s_sign = r_q.site.get_event_point().y > r_s.site.get_event_point().y
+        boundary_q_s = self.BOUNDARY_CLASS(bisector_q_s, boundary_q_s_sign)
+        self.add_bisector(bisector_q_s, sign=boundary_q_s_sign)
         left_region_node = intersection_region_node.left_neighbor
         right_region_node = intersection_region_node.right_neighbor
         self.l_list.remove_region(intersection_region_node, boundary_q_s)
@@ -319,7 +324,11 @@ class VoronoiDiagram:
         # Mark p as a vertex and as an endpoint of B*qr, B*rs and B*qs.
         # Add that this vertex is an endpoint of B*qr, B*rs and B*qs.
         vd_bisectors = self.get_voronoi_diagram_bisectors(
-            [intersection_left_bisector, intersection_right_bisector, bisector_q_s]
+            [
+                (intersection_left_bisector, intersection_left_bisector_sign),
+                (intersection_right_bisector, intersection_right_bisector_sign),
+                (bisector_q_s, boundary_q_s_sign),
+            ]
         )
         self.add_vertex(p.vertex, vd_bisectors)
 

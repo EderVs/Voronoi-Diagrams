@@ -126,7 +126,7 @@ def get_diagram_and_plot(
 ) -> None:
     """Get and plot Voronoi Diagram depending on the requested type."""
     sites += limit_sites
-    print(limit_sites)  # Debugging
+    # print(limit_sites)  # Debugging
     if type_vd == VORONOI_DIAGRAM_TYPE:
         voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(sites)
         plot_voronoi_diagram(voronoi_diagram, limit_sites, xlim, ylim)
@@ -137,9 +137,7 @@ def get_diagram_and_plot(
         )
 
 
-def get_sites_to_use_and_limit_sites(
-    xlim: Limit, ylim: Limit, type_vd: int,
-) -> Optional[Tuple[List[SiteToUse], List[SiteToUse]]]:
+def get_sites_to_use(type_vd: int,) -> Optional[List[SiteToUse]]:
     """Get sites to use and limit_sites."""
     n = int(input("Insert number of sites: "))
     sites = []
@@ -160,8 +158,7 @@ def get_sites_to_use_and_limit_sites(
             site_point = Point(x, y)
             sites.append((site_point, w))
 
-    limit_sites = get_limit_sites(xlim, ylim, sites, type_vd)
-    return (sites, limit_sites)
+    return sites
 
 
 def get_type_of_voronoi_diagram() -> int:
@@ -176,9 +173,9 @@ if __name__ == "__main__":
 
     type_vd = get_type_of_voronoi_diagram()
     xlim, ylim = get_limits()
-    sites_tuple = get_sites_to_use_and_limit_sites(xlim, ylim, type_vd)
-    if sites_tuple is None:
+    sites = get_sites_to_use(type_vd)
+    if sites is None:
         print("Bye bye")
     else:
-        sites, limit_sites = sites_tuple
+        limit_sites = get_limit_sites(xlim, ylim, sites, type_vd)
         get_diagram_and_plot(sites, limit_sites, xlim, ylim, type_vd)

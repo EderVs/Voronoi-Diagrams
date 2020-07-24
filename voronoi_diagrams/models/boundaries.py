@@ -288,7 +288,7 @@ class WeightedPointBoundary(Boundary):
             return (
                 are_close(
                     point.x,
-                    min(p.point.x, q.point.x) + (distance / 2),
+                    min(p.point.x, q.point.x) + (distance / Decimal(2)),
                     Decimal(0.000001),
                 )
                 and not self.sign
