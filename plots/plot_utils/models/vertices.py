@@ -4,12 +4,12 @@
 from voronoi_diagrams.models import VoronoiDiagramVertex
 
 # Plot.
-from matplotlib import pyplot as plt
+from plotly import graph_objects as go
 
 # Plot Models.
 from .points import plot_point
 
 
-def plot_vertex(vertex: VoronoiDiagramVertex):
+def plot_vertex(figure: go.Figure, vertex: VoronoiDiagramVertex):
     """Plot vertex."""
-    plot_point(vertex.point.x, vertex.point.y, "b", "o")
+    plot_point(figure, vertex.point.x, vertex.point.y, "b", "o")

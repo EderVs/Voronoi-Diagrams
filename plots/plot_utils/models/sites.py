@@ -4,7 +4,7 @@
 from voronoi_diagrams.models import Site, WeightedSite
 
 # Plot.
-from matplotlib import pyplot as plt
+from plotly import graph_objects as go
 
 # Numpy.
 import numpy as np
@@ -24,8 +24,8 @@ def create_weighted_site(x: Decimal, y: Decimal, w: Decimal) -> WeightedSite:
     return WeightedSite(x, y, w)
 
 
-def plot_site(site: Site, site_class=Site):
+def plot_site(figure: go.Figure, site: Site, site_class=Site):
     """Plot site."""
     if site_class == WeightedSite:
-        plot_circle(site.point.x, site.point.y, site.weight, "r")
-    plot_point(site.point.x, site.point.y, "r", ".")
+        plot_circle(figure, site.point.x, site.point.y, site.weight, "r")
+    plot_point(figure, site.point.x, site.point.y, "r", ".")

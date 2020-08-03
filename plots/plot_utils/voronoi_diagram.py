@@ -18,7 +18,8 @@ from voronoi_diagrams.models import (
 )
 
 # Plot.
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
+from plotly import graph_objects as go
 import numpy as np
 from plots.plot_utils.models.bisectors import (
     plot_bisector,
@@ -61,6 +62,7 @@ def is_equal_limit_site(
 
 
 def plot_vertices_and_bisectors(
+    figure: go.Figure,
     voronoi_diagram: VoronoiDiagram,
     limit_sites: List[SiteToUse],
     xlim: Limit,
@@ -72,6 +74,7 @@ def plot_vertices_and_bisectors(
         # print(voronoi_diagram.bisectors)  # Debugging
         if len(voronoi_diagram.bisectors) == 1:
             plot_voronoi_diagram_bisector(
+                figure,
                 voronoi_diagram.bisectors[0],
                 xlim=xlim,
                 ylim=ylim,
@@ -89,9 +92,9 @@ def plot_vertices_and_bisectors(
                 if id(bisector_vertex) in vertices_passed:
                     continue
                 vertices_passed.add(id(bisector_vertex))
-                plot_vertex(bisector_vertex)
+                plot_vertex(figure, bisector_vertex)
             plot_voronoi_diagram_bisector(
-                vd_bisector, xlim=xlim, ylim=ylim, bisector_class=bisector_class
+                figure, vd_bisector, xlim=xlim, ylim=ylim, bisector_class=bisector_class
             )
 
 
@@ -103,8 +106,14 @@ def plot_voronoi_diagram(
     site_class: Type[Site] = Site,
 ) -> None:
     """Plot voronoi diagram."""
-    plt.figure(figsize=(12, 10))
-    plt.gca().set_aspect("equal", adjustable="box")
+    figure = go.Figure()
+    layout = go.Layout(height=1000, width=1000,)
+    template = dict(layout=layout)
+    figure.update_layout(title="VD", template=template)
+    figure.update_xaxes(range=list(xlim))
+    figure.update_yaxes(range=list(ylim), scaleanchor="x", scaleratio=1)
+    # plt.figure(figsize=(12, 10))
+    # plt.gca().set_aspect("equal", adjustable="box")
 
     if site_class == Site:
         bisector_class = PointBisector
@@ -117,13 +126,14 @@ def plot_voronoi_diagram(
             if is_equal_limit_site(site, limit_site, bisector_class=bisector_class):
                 break
         else:
-            plot_site(site, site_class)
+            plot_site(figure, site, site_class)
 
     # Diagram.
     plot_vertices_and_bisectors(
-        voronoi_diagram, limit_sites, xlim, ylim, bisector_class
+        figure, voronoi_diagram, limit_sites, xlim, ylim, bisector_class
     )
 
-    plt.xlim(*xlim)
-    plt.ylim(*ylim)
-    plt.show()
+    # plt.xlim(*xlim)
+    # plt.ylim(*ylim)
+    # plt.show()
+    figure.show()

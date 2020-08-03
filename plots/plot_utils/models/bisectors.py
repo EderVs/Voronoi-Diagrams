@@ -14,7 +14,8 @@ from voronoi_diagrams.models import (
 from .sites import create_weighted_site, plot_point
 
 # Plot.
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
+from plotly import graph_objects as go
 import numpy as np
 
 # Math
@@ -46,7 +47,11 @@ def is_plot_in_x(
 
 
 def plot_voronoi_diagram_bisector(
-    vd_bisector: VoronoiDiagramBisector, xlim, ylim, bisector_class: Any = PointBisector
+    figure: go.Figure,
+    vd_bisector: VoronoiDiagramBisector,
+    xlim,
+    ylim,
+    bisector_class: Any = PointBisector,
 ):
     """Plot Bisector in a Voronoi Diagram.
 
@@ -57,17 +62,32 @@ def plot_voronoi_diagram_bisector(
         if len(vd_bisector.vertices) == 0:
             x_range = np.arange(Decimal(xlim[0]), xlim[1], Decimal("0.01"))
             plot_bisector(
-                vd_bisector.bisector, x_range=x_range, bisector_class=bisector_class
+                figure,
+                vd_bisector.bisector,
+                xlim,
+                ylim,
+                x_range=x_range,
+                bisector_class=bisector_class,
             )
         elif len(vd_bisector.vertices) == 1:
             vertex = vd_bisector.vertices[0]
             x_range = np.arange(Decimal(xlim[0]), vertex.point.x, Decimal("0.01"))
             plot_bisector(
-                vd_bisector.bisector, x_range=x_range, bisector_class=bisector_class
+                figure,
+                vd_bisector.bisector,
+                xlim,
+                ylim,
+                x_range=x_range,
+                bisector_class=bisector_class,
             )
             x_range = np.arange(vertex.point.x, Decimal(xlim[1]), Decimal("0.01"))
             plot_bisector(
-                vd_bisector.bisector, x_range=x_range, bisector_class=bisector_class
+                figure,
+                vd_bisector.bisector,
+                xlim,
+                ylim,
+                x_range=x_range,
+                bisector_class=bisector_class,
             )
         else:
             bisector_vertices_x = [vertex.point.x for vertex in vertices]
@@ -75,23 +95,43 @@ def plot_voronoi_diagram_bisector(
                 min(bisector_vertices_x), max(bisector_vertices_x), Decimal("0.01")
             )
             plot_bisector(
-                vd_bisector.bisector, x_range=x_range, bisector_class=bisector_class
+                figure,
+                vd_bisector.bisector,
+                xlim,
+                ylim,
+                x_range=x_range,
+                bisector_class=bisector_class,
             )
     else:
         if len(vd_bisector.vertices) == 0:
             y_range = np.arange(Decimal(ylim[0]), ylim[1], Decimal("0.01"))
             plot_bisector(
-                vd_bisector.bisector, y_range=y_range, bisector_class=bisector_class
+                figure,
+                vd_bisector.bisector,
+                xlim,
+                ylim,
+                y_range=y_range,
+                bisector_class=bisector_class,
             )
         elif len(vd_bisector.vertices) == 1:
             vertex = vd_bisector.vertices[0]
             y_range = np.arange(Decimal(ylim[0]), vertex.point.y, Decimal("0.01"))
             plot_bisector(
-                vd_bisector.bisector, y_range=y_range, bisector_class=bisector_class
+                figure,
+                vd_bisector.bisector,
+                xlim,
+                ylim,
+                y_range=y_range,
+                bisector_class=bisector_class,
             )
             y_range = np.arange(vertex.point.y, Decimal(ylim[1]), Decimal("0.01"))
             plot_bisector(
-                vd_bisector.bisector, y_range=y_range, bisector_class=bisector_class
+                figure,
+                vd_bisector.bisector,
+                xlim,
+                ylim,
+                y_range=y_range,
+                bisector_class=bisector_class,
             )
         else:
             bisector_vertices_y = [vertex.point.y for vertex in vertices]
@@ -99,12 +139,20 @@ def plot_voronoi_diagram_bisector(
                 min(bisector_vertices_y), max(bisector_vertices_y), Decimal("0.01")
             )
             plot_bisector(
-                vd_bisector.bisector, y_range=y_range, bisector_class=bisector_class
+                figure,
+                vd_bisector.bisector,
+                xlim,
+                ylim,
+                y_range=y_range,
+                bisector_class=bisector_class,
             )
 
 
 def plot_bisector(
+    figure: go.Figure,
     bisector: Bisector,
+    xlim: Tuple[Decimal, Decimal],
+    ylim: Tuple[Decimal, Decimal],
     x_range: Optional[Iterable] = None,
     y_range: Optional[Iterable] = None,
     bisector_class: Any = PointBisector,
@@ -127,33 +175,47 @@ def plot_bisector(
     if x_range is not None:
         y_lists = [[] for _ in range(num_lists)]
         for x in x_range:
+            if x < xlim[0] and x > xlim[1]:
+                break
             ys = bisector.formula_y(x)
             num_y = len(ys)
             for i in range(num_y):
-                y_lists[i].append(ys[i])
+                if ys[i] >= ylim[0] and ys[i] <= ylim[1]:
+                    y_lists[i].append(ys[i])
+                else:
+                    y_lists[i].append(None)
             for i in range(num_y, num_lists):
                 y_lists[i].append(None)
 
         for i in range(num_lists):
-            plt.plot(x_range, y_lists[i], "k")
+            figure.add_trace(go.Scatter(x=x_range, y=y_lists[i], mode="lines"))
+            # plt.plot(x_range, y_lists[i], "k")
     else:
         x_lists = [[] for _ in range(num_lists)]
         for y in y_range:
+            if y < ylim[0] and y > ylim[1]:
+                break
             xs = bisector.formula_x(y)
             num_x = len(xs)
             for i in range(num_x):
-                x_lists[i].append(xs[i])
+                if xs[i] >= xlim[0] and xs[i] <= xlim[1]:
+                    x_lists[i].append(xs[i])
+                else:
+                    x_lists[i].append(None)
             for i in range(num_x, num_lists):
                 x_lists[i].append(None)
 
         for i in range(num_lists):
-            plt.plot(x_lists[i], y_range, "k")
+            figure.add_trace(go.Scatter(x=x_lists[i], y=y_range, mode="lines"))
+            # plt.plot(x_lists[i], y_range, "k")
 
 
 def plot_intersections(
-    bisector1: WeightedPointBisector, bisector2: WeightedPointBisector
+    figure: go.Figure,
+    bisector1: WeightedPointBisector,
+    bisector2: WeightedPointBisector,
 ) -> None:
     """Plot intersections between 2 bisectors."""
     intersections = bisector1.get_intersection_points(bisector2)
     for intersection in intersections:
-        plot_point(intersection[0], intersection[1][0])
+        plot_point(figure, intersection[0], intersection[1][0])
