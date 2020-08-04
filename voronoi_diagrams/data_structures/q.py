@@ -1,7 +1,7 @@
 """Q Queue implementation."""
 
 # Standard Library
-from typing import Any, Optional
+from typing import Any, Optional, List
 
 # AVL
 from .avl_tree import AVLTree, AVLNode
@@ -56,7 +56,7 @@ class QQueue:
 
     def __str__(self) -> str:
         """Get string representation."""
-        return str(self.t)
+        return str(self.get_all_events())
 
     def __repr__(self):
         """Get representation."""
@@ -85,3 +85,7 @@ class QQueue:
     def is_empty(self) -> bool:
         """Return True if the Queue is Empty."""
         return self.t.is_empty()
+
+    def get_all_events(self) -> List[Event]:
+        """Get all events sorted."""
+        return self.t.dfs_inorder()
