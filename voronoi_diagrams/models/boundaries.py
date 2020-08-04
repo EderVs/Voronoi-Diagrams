@@ -7,7 +7,7 @@ from abc import ABCMeta, abstractmethod
 # Models
 from .points import Point
 from .bisectors import Bisector, PointBisector, WeightedPointBisector
-from .events import IntersectionEvent
+from .events import IntersectionEvent, Site
 
 # Math
 from decimal import Decimal
@@ -35,7 +35,7 @@ class Boundary:
         self.left_intersection = None
         self.right_intersection = None
 
-    def get_site(self):
+    def get_site(self) -> Site:
         """Get the site that is highest or more to the right.
 
         This is the site that defines the region of the 2 boundary sibling.
@@ -78,7 +78,11 @@ class Boundary:
 
     def __str__(self):
         """Get boundary string representation."""
-        return f"Boundary({self.bisector}, {self.sign})"
+        if self.sign:
+            sign_str = "+"
+        else:
+            sign_str = "-"
+        return f"B*{sign_str}({self.bisector})"
 
     def __repr__(self):
         """Get boundary representation."""

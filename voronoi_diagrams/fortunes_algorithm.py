@@ -30,6 +30,13 @@ from .models import (
 # Math
 from decimal import Decimal
 
+# Plot
+from plotly import graph_objects as go
+from plots.plot_utils.models.sites import plot_site
+from plots.plot_utils.data_structures.l_list import plot_l_list
+
+Limit = Tuple[Decimal, Decimal]
+
 
 class VoronoiDiagram:
     """Voronoi Diagram representation."""
@@ -43,8 +50,17 @@ class VoronoiDiagram:
     _bisectors: Dict[Any, Bisector]
     _active_bisectors: Dict[Any, VoronoiDiagramBisector]
     sites: List[Site]
+    _plot_steps: bool
+    _figure: Optional[go.Figure]
 
-    def __init__(self, sites: Iterable[Site], site_class: Type[Site] = Site):
+    def __init__(
+        self,
+        sites: Iterable[Site],
+        site_class: Type[Site] = Site,
+        plot_steps: bool = False,
+        xlim: Optional[Limit] = (-100, 100),
+        ylim: Optional[Limit] = (-100, 100),
+    ):
         """Construct and calculate Voronoi Diagram."""
         self.vertices = []
         self.vertices_list = []
@@ -56,14 +72,30 @@ class VoronoiDiagram:
         self._active_bisectors = dict()
 
         self.sites = list(sites)
+        self.SITE_CLASS = site_class
         if site_class == Site:
             self.BISECTOR_CLASS = PointBisector
             self.REGION_CLASS = Region
             self.BOUNDARY_CLASS = PointBoundary
+            self._site_traces = 1
         elif site_class == WeightedSite:
             self.BISECTOR_CLASS = WeightedPointBisector
             self.REGION_CLASS = Region
             self.BOUNDARY_CLASS = WeightedPointBoundary
+            self._site_traces = 3
+
+        self._plot_steps = plot_steps
+        if self._plot_steps:
+            self._figure = go.Figure()
+            layout = go.Layout(height=1000, width=1000,)
+            template = dict(layout=layout)
+            self._figure.update_layout(title="VD", template=template)
+            self._figure.update_xaxes(range=list(xlim))
+            self._figure.update_yaxes(range=list(ylim), scaleanchor="x", scaleratio=1)
+            self._xlim = xlim
+            self._ylim = ylim
+        else:
+            self._figure = None
         self._calculate_diagram()
 
     def add_vertex(
@@ -338,6 +370,7 @@ class VoronoiDiagram:
         self.q_queue = QQueue()
         for site in self.sites:
             self.q_queue.enqueue(site)
+            plot_site(self._figure, site, self.SITE_CLASS)
         # Step 2.
         p = self.q_queue.dequeue()
         # Step 3.
@@ -353,24 +386,47 @@ class VoronoiDiagram:
             # Step 13: p is an intersection.
             else:
                 self._handle_intersection(p)
+            if self._plot_steps:
+                # keep the sites and clean all other traces.
+                self._figure.data = self._figure.data[
+                    : self._site_traces * len(self.sites)
+                ]
+                plot_l_list(
+                    self._figure,
+                    self.l_list,
+                    self._xlim,
+                    self._ylim,
+                    self.BISECTOR_CLASS,
+                )
+                self._figure.show()
 
 
 class FortunesAlgorithm:
     """Fortune's Algorithm implementation."""
 
     @staticmethod
-    def calculate_voronoi_diagram(points: List[Point]) -> VoronoiDiagram:
+    def calculate_voronoi_diagram(
+        points: List[Point],
+        plot_steps: bool = False,
+        xlim: Limit = (-100, 100),
+        ylim: Limit = (-100, 100),
+    ) -> VoronoiDiagram:
         """Calculate Voronoi Diagram."""
         sites = [
             Site(points[i].x, points[i].y, name=str(i + 1)) for i in range(len(points))
         ]
-        voronoi_diagram = VoronoiDiagram(sites, site_class=Site)
+        voronoi_diagram = VoronoiDiagram(
+            sites, site_class=Site, plot_steps=plot_steps, xlim=xlim, ylim=ylim
+        )
 
         return voronoi_diagram
 
     @staticmethod
     def calculate_aw_voronoi_diagram(
-        points_and_weights: List[Tuple[Point, Decimal]]
+        points_and_weights: List[Tuple[Point, Decimal]],
+        plot_steps: bool = False,
+        xlim: Limit = (-100, 100),
+        ylim: Limit = (-100, 100),
     ) -> VoronoiDiagram:
         """Calculate AW Voronoi Diagram."""
         sites = []
@@ -379,6 +435,8 @@ class FortunesAlgorithm:
             site = WeightedSite(point.x, point.y, weight, name=str(i + 1))
             sites.append(site)
 
-        voronoi_diagram = VoronoiDiagram(sites, site_class=WeightedSite)
+        voronoi_diagram = VoronoiDiagram(
+            sites, site_class=WeightedSite, plot_steps=plot_steps, xlim=xlim, ylim=ylim
+        )
 
         return voronoi_diagram

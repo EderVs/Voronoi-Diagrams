@@ -123,15 +123,20 @@ def get_diagram_and_plot(
     xlim: Limit,
     ylim: Limit,
     type_vd: int,
+    plot_steps: bool = False,
 ) -> None:
     """Get and plot Voronoi Diagram depending on the requested type."""
     sites += limit_sites
     # print(limit_sites)  # Debugging
     if type_vd == VORONOI_DIAGRAM_TYPE:
-        voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(sites)
+        voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(
+            sites, plot_steps=plot_steps, xlim=xlim, ylim=ylim
+        )
         plot_voronoi_diagram(voronoi_diagram, limit_sites, xlim, ylim)
     elif type_vd == AW_VORONOI_DIAGRAM_TYPE:
-        voronoi_diagram = FortunesAlgorithm.calculate_aw_voronoi_diagram(sites)
+        voronoi_diagram = FortunesAlgorithm.calculate_aw_voronoi_diagram(
+            sites, plot_steps=plot_steps, xlim=xlim, ylim=ylim
+        )
         plot_voronoi_diagram(
             voronoi_diagram, limit_sites, xlim, ylim, site_class=WeightedSite
         )
@@ -172,10 +177,14 @@ def get_type_of_voronoi_diagram() -> int:
 if __name__ == "__main__":
 
     type_vd = get_type_of_voronoi_diagram()
+    plot_steps = True
     xlim, ylim = get_limits()
     sites = get_sites_to_use(type_vd)
     if sites is None:
         print("Bye bye")
     else:
-        limit_sites = get_limit_sites(xlim, ylim, sites, type_vd)
-        get_diagram_and_plot(sites, limit_sites, xlim, ylim, type_vd)
+        # limit_sites = get_limit_sites(xlim, ylim, sites, type_vd)
+        limit_sites = []
+        get_diagram_and_plot(
+            sites, limit_sites, xlim, ylim, type_vd, plot_steps=plot_steps
+        )

@@ -44,7 +44,10 @@ class Event:
             letter = "S"
         else:
             letter = "I"
-        return f"{self.name} {letter}({self.point.x}, {self.point.y})"
+        return (
+            f"{self.name} {letter}({'{0:.4f}'.format(self.point.x)},"
+            f" {'{0:.4f}'.format(self.point.x)})"
+        )
 
     def __repr__(self):
         """Get object representation."""

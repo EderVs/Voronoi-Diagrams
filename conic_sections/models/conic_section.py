@@ -278,11 +278,11 @@ class ConicSection:
 
     def get_changes_of_sign_in_x(self) -> List[Decimal]:
         """Get changes of sign in the y_formula."""
-        a = self.b ** 2 - 4 * self.c * self.a
-        b = 2 * self.b * self.e - 4 * self.c * self.d
-        c = self.e ** 2 - 4 * self.c * self.f
+        a = self.b ** Decimal(2) - Decimal(4) * self.c * self.a
+        b = Decimal(2) * self.b * self.e - Decimal(4) * self.c * self.d
+        c = self.e ** Decimal(2) - Decimal(4) * self.c * self.f
         xs = []
         for x in roots([a, b, c]):
-            if x.imag == 0:
+            if Decimal(x.imag) < Decimal("0.00001"):
                 xs.append(Decimal(x.real))
         return xs

@@ -111,7 +111,7 @@ class Bisector:
 
     def __str__(self):
         """Get bisector string representation."""
-        return f"Bisector({self.sites[0]}, {self.sites[1]})"
+        return f"B({self.sites[0]}, {self.sites[1]})"
 
     def __repr__(self):
         """Get Bisector representation."""
@@ -328,21 +328,21 @@ class WeightedPointBisector(Bisector):
         qw = q.weight
         if self.point_bisector:
             # The bisector is a line.
-            self.a = 0
-            self.b = 0
-            self.c = 0
-            self.d = 2 * qx - 2 * px
-            self.e = 2 * qy - 2 * py
-            self.f = (px ** 2) + (py ** 2) - (qx ** 2) - (qy ** 2)
+            self.a = Decimal(0)
+            self.b = Decimal(0)
+            self.c = Decimal(0)
+            self.d = Decimal(2 * qx - 2 * px)
+            self.e = Decimal(2 * qy - 2 * py)
+            self.f = Decimal((px ** 2) + (py ** 2) - (qx ** 2) - (qy ** 2))
         else:
             r = (qx ** 2) + (qy ** 2) - (px ** 2) - (py ** 2) - ((pw - qw) ** 2)
             s = 4 * ((pw - qw) ** 2)
-            self.a = s - (((2 * px) - (2 * qx)) ** 2)
-            self.b = (-2) * ((2 * px) - (2 * qx)) * ((2 * py) - (2 * qy))
-            self.c = s - (((2 * py) - (2 * qy)) ** 2)
-            self.d = (-2 * px * s) - (2 * ((2 * px) - (2 * qx)) * r)
-            self.e = (-2 * py * s) - (2 * ((2 * py) - (2 * qy)) * r)
-            self.f = (s * (px ** 2)) + (s * (py ** 2)) - (r ** 2)
+            self.a = Decimal(s - (((2 * px) - (2 * qx)) ** 2))
+            self.b = Decimal((-2) * ((2 * px) - (2 * qx)) * ((2 * py) - (2 * qy)))
+            self.c = Decimal(s - (((2 * py) - (2 * qy)) ** 2))
+            self.d = Decimal((-2 * px * s) - (2 * ((2 * px) - (2 * qx)) * r))
+            self.e = Decimal((-2 * py * s) - (2 * ((2 * py) - (2 * qy)) * r))
+            self.f = Decimal((s * (px ** 2)) + (s * (py ** 2)) - (r ** 2))
 
     def _is_point_part_of_bisector(self, x: Decimal, y: Decimal) -> bool:
         """Get if the point is part of bisector.

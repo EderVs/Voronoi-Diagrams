@@ -175,8 +175,8 @@ def plot_bisector(
     if x_range is not None:
         y_lists = [[] for _ in range(num_lists)]
         for x in x_range:
-            if x < xlim[0] and x > xlim[1]:
-                break
+            if x < xlim[0] or x > xlim[1]:
+                continue
             ys = bisector.formula_y(x)
             num_y = len(ys)
             for i in range(num_y):
@@ -193,8 +193,8 @@ def plot_bisector(
     else:
         x_lists = [[] for _ in range(num_lists)]
         for y in y_range:
-            if y < ylim[0] and y > ylim[1]:
-                break
+            if y < ylim[0] or y > ylim[1]:
+                continue
             xs = bisector.formula_x(y)
             num_x = len(xs)
             for i in range(num_x):
