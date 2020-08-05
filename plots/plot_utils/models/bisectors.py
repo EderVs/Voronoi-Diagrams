@@ -176,6 +176,8 @@ def plot_bisector(
         y_lists = [[] for _ in range(num_lists)]
         for x in x_range:
             if x < xlim[0] or x > xlim[1]:
+                for i in range(num_lists):
+                    y_lists[i].append(None)
                 continue
             ys = bisector.formula_y(x)
             num_y = len(ys)
@@ -188,12 +190,16 @@ def plot_bisector(
                 y_lists[i].append(None)
 
         for i in range(num_lists):
-            figure.add_trace(go.Scatter(x=x_range, y=y_lists[i], mode="lines"))
+            figure.add_trace(
+                go.Scatter(x=x_range, y=y_lists[i], mode="lines", connectgaps=True)
+            )
             # plt.plot(x_range, y_lists[i], "k")
     else:
         x_lists = [[] for _ in range(num_lists)]
         for y in y_range:
             if y < ylim[0] or y > ylim[1]:
+                for i in range(num_lists):
+                    x_lists[i].append(None)
                 continue
             xs = bisector.formula_x(y)
             num_x = len(xs)
@@ -206,7 +212,9 @@ def plot_bisector(
                 x_lists[i].append(None)
 
         for i in range(num_lists):
-            figure.add_trace(go.Scatter(x=x_lists[i], y=y_range, mode="lines"))
+            figure.add_trace(
+                go.Scatter(x=x_lists[i], y=y_range, mode="lines", connectgaps=True)
+            )
             # plt.plot(x_lists[i], y_range, "k")
 
 

@@ -32,7 +32,7 @@ from decimal import Decimal
 
 # Plot
 from plotly import graph_objects as go
-from plots.plot_utils.models.sites import plot_site
+from plots.plot_utils.models.sites import plot_site, plot_sweep_line
 from plots.plot_utils.data_structures.l_list import plot_l_list
 
 Limit = Tuple[Decimal, Decimal]
@@ -376,29 +376,31 @@ class VoronoiDiagram:
         # Step 3.
         r_p = self.REGION_CLASS(p, None, None)
         self.l_list = LList(r_p)
+        self._plot_step(p)
         # Step 4.
         while not self.q_queue.is_empty():
             # Step 5.
             p = self.q_queue.dequeue()
+            self._plot_step(p)
             # Step 6 and 7.
             if p.is_site:
                 self._handle_site(p)
             # Step 13: p is an intersection.
             else:
                 self._handle_intersection(p)
-            if self._plot_steps:
-                # keep the sites and clean all other traces.
-                self._figure.data = self._figure.data[
-                    : self._site_traces * len(self.sites)
-                ]
-                plot_l_list(
-                    self._figure,
-                    self.l_list,
-                    self._xlim,
-                    self._ylim,
-                    self.BISECTOR_CLASS,
-                )
-                self._figure.show()
+            self._plot_step(p)
+
+    def _plot_step(self, p: Event):
+        """Plot step."""
+        if self._plot_steps:
+            # keep the sites and clean all other traces.
+            self._figure.data = self._figure.data[: self._site_traces * len(self.sites)]
+            plot_l_list(
+                self._figure, self.l_list, self._xlim, self._ylim, self.BISECTOR_CLASS,
+            )
+            plot_sweep_line(self._figure, self._xlim, self._ylim, p)
+            self._figure.show()
+            print(self.l_list)
 
 
 class FortunesAlgorithm:

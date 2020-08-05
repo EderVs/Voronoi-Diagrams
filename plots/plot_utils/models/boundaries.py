@@ -45,6 +45,8 @@ def plot_boundary(
             ys = boundary.formula_y(Decimal(x))
             if ys[0] >= ylim[0] and ys[0] <= ylim[1]:
                 y_list.append(ys[0])
+            else:
+                y_list.append(None)
     elif bisector_class == WeightedPointBisector:
         x_list = []
         y_list = []
@@ -97,6 +99,12 @@ def plot_boundary(
                 ys = boundary.formula_y(Decimal(x))
                 if ys[0] >= ylim[0] and ys[0] <= ylim[1]:
                     y_list.append(ys[0])
+                else:
+                    y_list.append(None)
 
-    figure.add_trace(go.Scatter(x=x_list, y=y_list, mode="lines", name=str(boundary)))
+    figure.add_trace(
+        go.Scatter(
+            x=x_list, y=y_list, mode="lines", name=str(boundary), connectgaps=True
+        )
+    )
     # plt.plot(x_list, y_list, "k")
