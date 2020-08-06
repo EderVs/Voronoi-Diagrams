@@ -25,7 +25,7 @@ from plots.plot_utils.models.bisectors import (
     plot_bisector,
     plot_voronoi_diagram_bisector,
 )
-from plots.plot_utils.models.sites import plot_site
+from plots.plot_utils.models.events import plot_site
 from plots.plot_utils.models.vertices import plot_vertex
 from plots.plot_utils.models.points import plot_point
 

@@ -32,7 +32,8 @@ from decimal import Decimal
 
 # Plot
 from plotly import graph_objects as go
-from plots.plot_utils.models.sites import plot_site, plot_sweep_line
+from plots.plot_utils.models.events import plot_site, plot_sweep_line
+from plots.plot_utils.models.boundaries import plot_boundary
 from plots.plot_utils.data_structures.l_list import plot_l_list
 
 Limit = Tuple[Decimal, Decimal]
@@ -52,6 +53,8 @@ class VoronoiDiagram:
     sites: List[Site]
     _plot_steps: bool
     _figure: Optional[go.Figure]
+    _figure_traces: int
+    _boundary_plot_dict: Dict[str, int]
 
     def __init__(
         self,
@@ -82,18 +85,20 @@ class VoronoiDiagram:
             self.BISECTOR_CLASS = WeightedPointBisector
             self.REGION_CLASS = Region
             self.BOUNDARY_CLASS = WeightedPointBoundary
-            self._site_traces = 3
+            self._site_traces = 2
 
         self._plot_steps = plot_steps
         if self._plot_steps:
             self._figure = go.Figure()
-            layout = go.Layout(height=1000, width=1000,)
+            layout = go.Layout(height=1000, width=1400,)
             template = dict(layout=layout)
             self._figure.update_layout(title="VD", template=template)
             self._figure.update_xaxes(range=list(xlim))
             self._figure.update_yaxes(range=list(ylim), scaleanchor="x", scaleratio=1)
             self._xlim = xlim
             self._ylim = ylim
+            self._figure_traces = 0
+            self._boundary_plot_dict = {}
         else:
             self._figure = None
         self._calculate_diagram()
@@ -255,6 +260,26 @@ class VoronoiDiagram:
             r_q_right_node,
         ) = self._update_list_l(r_p, r_q, bisector_p_q)
 
+        if self._plot_steps:
+            plot_boundary(
+                self._figure,
+                boundary_p_q_plus,
+                self._xlim,
+                self._ylim,
+                self.BISECTOR_CLASS,
+            )
+            self._figure_traces += 1
+            self._boundary_plot_dict[str(boundary_p_q_plus)] = self._figure_traces - 1
+            plot_boundary(
+                self._figure,
+                boundary_p_q_minus,
+                self._xlim,
+                self._ylim,
+                self.BISECTOR_CLASS,
+            )
+            self._figure_traces += 1
+            self._boundary_plot_dict[str(boundary_p_q_minus)] = self._figure_traces - 1
+
         # Step 11.
         # Delete from Q the intersection between the left and right boundary of R*q, if any.
         left_boundary: Optional[Boundary] = None
@@ -294,6 +319,35 @@ class VoronoiDiagram:
         r_s = r_s_node.value  # type: ignore
         return r_q, r_s, r_q_node, r_s_node
 
+    def _remove_boundary_from_figure_traces(self, boundary: Optional[Boundary]):
+        """Remove boundary from figure traces."""
+        if boundary is None:
+            return
+        data = list(self._figure.data)
+        data.pop(self._boundary_plot_dict[str(boundary)])
+        self._figure.data = data
+        self._figure_traces -= 1
+
+    def _remove_boundaries_from_figure_traces(
+        self, boundary1: Optional[Boundary], boundary2: Optional[Boundary]
+    ):
+        """Remove boundary from figure traces."""
+        if boundary1 is None and boundary2 is None:
+            return
+        if boundary1 is None:
+            self._remove_boundary_from_figure_traces(boundary2)
+        elif boundary2 is None:
+            self._remove_boundary_from_figure_traces(boundary1)
+        else:
+            position1 = self._boundary_plot_dict[str(boundary1)]
+            position2 = self._boundary_plot_dict[str(boundary2)]
+            if position1 > position2:
+                self._remove_boundary_from_figure_traces(boundary1)
+                self._remove_boundary_from_figure_traces(boundary2)
+            else:
+                self._remove_boundary_from_figure_traces(boundary2)
+                self._remove_boundary_from_figure_traces(boundary1)
+
     def _handle_intersection(self, p: IntersectionEvent):
         """Handle when event is an intersection."""
         # Step 14.
@@ -320,6 +374,20 @@ class VoronoiDiagram:
         self.add_bisector(bisector_q_s, sign=boundary_q_s_sign)
         left_region_node = intersection_region_node.left_neighbor
         right_region_node = intersection_region_node.right_neighbor
+
+        if self._plot_steps:
+            # Remove
+            self._remove_boundaries_from_figure_traces(
+                intersection_region_node.value.left,
+                intersection_region_node.value.right,
+            )
+            # Add new boundary
+            self._figure_traces += 1
+            self._boundary_plot_dict[str(boundary_q_s)] = self._figure_traces - 1
+            plot_boundary(
+                self._figure, boundary_q_s, self._xlim, self._ylim, self.BISECTOR_CLASS,
+            )
+
         self.l_list.remove_region(intersection_region_node, boundary_q_s)
 
         # Step 17.
@@ -371,6 +439,7 @@ class VoronoiDiagram:
         for site in self.sites:
             self.q_queue.enqueue(site)
             plot_site(self._figure, site, self.SITE_CLASS)
+            self._figure_traces += self._site_traces
         # Step 2.
         p = self.q_queue.dequeue()
         # Step 3.
@@ -394,13 +463,10 @@ class VoronoiDiagram:
         """Plot step."""
         if self._plot_steps:
             # keep the sites and clean all other traces.
-            self._figure.data = self._figure.data[: self._site_traces * len(self.sites)]
-            plot_l_list(
-                self._figure, self.l_list, self._xlim, self._ylim, self.BISECTOR_CLASS,
-            )
+            print(self.l_list)
             plot_sweep_line(self._figure, self._xlim, self._ylim, p)
             self._figure.show()
-            print(self.l_list)
+            self._figure.data = self._figure.data[: self._figure_traces]
 
 
 class FortunesAlgorithm:

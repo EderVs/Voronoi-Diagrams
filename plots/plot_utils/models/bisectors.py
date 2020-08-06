@@ -11,7 +11,8 @@ from voronoi_diagrams.models import (
 )
 
 # Utils.
-from .sites import create_weighted_site, plot_point
+from .events import create_weighted_site
+from .points import plot_point
 
 # Plot.
 # from matplotlib import pyplot as plt

@@ -1,6 +1,7 @@
 """Sites representations in plot."""
 
 from typing import Iterable
+from random import randint
 
 # Models.
 from voronoi_diagrams.models import Site, WeightedSite, Event
@@ -18,7 +19,7 @@ from decimal import Decimal
 from .points import plot_point
 
 # Conic sections.
-from .conic_sections import plot_circle
+from .conic_sections import get_circle_ranges
 
 
 def create_weighted_site(x: Decimal, y: Decimal, w: Decimal) -> WeightedSite:
@@ -28,9 +29,22 @@ def create_weighted_site(x: Decimal, y: Decimal, w: Decimal) -> WeightedSite:
 
 def plot_site(figure: go.Figure, site: Site, site_class=Site):
     """Plot site."""
+    color = f"rgb({randint(0, 255)}, {randint(0, 255)}, {randint(0, 255)})"
     if site_class == WeightedSite:
-        plot_circle(figure, site.point.x, site.point.y, site.weight, "r")
-    plot_point(figure, site.point.x, site.point.y, "r", ".")
+        x_range, y_range = get_circle_ranges(
+            site.point.x, site.point.y, site.weight, "r"
+        )
+        line_properties = {"width": 2.5, "color": color}
+        figure.add_trace(
+            go.Scatter(
+                x=x_range,
+                y=y_range,
+                mode="lines",
+                name=f"Weight {str(site)}",
+                line=line_properties,
+            )
+        )
+    plot_point(figure, site.point.x, site.point.y, name=f"{str(site)}", color=color)
 
 
 def plot_sites(figure: go.Figure, sites: Iterable[Site], site_class=Site):
@@ -47,4 +61,9 @@ def plot_sweep_line(figure: go.Figure, xlim, ylim, event: Event):
     step = Decimal("1")
     x_range = np.arange(xlim[0], xlim[1], step)
     y_range = [y for _ in x_range]
-    figure.add_trace(go.Scatter(x=x_range, y=y_range, mode="lines", name="Sweep line"))
+    line_properties = {"width": 3.5}
+    figure.add_trace(
+        go.Scatter(
+            x=x_range, y=y_range, mode="lines", name="Sweep line", line=line_properties
+        )
+    )

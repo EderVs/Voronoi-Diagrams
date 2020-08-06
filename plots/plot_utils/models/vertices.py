@@ -12,4 +12,4 @@ from .points import plot_point
 
 def plot_vertex(figure: go.Figure, vertex: VoronoiDiagramVertex):
     """Plot vertex."""
-    plot_point(figure, vertex.point.x, vertex.point.y, "b", "o")
+    plot_point(figure, vertex.point.x, vertex.point.y)
