@@ -3,6 +3,9 @@
 # Standard Library
 from typing import List, Any, Tuple, Optional
 from decimal import Decimal
+import time
+from random import random
+
 
 # Voronoi Diagrams
 from voronoi_diagrams.fortunes_algorithm import FortunesAlgorithm
@@ -124,42 +127,58 @@ def get_diagram_and_plot(
     ylim: Limit,
     type_vd: int,
     plot_steps: bool = False,
+    plot_diagram: bool = False,
 ) -> None:
     """Get and plot Voronoi Diagram depending on the requested type."""
     sites += limit_sites
     # print(limit_sites)  # Debugging
+    start_time = time.time()
     if type_vd == VORONOI_DIAGRAM_TYPE:
         voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(
             sites, plot_steps=plot_steps, xlim=xlim, ylim=ylim
         )
-        plot_voronoi_diagram(voronoi_diagram, limit_sites, xlim, ylim)
+        print("--- %s seconds to calculate diagram. ---" % (time.time() - start_time))
+        if plot_diagram:
+            plot_voronoi_diagram(voronoi_diagram, limit_sites, xlim, ylim)
     elif type_vd == AW_VORONOI_DIAGRAM_TYPE:
         voronoi_diagram = FortunesAlgorithm.calculate_aw_voronoi_diagram(
             sites, plot_steps=plot_steps, xlim=xlim, ylim=ylim
         )
-        plot_voronoi_diagram(
-            voronoi_diagram, limit_sites, xlim, ylim, site_class=WeightedSite
-        )
+        print("--- %s seconds to calculate diagram. ---" % (time.time() - start_time))
+        if plot_diagram:
+            plot_voronoi_diagram(
+                voronoi_diagram, limit_sites, xlim, ylim, site_class=WeightedSite
+            )
 
 
-def get_sites_to_use(type_vd: int,) -> Optional[List[SiteToUse]]:
+def get_sites_to_use(type_vd: int, random_sites: bool) -> Optional[List[SiteToUse]]:
     """Get sites to use and limit_sites."""
     n = int(input("Insert number of sites: "))
     sites = []
     if type_vd not in [1, 2]:
         return None
 
-    if type_vd == VORONOI_DIAGRAM_TYPE:
+    if type_vd == VORONOI_DIAGRAM_TYPE and not random_sites:
         print("Insert site this way: x y")
-    elif type_vd == AW_VORONOI_DIAGRAM_TYPE:
+    elif type_vd == AW_VORONOI_DIAGRAM_TYPE and not random_sites:
         print("Insert site this way: x y w")
     for _ in range(n):
         if type_vd == VORONOI_DIAGRAM_TYPE:
-            x, y = list(map(Decimal, input().split()))
+            if random_sites:
+                x, y = (Decimal(random() * 200 - 100), Decimal(random() * 200 - 100))
+            else:
+                x, y = list(map(Decimal, input().split()))
             site_point = Point(x, y)
             sites.append(site_point)
         elif type_vd == AW_VORONOI_DIAGRAM_TYPE:
-            x, y, w = list(map(Decimal, input().split()))
+            if random_sites:
+                x, y, w = (
+                    Decimal(random() * 200 - 100),
+                    Decimal(random() * 200 - 100),
+                    Decimal(random() * 10),
+                )
+            else:
+                x, y, w = list(map(Decimal, input().split()))
             site_point = Point(x, y)
             sites.append((site_point, w))
 
@@ -174,17 +193,45 @@ def get_type_of_voronoi_diagram() -> int:
     return type_vd
 
 
-if __name__ == "__main__":
+def get_if_random_sites() -> bool:
+    """Get if there will be random sites."""
+    print("Random? 1/0")
+    random_sites = bool(int(input()))
+    return random_sites
 
+
+def get_if_plot_steps() -> bool:
+    """Get if each step in the voronoi diagram will be plot."""
+    print("Plot steps? 1/0")
+    plot_steps = bool(int(input()))
+    return plot_steps
+
+
+def get_if_plot_diagram() -> bool:
+    """Get if the voronoi diagram will be plot."""
+    print("Plot Diagram? 1/0")
+    plot_diagram = bool(int(input()))
+    return plot_diagram
+
+
+if __name__ == "__main__":
     type_vd = get_type_of_voronoi_diagram()
-    plot_steps = True
     xlim, ylim = get_limits()
-    sites = get_sites_to_use(type_vd)
+    random_sites = get_if_random_sites()
+    plot_diagram = get_if_plot_diagram()
+    plot_steps = get_if_plot_steps()
+    sites = get_sites_to_use(type_vd, random_sites)
     if sites is None:
         print("Bye bye")
     else:
         # limit_sites = get_limit_sites(xlim, ylim, sites, type_vd)
         limit_sites = []
         get_diagram_and_plot(
-            sites, limit_sites, xlim, ylim, type_vd, plot_steps=plot_steps
+            sites,
+            limit_sites,
+            xlim,
+            ylim,
+            type_vd,
+            plot_steps=plot_steps,
+            plot_diagram=plot_diagram,
         )

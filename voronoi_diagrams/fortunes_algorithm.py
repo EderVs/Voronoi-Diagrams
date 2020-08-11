@@ -438,8 +438,9 @@ class VoronoiDiagram:
         self.q_queue = QQueue()
         for site in self.sites:
             self.q_queue.enqueue(site)
-            plot_site(self._figure, site, self.SITE_CLASS)
-            self._figure_traces += self._site_traces
+            if self._plot_steps:
+                plot_site(self._figure, site, self.SITE_CLASS)
+                self._figure_traces += self._site_traces
         # Step 2.
         p = self.q_queue.dequeue()
         # Step 3.
