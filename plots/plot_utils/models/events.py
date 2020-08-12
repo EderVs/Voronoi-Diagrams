@@ -16,7 +16,7 @@ import numpy as np
 from decimal import Decimal
 
 # Plot Models.
-from .points import plot_point
+from .points import plot_point, get_point_trace
 
 # Conic sections.
 from .conic_sections import get_circle_ranges
@@ -27,24 +27,35 @@ def create_weighted_site(x: Decimal, y: Decimal, w: Decimal) -> WeightedSite:
     return WeightedSite(x, y, w)
 
 
-def plot_site(figure: go.Figure, site: Site, site_class=Site):
-    """Plot site."""
+def get_site_traces(site: Site, site_class=Site):
+    """Get site traces."""
     color = f"rgb({randint(0, 255)}, {randint(0, 255)}, {randint(0, 255)})"
+    traces = []
     if site_class == WeightedSite:
         x_range, y_range = get_circle_ranges(
             site.point.x, site.point.y, site.weight, "r"
         )
         line_properties = {"width": 2.5, "color": color}
-        figure.add_trace(
+        traces.append(
             go.Scatter(
                 x=x_range,
                 y=y_range,
                 mode="lines",
                 name=f"Weight {str(site)}",
                 line=line_properties,
+                connectgaps=True,
             )
         )
-    plot_point(figure, site.point.x, site.point.y, name=f"{str(site)}", color=color)
+    traces.append(
+        get_point_trace(site.point.x, site.point.y, name=f"{str(site)}", color=color)
+    )
+    return traces
+
+
+def plot_site(figure: go.Figure, site: Site, site_class=Site):
+    """Plot site."""
+    for trace in get_site_traces(site, site_class):
+        figure.add_trace(trace)
 
 
 def plot_sites(figure: go.Figure, sites: Iterable[Site], site_class=Site):

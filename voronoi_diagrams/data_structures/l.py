@@ -66,7 +66,7 @@ class LList:
                 return "None"
 
         string = (
-            f"[None, {get_region_str(self.head.value)}, "
+            f"L: [None, {get_region_str(self.head.value)}, "
             f"{get_boundary_str(self.head.value.right)}"
         )
         node = self.head.right_neighbor

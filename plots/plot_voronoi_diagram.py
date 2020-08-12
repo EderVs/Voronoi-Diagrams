@@ -8,8 +8,12 @@ from random import random
 
 
 # Voronoi Diagrams
-from voronoi_diagrams.fortunes_algorithm import FortunesAlgorithm
-from voronoi_diagrams.models import Point, WeightedSite
+from voronoi_diagrams.fortunes_algorithm import (
+    FortunesAlgorithm,
+    STATIC_MODE,
+    DYNAMIC_MODE,
+)
+from voronoi_diagrams.models import Point, WeightedSite, Site
 
 # Plot
 from plots.plot_utils.voronoi_diagram import plot_voronoi_diagram, SiteToUse, Limit
@@ -128,6 +132,7 @@ def get_diagram_and_plot(
     type_vd: int,
     plot_steps: bool = False,
     plot_diagram: bool = False,
+    mode: int = STATIC_MODE,
 ) -> None:
     """Get and plot Voronoi Diagram depending on the requested type."""
     sites += limit_sites
@@ -135,20 +140,31 @@ def get_diagram_and_plot(
     start_time = time.time()
     if type_vd == VORONOI_DIAGRAM_TYPE:
         voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(
-            sites, plot_steps=plot_steps, xlim=xlim, ylim=ylim
+            sites, plot_steps=plot_steps, xlim=xlim, ylim=ylim, mode=mode
         )
         print("--- %s seconds to calculate diagram. ---" % (time.time() - start_time))
+        site_class = Site
         if plot_diagram:
             plot_voronoi_diagram(voronoi_diagram, limit_sites, xlim, ylim)
     elif type_vd == AW_VORONOI_DIAGRAM_TYPE:
         voronoi_diagram = FortunesAlgorithm.calculate_aw_voronoi_diagram(
-            sites, plot_steps=plot_steps, xlim=xlim, ylim=ylim
+            sites, plot_steps=plot_steps, xlim=xlim, ylim=ylim, mode=mode
         )
+        site_class = WeightedSite
+
+    # Mode
+    if mode == STATIC_MODE:
         print("--- %s seconds to calculate diagram. ---" % (time.time() - start_time))
-        if plot_diagram:
-            plot_voronoi_diagram(
-                voronoi_diagram, limit_sites, xlim, ylim, site_class=WeightedSite
-            )
+    else:
+        while not voronoi_diagram.q_queue.is_empty():
+            input("Press Enter to get next event.")
+            voronoi_diagram.calculate_next_event()
+
+    # Plot
+    if plot_diagram:
+        plot_voronoi_diagram(
+            voronoi_diagram, limit_sites, xlim, ylim, site_class=site_class,
+        )
 
 
 def get_sites_to_use(type_vd: int, random_sites: bool) -> Optional[List[SiteToUse]]:
@@ -214,12 +230,20 @@ def get_if_plot_diagram() -> bool:
     return plot_diagram
 
 
+def get_mode() -> bool:
+    """Get if the voronoi diagram will be plot."""
+    print("Mode? 0(Static)/1(Dynamic)")
+    mode = bool(int(input()))
+    return mode
+
+
 if __name__ == "__main__":
     type_vd = get_type_of_voronoi_diagram()
     xlim, ylim = get_limits()
     random_sites = get_if_random_sites()
     plot_diagram = get_if_plot_diagram()
     plot_steps = get_if_plot_steps()
+    mode = get_mode()
     sites = get_sites_to_use(type_vd, random_sites)
     if sites is None:
         print("Bye bye")
@@ -234,4 +258,5 @@ if __name__ == "__main__":
             type_vd,
             plot_steps=plot_steps,
             plot_diagram=plot_diagram,
+            mode=mode,
         )

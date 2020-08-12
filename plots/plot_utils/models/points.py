@@ -14,6 +14,23 @@ from conic_sections.utils.circle import get_circle_formula_y
 from decimal import Decimal
 
 
+def get_point_trace(
+    x: Decimal,
+    y: Decimal,
+    color: str = "",
+    marker: str = "",
+    name: str = "",
+    symbol: str = "",
+) -> go.Scatter:
+    """Get point trace."""
+    marker_properties = {}
+    if color != "":
+        marker_properties["color"] = color
+    if symbol != "":
+        marker_properties["symbol"] = symbol
+    return go.Scatter(x=[x], y=[y], mode="markers", name=name, marker=marker_properties)
+
+
 def plot_point(
     figure: go.Figure,
     x: Decimal,
@@ -21,12 +38,8 @@ def plot_point(
     color: str = "",
     marker: str = "",
     name: str = "",
+    symbol: str = "",
 ) -> None:
     """Plot a Point."""
-    marker_properties = {}
-    if color != "":
-        marker_properties["color"] = color
-    figure.add_trace(
-        go.Scatter(x=[x], y=[y], mode="markers", name=name, marker=marker_properties)
-    )
+    figure.add_trace(get_point_trace(x, y, color, marker, name, symbol))
     # plt.plot(x, y, f"{color}{marker}", markersize=5)

@@ -56,7 +56,7 @@ class QQueue:
 
     def __str__(self) -> str:
         """Get string representation."""
-        return str(self.get_all_events())
+        return f"Q: {str(self.get_all_events())}"
 
     def __repr__(self):
         """Get representation."""

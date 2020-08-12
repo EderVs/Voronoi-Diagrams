@@ -20,13 +20,12 @@ import numpy as np
 from decimal import Decimal
 
 
-def plot_boundary(
-    figure: go.Figure,
+def get_plot_scatter_boundary(
     boundary: Boundary,
     xlim: Tuple[Decimal, Decimal],
     ylim: Tuple[Decimal, Decimal],
     bisector_class: Type[Bisector],
-):
+) -> go.Scatter:
     """Plot boundary."""
     y_list = []
     if bisector_class == PointBisector:
@@ -102,9 +101,17 @@ def plot_boundary(
                 else:
                     y_list.append(None)
 
-    figure.add_trace(
-        go.Scatter(
-            x=x_list, y=y_list, mode="lines", name=str(boundary), connectgaps=True
-        )
+    return go.Scatter(
+        x=x_list, y=y_list, mode="lines", name=str(boundary), connectgaps=True
     )
-    # plt.plot(x_list, y_list, "k")
+
+
+def plot_boundary(
+    figure: go.Figure,
+    boundary: Boundary,
+    xlim: Tuple[Decimal, Decimal],
+    ylim: Tuple[Decimal, Decimal],
+    bisector_class: Type[Bisector],
+):
+    """Plot boundary."""
+    figure.add_trace(get_plot_scatter_boundary(boundary, xlim, ylim, bisector_class))

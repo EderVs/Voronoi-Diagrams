@@ -38,16 +38,18 @@ class Event:
         """Get event point to evaluate."""
         raise NotImplementedError
 
+    def get_str(self):
+        """Get letter in str representation of event."""
+        raise NotImplementedError
+
+    def get_point_str(self):
+        """Get point string representation."""
+        return f"{'{0:.4f}'.format(self.point.x)}, {'{0:.4f}'.format(self.point.y)}"
+
     def __str__(self):
         """Get String representation."""
-        if self.is_site:
-            letter = "S"
-        else:
-            letter = "I"
-        return (
-            f"{self.name} {letter}({'{0:.4f}'.format(self.point.x)},"
-            f" {'{0:.4f}'.format(self.point.x)})"
-        )
+        event_str = self.get_str()
+        return f"{self.name} {event_str}"
 
     def __repr__(self):
         """Get object representation."""
@@ -64,6 +66,10 @@ class Site(Event):
     def __init__(self, x: Decimal, y: Decimal, name: str = ""):
         """Construct point."""
         super(Site, self).__init__(x, y, True, name=name)
+
+    def get_str(self):
+        """Get string representation of Site."""
+        return f"S({self.get_point_str()})"
 
     def __eq__(self, site: Any) -> bool:
         """Get equality between sites."""
@@ -142,6 +148,10 @@ class IntersectionEvent(Event):
         super(IntersectionEvent, self).__init__(event.x, event.y, False)
         self.vertex = vertex
         self.region_node = region_node
+
+    def get_str(self):
+        """Get string representation of Site."""
+        return f"I({self.get_point_str()})"
 
     def get_event_point(self) -> Point:
         """Get event point to evaluate."""
@@ -278,9 +288,9 @@ class WeightedSite(Site):
         """Get lowest point in the site."""
         return Point(self.point.x, self.point.y - abs(self.weight))
 
-    def __str__(self):
+    def get_str(self):
         """Get String representation."""
-        return f"{self.name} WS({self.point.x}, {self.point.y}, {self.weight})"
+        return f"WS({self.get_point_str()}, {'{0:.4f}'.format(self.weight)})"
 
     def is_dominated(self, site: Any) -> bool:
         """Check if this event is dominated to other event."""
