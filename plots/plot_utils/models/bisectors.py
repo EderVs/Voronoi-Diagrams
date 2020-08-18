@@ -58,95 +58,15 @@ def plot_voronoi_diagram_bisector(
 
     This bisector has 2 vertices.
     """
-    vertices = vd_bisector.vertices
-    if is_plot_in_x(vd_bisector, bisector_class=bisector_class):
-        if len(vd_bisector.vertices) == 0:
-            x_range = np.arange(Decimal(xlim[0]), xlim[1], Decimal("0.01"))
-            plot_bisector(
-                figure,
-                vd_bisector.bisector,
-                xlim,
-                ylim,
-                x_range=x_range,
-                bisector_class=bisector_class,
-            )
-        elif len(vd_bisector.vertices) == 1:
-            vertex = vd_bisector.vertices[0]
-            x_range = np.arange(Decimal(xlim[0]), vertex.point.x, Decimal("0.01"))
-            plot_bisector(
-                figure,
-                vd_bisector.bisector,
-                xlim,
-                ylim,
-                x_range=x_range,
-                bisector_class=bisector_class,
-            )
-            x_range = np.arange(vertex.point.x, Decimal(xlim[1]), Decimal("0.01"))
-            plot_bisector(
-                figure,
-                vd_bisector.bisector,
-                xlim,
-                ylim,
-                x_range=x_range,
-                bisector_class=bisector_class,
-            )
-        else:
-            bisector_vertices_x = [vertex.point.x for vertex in vertices]
-            x_range = np.arange(
-                min(bisector_vertices_x), max(bisector_vertices_x), Decimal("0.01")
-            )
-            plot_bisector(
-                figure,
-                vd_bisector.bisector,
-                xlim,
-                ylim,
-                x_range=x_range,
-                bisector_class=bisector_class,
-            )
-    else:
-        if len(vd_bisector.vertices) == 0:
-            y_range = np.arange(Decimal(ylim[0]), ylim[1], Decimal("0.01"))
-            plot_bisector(
-                figure,
-                vd_bisector.bisector,
-                xlim,
-                ylim,
-                y_range=y_range,
-                bisector_class=bisector_class,
-            )
-        elif len(vd_bisector.vertices) == 1:
-            vertex = vd_bisector.vertices[0]
-            y_range = np.arange(Decimal(ylim[0]), vertex.point.y, Decimal("0.01"))
-            plot_bisector(
-                figure,
-                vd_bisector.bisector,
-                xlim,
-                ylim,
-                y_range=y_range,
-                bisector_class=bisector_class,
-            )
-            y_range = np.arange(vertex.point.y, Decimal(ylim[1]), Decimal("0.01"))
-            plot_bisector(
-                figure,
-                vd_bisector.bisector,
-                xlim,
-                ylim,
-                y_range=y_range,
-                bisector_class=bisector_class,
-            )
-        else:
-            bisector_vertices_y = [vertex.point.y for vertex in vertices]
-            y_range = np.arange(
-                min(bisector_vertices_y), max(bisector_vertices_y), Decimal("0.01")
-            )
-            plot_bisector(
-                figure,
-                vd_bisector.bisector,
-                xlim,
-                ylim,
-                y_range=y_range,
-                bisector_class=bisector_class,
-            )
+    x_range = vd_bisector.get_ranges(xlim)
+    plot_bisector(
+        figure,
+        vd_bisector.bisector,
+        xlim,
+        ylim,
+        x_range=x_range,
+        bisector_class=bisector_class,
+    )
 
 
 def plot_bisector(

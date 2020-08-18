@@ -5,7 +5,7 @@ from typing import List, Any, Optional
 
 # Models
 from .points import Point
-from .bisectors import VoronoiDiagramBisector
+from .voronoi_diagram_bisectors import VoronoiDiagramBisector
 
 
 class VoronoiDiagramVertex:

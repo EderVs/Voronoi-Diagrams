@@ -24,6 +24,8 @@ from .models import (
     WeightedPointBisector,
     WeightedPointBoundary,
     VoronoiDiagramBisector,
+    VoronoiDiagramPointBisector,
+    VoronoiDiagramWeightedPointBisector,
     VoronoiDiagramVertex,
 )
 
@@ -89,11 +91,13 @@ class VoronoiDiagram:
             self.BISECTOR_CLASS = PointBisector
             self.REGION_CLASS = Region
             self.BOUNDARY_CLASS = PointBoundary
+            self.VD_BISECTOR_CLASS = VoronoiDiagramPointBisector
             self._site_traces = 1
         elif site_class == WeightedSite:
             self.BISECTOR_CLASS = WeightedPointBisector
             self.REGION_CLASS = Region
             self.BOUNDARY_CLASS = WeightedPointBoundary
+            self.VD_BISECTOR_CLASS = VoronoiDiagramWeightedPointBisector
             self._site_traces = 2
 
         # Plot.
@@ -143,7 +147,11 @@ class VoronoiDiagram:
         if hasheable_of_bisector not in self._bisectors:
             self._bisectors[hasheable_of_bisector] = bisector
             self.bisectors_list.append(bisector)
-        vd_bisector = VoronoiDiagramBisector(bisector)
+        vd_bisector = self.VD_BISECTOR_CLASS(
+            bisector,
+            self.BOUNDARY_CLASS(bisector, True),
+            self.BOUNDARY_CLASS(bisector, False),
+        )
         self.bisectors.append(vd_bisector)
         if sign is None:
             self._active_bisectors[(hasheable_of_bisector, False)] = vd_bisector
@@ -292,6 +300,8 @@ class VoronoiDiagram:
             r_q_left_node,
             r_q_right_node,
         ) = self._update_list_l(r_p, r_q, bisector_p_q)
+        self.add_begin_bisector(boundary_p_q_minus, p)
+        self.add_begin_bisector(boundary_p_q_plus, p)
 
         if self._plot_steps:
             self._add_boundaries_to_plot([boundary_p_q_minus, boundary_p_q_plus])
@@ -361,13 +371,20 @@ class VoronoiDiagram:
                 self._remove_boundary_from_figure_traces(boundary2)
                 self._remove_boundary_from_figure_traces(boundary1)
 
+    def add_begin_bisector(self, boundary: Boundary, event: Event) -> None:
+        """Get range of the bisector based on the boundary and the intersection."""
+        voronoi_diagram_bisector = self.get_voronoi_diagram_bisectors(
+            [(boundary.bisector, boundary.sign)]
+        )[0]
+        side = boundary.get_side_where_point_belongs(event)
+        voronoi_diagram_bisector.add_begin_range(event.point.x, boundary.sign, side)
+
     def add_end_bisector(
         self, boundary: Boundary, intersection: IntersectionEvent
     ) -> None:
         """Get range of the bisector based on the boundary and the intersection."""
-        boundary.get_range_of_bisector(intersection)
         voronoi_diagram_bisector = self.get_voronoi_diagram_bisectors(
-            [(boundary, boundary.sign)]
+            [(boundary.bisector, boundary.sign)]
         )[0]
         side = boundary.get_side_where_point_belongs(intersection)
         voronoi_diagram_bisector.add_end_range(
@@ -398,6 +415,7 @@ class VoronoiDiagram:
         boundary_q_s_sign = r_q.site.get_event_point().y > r_s.site.get_event_point().y
         boundary_q_s = self.BOUNDARY_CLASS(bisector_q_s, boundary_q_s_sign)
         self.add_bisector(bisector_q_s, sign=boundary_q_s_sign)
+        self.add_begin_bisector(boundary_q_s, p)
         left_region_node = intersection_region_node.left_neighbor
         right_region_node = intersection_region_node.right_neighbor
 

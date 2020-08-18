@@ -84,7 +84,8 @@ def plot_vertices_and_bisectors(
 
     vertices_passed = set()
     for vd_bisector in voronoi_diagram.bisectors:
-        # print(vd_bisector)  # Debugging
+        print("//////////////////////////////////////////////////")
+        print(vd_bisector)  # Debugging
         if not is_a_limit_bisector(
             vd_bisector, limit_sites, bisector_class=bisector_class
         ):
@@ -96,6 +97,9 @@ def plot_vertices_and_bisectors(
             plot_voronoi_diagram_bisector(
                 figure, vd_bisector, xlim=xlim, ylim=ylim, bisector_class=bisector_class
             )
+
+        print("-", vd_bisector.ranges_b_minus)
+        print("+", vd_bisector.ranges_b_plus)
 
 
 def plot_voronoi_diagram(

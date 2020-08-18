@@ -2,6 +2,7 @@
 
 from typing import Tuple, Any, Optional, List
 from decimal import Decimal
+import numpy as np
 
 # Models
 from .bisectors import Bisector, PointBisector, WeightedPointBisector
@@ -86,9 +87,7 @@ class VoronoiDiagramBisector:
             return
         self.vertices.append(vertex)
 
-    def get_ranges(
-        self,
-    ) -> List[Tuple[List[Optional[Decimal]], List[Optional[Decimal]]]]:
+    def get_ranges(self, xlim: Tuple[Decimal, Decimal]) -> List[Optional[Decimal]]:
         """Get Ranges to graph in the Voronoi Diagram."""
         raise NotImplementedError
 
@@ -122,11 +121,21 @@ class VoronoiDiagramPointBisector(VoronoiDiagramBisector):
         """Create Voronoi Diagram Weighted Bisector."""
         super().__init__(bisector, boundary_plus, boundary_minus, vertex1, vertex2)
 
-    def get_ranges(
-        self,
-    ) -> List[Tuple[List[Optional[Decimal]], List[Optional[Decimal]]]]:
+    def get_ranges(self, xlim: Tuple[Decimal, Decimal]) -> List[Optional[Decimal]]:
         """Get Ranges to plot."""
-        pass
+        ranges = []
+        step = Decimal("0.01")
+        for x1, x0, _ in self.ranges_b_minus[::-1]:
+            if x0 is None:
+                x0 = xlim[0]
+            x_range = np.arange(x0, x1, step)
+            ranges.append(x_range)
+        for x0, x1, _ in self.ranges_b_plus:
+            if x1 is None:
+                x1 = xlim[1]
+            x_range = np.arange(x0, x1, step)
+            ranges.append(x_range)
+        return np.concatenate(ranges)
 
     def add_end_range(
         self, x: Decimal, boundary_sign: bool, side: BisectorSide
@@ -154,9 +163,7 @@ class VoronoiDiagramWeightedPointBisector(VoronoiDiagramBisector):
         """Create Voronoi Diagram Weighted Bisector."""
         super().__init__(bisector, boundary_plus, boundary_minus, vertex1, vertex2)
 
-    def get_ranges(
-        self,
-    ) -> List[Tuple[List[Optional[Decimal]], List[Optional[Decimal]]]]:
+    def get_ranges(self, xlim: Tuple[Decimal, Decimal]) -> List[Optional[Decimal]]:
         """Get Ranges to plot."""
         pass
 
