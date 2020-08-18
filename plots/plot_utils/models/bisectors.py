@@ -58,13 +58,14 @@ def plot_voronoi_diagram_bisector(
 
     This bisector has 2 vertices.
     """
-    x_range = vd_bisector.get_ranges(xlim)
+    x_range, y_range = vd_bisector.get_ranges(xlim)
     plot_bisector(
         figure,
         vd_bisector.bisector,
         xlim,
         ylim,
         x_range=x_range,
+        y_range=y_range,
         bisector_class=bisector_class,
     )
 
@@ -82,7 +83,7 @@ def plot_bisector(
 
     x_range: values of xs that will be plotted.
     """
-    if x_range is not None and y_range is not None:
+    if x_range is None and y_range is None:
         # error
         return
 
@@ -93,7 +94,7 @@ def plot_bisector(
     else:
         return
 
-    if x_range is not None:
+    if y_range is None:
         y_lists = [[] for _ in range(num_lists)]
         for x in x_range:
             if x < xlim[0] or x > xlim[1]:
@@ -115,7 +116,7 @@ def plot_bisector(
                 go.Scatter(x=x_range, y=y_lists[i], mode="lines", connectgaps=True)
             )
             # plt.plot(x_range, y_lists[i], "k")
-    else:
+    elif x_range is None:
         x_lists = [[] for _ in range(num_lists)]
         for y in y_range:
             if y < ylim[0] or y > ylim[1]:
@@ -137,6 +138,10 @@ def plot_bisector(
                 go.Scatter(x=x_lists[i], y=y_range, mode="lines", connectgaps=True)
             )
             # plt.plot(x_lists[i], y_range, "k")
+    else:
+        figure.add_trace(
+            go.Scatter(x=x_range, y=y_range, mode="lines", connectgaps=True)
+        )
 
 
 def plot_intersections(

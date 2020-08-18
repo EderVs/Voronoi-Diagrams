@@ -376,7 +376,7 @@ class VoronoiDiagram:
         voronoi_diagram_bisector = self.get_voronoi_diagram_bisectors(
             [(boundary.bisector, boundary.sign)]
         )[0]
-        side = boundary.get_side_where_point_belongs(event)
+        side = boundary.get_side_where_point_belongs(event.point)
         voronoi_diagram_bisector.add_begin_range(event.point.x, boundary.sign, side)
 
     def add_end_bisector(
@@ -386,7 +386,7 @@ class VoronoiDiagram:
         voronoi_diagram_bisector = self.get_voronoi_diagram_bisectors(
             [(boundary.bisector, boundary.sign)]
         )[0]
-        side = boundary.get_side_where_point_belongs(intersection)
+        side = boundary.get_side_where_point_belongs(intersection.point)
         voronoi_diagram_bisector.add_end_range(
             intersection.point.x, boundary.sign, side
         )

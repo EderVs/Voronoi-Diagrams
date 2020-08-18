@@ -87,8 +87,48 @@ class VoronoiDiagramBisector:
             return
         self.vertices.append(vertex)
 
-    def get_ranges(self, xlim: Tuple[Decimal, Decimal]) -> List[Optional[Decimal]]:
-        """Get Ranges to graph in the Voronoi Diagram."""
+    def get_ranges(
+        self, xlim: Tuple[Decimal, Decimal]
+    ) -> Tuple[List[Optional[Decimal]], List[Optional[Decimal]]]:
+        """Get Ranges to plot."""
+        x_ranges = []
+        y_ranges = []
+        step = Decimal("0.01")
+        for x1, x0, side in self.ranges_b_minus[::-1]:
+            if x0 is None:
+                if side == 0:
+                    x0 = xlim[0]
+                else:
+                    x0 = xlim[1]
+            if side == 1:
+                x_range = np.arange(x0, x1, -step)
+            else:
+                x_range = np.arange(x0, x1, step)
+            y_range = []
+            for x in x_range:
+                y_range.append(self.get_y_by_side(x, side))
+            x_ranges.append(x_range)
+            y_ranges.append(y_range)
+        for x0, x1, side in self.ranges_b_plus:
+            if x1 is None:
+                if side == 0:
+                    x1 = xlim[1]
+                else:
+                    x1 = xlim[0]
+            if side == 1:
+                x_range = np.arange(x0, x1, -step)
+            else:
+                x_range = np.arange(x0, x1, step)
+            y_range = []
+            for x in x_range:
+                y_range.append(self.get_y_by_side(x, side))
+            x_ranges.append(x_range)
+            y_ranges.append(y_range)
+        ranges = (np.concatenate(x_ranges), np.concatenate(y_ranges))
+        return ranges
+
+    def get_y_by_side(self, w: Decimal, side: BisectorSide) -> Optional[Decimal]:
+        """Get y by BisectorSide."""
         raise NotImplementedError
 
     def add_begin_range(
@@ -121,22 +161,6 @@ class VoronoiDiagramPointBisector(VoronoiDiagramBisector):
         """Create Voronoi Diagram Weighted Bisector."""
         super().__init__(bisector, boundary_plus, boundary_minus, vertex1, vertex2)
 
-    def get_ranges(self, xlim: Tuple[Decimal, Decimal]) -> List[Optional[Decimal]]:
-        """Get Ranges to plot."""
-        ranges = []
-        step = Decimal("0.01")
-        for x1, x0, _ in self.ranges_b_minus[::-1]:
-            if x0 is None:
-                x0 = xlim[0]
-            x_range = np.arange(x0, x1, step)
-            ranges.append(x_range)
-        for x0, x1, _ in self.ranges_b_plus:
-            if x1 is None:
-                x1 = xlim[1]
-            x_range = np.arange(x0, x1, step)
-            ranges.append(x_range)
-        return np.concatenate(ranges)
-
     def add_end_range(
         self, x: Decimal, boundary_sign: bool, side: BisectorSide
     ) -> None:
@@ -147,6 +171,13 @@ class VoronoiDiagramPointBisector(VoronoiDiagramBisector):
             ranges = self.ranges_b_minus
 
         ranges[-1] = (ranges[-1][0], x, side)
+
+    def get_y_by_side(self, x: Decimal, side: BisectorSide) -> Optional[Decimal]:
+        """Get y by BisectorSide."""
+        ys = self.bisector.formula_y(x)
+        if len(ys) == 0:
+            return None
+        return ys[0]
 
 
 class VoronoiDiagramWeightedPointBisector(VoronoiDiagramBisector):
@@ -163,10 +194,6 @@ class VoronoiDiagramWeightedPointBisector(VoronoiDiagramBisector):
         """Create Voronoi Diagram Weighted Bisector."""
         super().__init__(bisector, boundary_plus, boundary_minus, vertex1, vertex2)
 
-    def get_ranges(self, xlim: Tuple[Decimal, Decimal]) -> List[Optional[Decimal]]:
-        """Get Ranges to plot."""
-        pass
-
     def add_end_range(
         self, x: Decimal, boundary_sign: bool, side: BisectorSide
     ) -> None:
@@ -178,7 +205,7 @@ class VoronoiDiagramWeightedPointBisector(VoronoiDiagramBisector):
 
         last_side = ranges[-1][2]
         if last_side != side:
-            changes_of_sign_in_x = self.bisector.get_changes_of_sign_in_x()[0]
+            changes_of_sign_in_x = self.bisector.get_changes_of_sign_in_x()
             if len(changes_of_sign_in_x) >= 1:
                 ranges[-1] = (
                     ranges[-1][0],
@@ -188,3 +215,15 @@ class VoronoiDiagramWeightedPointBisector(VoronoiDiagramBisector):
                 ranges.append((changes_of_sign_in_x[0], x, side))
         else:
             ranges[-1] = (ranges[-1][0], x, side)
+
+    def get_y_by_side(self, x: Decimal, side: BisectorSide) -> Optional[Decimal]:
+        """Get y by BisectorSide."""
+        ys = self.bisector.formula_y(x)
+        if len(ys) == 0:
+            return None
+        elif len(ys) == 1:
+            return ys[0]
+        else:
+            if side == 1:
+                return max(ys)
+            return min(ys)
