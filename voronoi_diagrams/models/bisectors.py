@@ -18,64 +18,6 @@ from decimal import Decimal
 from general_utils.numbers import are_close
 
 
-class VoronoiDiagramBisector:
-    """Bisector representation in the Voronoi diagram."""
-
-    bisector: Any
-    vertices: List[Any]
-
-    def __init__(self, bisector: Any, vertex1: Any = None, vertex2: Any = None) -> None:
-        """Constructor."""
-        self.bisector = bisector
-        self.vertices = []
-        if vertex1 is not None:
-            self.vertices.append(vertex1)
-        if vertex2 is not None:
-            self.vertices.append(vertex2)
-
-    def __eq__(self, other: Any) -> bool:
-        """Equallity between VoronoiDiagramBisectors."""
-        return self.bisector == other.bisector and (
-            (self.vertex1 == other.vertex1 and self.vertex2 == other.vertex2)
-            or (self.vertex1 == other.vertex2 and self.vertex2 == other.vertex1)
-        )
-
-    def __str__(self) -> str:
-        """Return string representation."""
-        return f"B({str(self.bisector)}, {str(self.vertices)})"
-
-    def is_to_the_infinity(self) -> bool:
-        """Check if the bisector doesn't have one vertex."""
-        return len(self.vertices) != 2
-
-    def get_vertices(self) -> Tuple[Any, Any]:
-        """Get vertices linked to this bisector."""
-        if len(self.vertices) == 0:
-            vertex1 = None
-            vertex2 = None
-        elif len(self.vertices) == 1:
-            vertex1 = self.vertices[0]
-            vertex2 = None
-        else:
-            if self.vertices[0].vertex.y > self.vertices[1].vertex.y or (
-                self.vertices[0].vertex.y == self.vertices[1].vertex.y
-                and self.vertices[0].vertex.x > self.vertices[1].vertex.x
-            ):
-                vertex1 = self.vertices[1]
-                vertex2 = self.vertices[0]
-            else:
-                vertex1 = self.vertices[0]
-                vertex2 = self.vertices[1]
-
-        return (vertex1, vertex2)
-
-    def add_vertex(self, vertex: Any):
-        """Add vertex."""
-        if len(self.vertices) >= 2:
-            return
-        self.vertices.append(vertex)
-
-
 class Bisector:
     """Bisector representation.
 

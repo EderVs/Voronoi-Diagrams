@@ -113,6 +113,10 @@ class Boundary:
         """Get if the given point is above the boundary."""
         raise NotImplementedError
 
+    def get_side_where_point_belongs(self, point: Point) -> int:
+        """Get where point belongs."""
+        raise NotImplementedError
+
 
 class PointBoundary(Boundary):
     """Boundary of a site point."""
@@ -229,6 +233,10 @@ class PointBoundary(Boundary):
                         (intersection_point, intersection_point_star)
                     )
         return all_intersections
+
+    def get_side_where_point_belongs(self, point: Point) -> int:
+        """Get where point belongs."""
+        return 0
 
 
 class WeightedPointBoundary(Boundary):
@@ -414,3 +422,11 @@ class WeightedPointBoundary(Boundary):
             ) and boundary.is_point_in_boundary(intersection_point_star):
                 all_intersections.append((intersection_point, intersection_point_star))
         return all_intersections
+
+    def get_side_where_point_belongs(self, point: Point) -> int:
+        """Get where point belongs."""
+        if self.is_boundary_concave_to_y():
+            ys = self.formula_y(point.x)
+            if are_close(point.y, max(ys), Decimal(0.000001),):
+                return 1
+        return 0

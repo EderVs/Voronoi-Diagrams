@@ -361,6 +361,19 @@ class VoronoiDiagram:
                 self._remove_boundary_from_figure_traces(boundary2)
                 self._remove_boundary_from_figure_traces(boundary1)
 
+    def add_end_bisector(
+        self, boundary: Boundary, intersection: IntersectionEvent
+    ) -> None:
+        """Get range of the bisector based on the boundary and the intersection."""
+        boundary.get_range_of_bisector(intersection)
+        voronoi_diagram_bisector = self.get_voronoi_diagram_bisectors(
+            [(boundary, boundary.sign)]
+        )[0]
+        side = boundary.get_side_where_point_belongs(intersection)
+        voronoi_diagram_bisector.add_end_range(
+            intersection.point.x, boundary.sign, side
+        )
+
     def _handle_intersection(self, p: IntersectionEvent):
         """Handle when event is an intersection."""
         # Step 14.
@@ -396,6 +409,10 @@ class VoronoiDiagram:
             )
             # Add new boundary
             self._add_boundary_to_plot(boundary_q_s)
+
+        # TODO: Get ranges of x of the Bisector in the Diagram.
+        self.add_end_bisector(intersection_region_node.value.left, p)
+        self.add_end_bisector(intersection_region_node.value.right, p)
 
         self.l_list.remove_region(intersection_region_node, boundary_q_s)
 
