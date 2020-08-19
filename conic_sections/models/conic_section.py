@@ -50,7 +50,7 @@ class ConicSection:
         xs = roots([a, b, c])
         to_return = []
         for x in xs:
-            if x.imag == 0:
+            if Decimal(x.imag) < Decimal("0.00001"):
                 to_return.append(Decimal(x.real))
         return to_return
 
@@ -67,7 +67,7 @@ class ConicSection:
         xs = roots([a, b, c])
         to_return = []
         for x in xs:
-            if x.imag == 0:
+            if Decimal(x.imag) < Decimal("0.00001"):
                 to_return.append(Decimal(x.real))
         return to_return
 
@@ -283,6 +283,6 @@ class ConicSection:
         c = self.e ** Decimal(2) - Decimal(4) * self.c * self.f
         xs = []
         for x in roots([a, b, c]):
-            if Decimal(x.imag) < Decimal("0.00001"):
+            if Decimal(x.imag) < Decimal("0.001"):
                 xs.append(Decimal(x.real))
         return xs

@@ -362,8 +362,23 @@ class WeightedPointBisector(Bisector):
         xs = self.conic_section.get_changes_of_sign_in_x()
         valid_xs = []
         for x in xs:
-            if len(self.formula_y(x)) >= 1:
+            decimals = Decimal("4")
+            multiplier = Decimal("10") ** decimals
+            truncated_x = Decimal(int(x * multiplier) / multiplier)
+            ys = self.formula_y(truncated_x)
+            if len(ys) >= 1:
                 valid_xs.append(x)
+            else:
+                # Second chance.
+                ys = self.formula_y(truncated_x + Decimal("0.0001"))
+                if len(ys) >= 1:
+                    valid_xs.append(x)
+                else:
+                    # Third Chance
+                    ys = self.formula_y(truncated_x - Decimal("0.0001"))
+                    if len(ys) >= 1:
+                        valid_xs.append(x)
+
         return valid_xs
 
     def get_sites_tuple(self):
