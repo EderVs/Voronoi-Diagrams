@@ -188,11 +188,16 @@ def get_sites_to_use(type_vd: int, random_sites: bool) -> Optional[List[SiteToUs
             sites.append(site_point)
         elif type_vd == AW_VORONOI_DIAGRAM_TYPE:
             if random_sites:
+                decimals = Decimal("4")
+                multiplier = Decimal("10") ** decimals
                 x, y, w = (
                     Decimal(random() * 200 - 100),
                     Decimal(random() * 200 - 100),
                     Decimal(random() * 10),
                 )
+                x = Decimal(int(x * multiplier) / multiplier)
+                y = Decimal(int(y * multiplier) / multiplier)
+                w = Decimal(int(w * multiplier) / multiplier)
             else:
                 x, y, w = list(map(Decimal, input().split()))
             site_point = Point(x, y)
