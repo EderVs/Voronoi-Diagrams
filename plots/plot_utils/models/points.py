@@ -1,7 +1,7 @@
 """Points representations in plot."""
 
 # Standard Library.
-from typing import List
+from typing import List, Optional, Dict, Any
 
 # Plot
 # from matplotlib import pyplot as plt
@@ -21,13 +21,16 @@ def get_point_trace(
     marker: str = "",
     name: str = "",
     symbol: str = "",
+    size: Optional[int] = None,
 ) -> go.Scatter:
     """Get point trace."""
-    marker_properties = {}
+    marker_properties: Dict[str, Any] = {}
     if color != "":
         marker_properties["color"] = color
     if symbol != "":
         marker_properties["symbol"] = symbol
+    if size is not None:
+        marker_properties["size"] = size
     return go.Scatter(x=[x], y=[y], mode="markers", name=name, marker=marker_properties)
 
 
@@ -39,7 +42,8 @@ def plot_point(
     marker: str = "",
     name: str = "",
     symbol: str = "",
+    size: Optional[int] = None,
 ) -> None:
     """Plot a Point."""
-    figure.add_trace(get_point_trace(x, y, color, marker, name, symbol))
+    figure.add_trace(get_point_trace(x, y, color, marker, name, symbol, size))
     # plt.plot(x, y, f"{color}{marker}", markersize=5)

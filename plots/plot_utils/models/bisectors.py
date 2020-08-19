@@ -113,7 +113,13 @@ def plot_bisector(
 
         for i in range(num_lists):
             figure.add_trace(
-                go.Scatter(x=x_range, y=y_lists[i], mode="lines", connectgaps=True)
+                go.Scatter(
+                    x=x_range,
+                    y=y_lists[i],
+                    mode="lines",
+                    name=bisector.small_str(),
+                    connectgaps=True,
+                )
             )
             # plt.plot(x_range, y_lists[i], "k")
     elif x_range is None:
@@ -135,12 +141,24 @@ def plot_bisector(
 
         for i in range(num_lists):
             figure.add_trace(
-                go.Scatter(x=x_lists[i], y=y_range, mode="lines", connectgaps=True)
+                go.Scatter(
+                    x=x_lists[i],
+                    y=y_range,
+                    name=bisector.small_str(),
+                    mode="lines",
+                    connectgaps=True,
+                )
             )
             # plt.plot(x_lists[i], y_range, "k")
     else:
         figure.add_trace(
-            go.Scatter(x=x_range, y=y_range, mode="lines", connectgaps=True)
+            go.Scatter(
+                x=x_range,
+                y=y_range,
+                mode="lines",
+                name=bisector.small_str(),
+                connectgaps=True,
+            )
         )
 
 

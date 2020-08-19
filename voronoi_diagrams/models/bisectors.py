@@ -55,6 +55,10 @@ class Bisector:
         """Get bisector string representation."""
         return f"B({self.sites[0]}, {self.sites[1]})"
 
+    def small_str(self):
+        """Get bisector small string representation."""
+        return f"B({self.sites[0].name}, {self.sites[1].name})"
+
     def __repr__(self):
         """Get Bisector representation."""
         return self.__str__()
