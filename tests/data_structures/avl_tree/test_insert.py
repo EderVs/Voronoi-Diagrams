@@ -127,8 +127,8 @@ class TestInsert:
 
     def test_random(self) -> None:
         """Test with a random sort."""
-        expected_list = [i for i in range(100)]
-        for _ in range(100):
+        expected_list = [i for i in range(20000)]
+        for _ in range(2):
             random_list = expected_list.copy()
             shuffle(random_list)
             t = create_tree(random_list)

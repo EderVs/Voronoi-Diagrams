@@ -7,7 +7,7 @@ from abc import ABCMeta, abstractmethod
 # Models
 from .points import Point
 from .bisectors import Bisector, PointBisector, WeightedPointBisector
-from .events import IntersectionEvent
+from .events import IntersectionEvent, Site
 
 # Math
 from decimal import Decimal
@@ -35,7 +35,7 @@ class Boundary:
         self.left_intersection = None
         self.right_intersection = None
 
-    def get_site(self):
+    def get_site(self) -> Site:
         """Get the site that is highest or more to the right.
 
         This is the site that defines the region of the 2 boundary sibling.
@@ -78,7 +78,11 @@ class Boundary:
 
     def __str__(self):
         """Get boundary string representation."""
-        return f"Boundary({self.bisector}, {self.sign})"
+        if self.sign:
+            sign_str = "+"
+        else:
+            sign_str = "-"
+        return f"B*{sign_str}({self.bisector})"
 
     def __repr__(self):
         """Get boundary representation."""
@@ -107,6 +111,10 @@ class Boundary:
     @abstractmethod
     def is_boundary_below(self, point: Point) -> bool:
         """Get if the given point is above the boundary."""
+        raise NotImplementedError
+
+    def get_side_where_point_belongs(self, point: Point) -> int:
+        """Get where point belongs."""
         raise NotImplementedError
 
 
@@ -226,6 +234,10 @@ class PointBoundary(Boundary):
                     )
         return all_intersections
 
+    def get_side_where_point_belongs(self, point: Point) -> int:
+        """Get where point belongs."""
+        return 0
+
 
 class WeightedPointBoundary(Boundary):
     """Boundary of a weighted site point."""
@@ -288,7 +300,7 @@ class WeightedPointBoundary(Boundary):
             return (
                 are_close(
                     point.x,
-                    min(p.point.x, q.point.x) + (distance / 2),
+                    min(p.point.x, q.point.x) + (distance / Decimal(2)),
                     Decimal(0.000001),
                 )
                 and not self.sign
@@ -410,3 +422,11 @@ class WeightedPointBoundary(Boundary):
             ) and boundary.is_point_in_boundary(intersection_point_star):
                 all_intersections.append((intersection_point, intersection_point_star))
         return all_intersections
+
+    def get_side_where_point_belongs(self, point: Point) -> int:
+        """Get where point belongs."""
+        if self.is_boundary_concave_to_y():
+            ys = self.formula_y(point.x)
+            if are_close(point.y, max(ys), Decimal(0.000001),):
+                return 1
+        return 0
