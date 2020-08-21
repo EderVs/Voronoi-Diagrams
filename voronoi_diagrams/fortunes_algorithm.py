@@ -545,7 +545,7 @@ class VoronoiDiagram:
                 if trace is not None:
                     self._figure.add_trace(trace)
             plot_sweep_line(self._figure, self._xlim, self._ylim, self.event)
-            self._figure.show()
+            #self._figure.show()
 
 
 class FortunesAlgorithm:
@@ -558,10 +558,13 @@ class FortunesAlgorithm:
         xlim: Limit = (-100, 100),
         ylim: Limit = (-100, 100),
         mode: int = STATIC_MODE,
+        names: Optional[List[str]] = None,
     ) -> VoronoiDiagram:
         """Calculate Voronoi Diagram."""
+        if names is None or len(points) != len(names):
+            names = [str(i+1) for i in range(len(points))]
         sites = [
-            Site(points[i].x, points[i].y, name=str(i + 1)) for i in range(len(points))
+            Site(points[i].x, points[i].y, name=names[i]) for i in range(len(points))
         ]
         voronoi_diagram = VoronoiDiagram(
             sites,

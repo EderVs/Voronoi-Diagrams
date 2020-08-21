@@ -2,6 +2,9 @@
 
 from django.contrib import admin
 from django.urls import path, include
-from .views import MainView
+from . import views
 
-urlpatterns = [path("", MainView.as_view(), name="main")]
+urlpatterns = [
+    path("", views.MainView.as_view(), name="main"),
+    path("plot-vd/", views.PlotVDView.as_view(), name="plot_vd"),
+]

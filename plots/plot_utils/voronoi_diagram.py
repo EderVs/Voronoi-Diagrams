@@ -20,6 +20,7 @@ from voronoi_diagrams.models import (
 # Plot.
 # from matplotlib import pyplot as plt
 from plotly import graph_objects as go
+import plotly.offline as py
 import numpy as np
 from plots.plot_utils.models.bisectors import (
     plot_bisector,
@@ -102,14 +103,15 @@ def plot_vertices_and_bisectors(
         print("+", vd_bisector.ranges_b_plus)
 
 
-def plot_voronoi_diagram(
+def get_vd_figure(
     voronoi_diagram: VoronoiDiagram,
     limit_sites: List[SiteToUse],
     xlim: Limit,
     ylim: Limit,
     site_class: Type[Site] = Site,
-) -> None:
-    """Plot voronoi diagram."""
+) -> go.Figure:
+    """Get figure of voronoi diagram."""
+
     figure = go.Figure()
     layout = go.Layout(height=1000, width=1000,)
     template = dict(layout=layout)
@@ -140,4 +142,29 @@ def plot_voronoi_diagram(
     # plt.xlim(*xlim)
     # plt.ylim(*ylim)
     # plt.show()
+    return figure
+
+
+def get_vd_html(
+    voronoi_diagram: VoronoiDiagram,
+    limit_sites: List[SiteToUse],
+    xlim: Limit,
+    ylim: Limit,
+    site_class: Type[Site] = Site,
+) -> None:
+    """Plot voronoi diagram."""
+    figure = get_vd_figure(voronoi_diagram, limit_sites, xlim, ylim, site_class)
+    html = figure.to_html()
+    return html
+
+
+def plot_voronoi_diagram(
+    voronoi_diagram: VoronoiDiagram,
+    limit_sites: List[SiteToUse],
+    xlim: Limit,
+    ylim: Limit,
+    site_class: Type[Site] = Site,
+) -> None:
+    """Plot voronoi diagram."""
+    figure = get_vd_figure(voronoi_diagram, limit_sites, xlim, ylim, site_class)
     figure.show()
