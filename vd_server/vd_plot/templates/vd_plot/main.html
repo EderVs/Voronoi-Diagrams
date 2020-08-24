@@ -1,1 +1,41 @@
-Hello world!
+<html>
+
+<head>
+    <title>Voronoi diagrams</title>
+    {% load static %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+
+<body>
+    <div id="plot"></div>
+    <div id="input">
+        <form id="vd_form">
+            <div id="vd_type">
+                <input type="radio" id="vd_type" name="vd_type" value="vd" checked>
+                <label for="vd">Voronoi Diagram</label>
+                <input type="radio" id="aw_vd_type" name="vd_type" value="aw_vd">
+                <label for="aw_vd">AW Voronoi Diagram</label>
+            </div>
+            <div id="limits">
+                <input type="text" placeholder="limit_x0" name="limit_x0" value="100">
+                <input type="text" placeholder="limit_x1" name="limit_x1" value="100">
+                <input type="text" placeholder="limit_y0" name="limit_y0" value="100">
+                <input type="text" placeholder="limit_y1" name="limit_y1" value="100">
+            </div>
+            <div id="steps">
+                <label for="steps">Plot each step?</label><input type="checkbox" placeholder="limit_x0" name="step"
+                    value="100">
+            </div>
+            <input type="submit" value="Go!">
+            <div id="sites">
+                <input type="number" name="num_sites" id="num_sites" value=0>
+                <input type="number" name="actual_sites" id="actual_sites" value=0>
+            </div>
+            <button type="button" id="add_site">Add another site</button>
+        </form>
+    </div>
+    <script src="{% static 'vd_plot/js/sites.js' %}"></script>
+
+</body>
+
+</html>

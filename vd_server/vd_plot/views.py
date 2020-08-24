@@ -28,7 +28,7 @@ class MainView(View):
 
 
 class PlotVDView(View):
-    """Main View."""
+    """Plot Voronoi Diagram View."""
 
     def get(self, request):
         """Get voronoi diagram."""
