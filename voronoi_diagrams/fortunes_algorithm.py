@@ -300,8 +300,12 @@ class VoronoiDiagram:
             r_q_left_node,
             r_q_right_node,
         ) = self._update_list_l(r_p, r_q, bisector_p_q)
-        self.add_begin_bisector(boundary_p_q_minus, p)
-        self.add_begin_bisector(boundary_p_q_plus, p)
+
+        if bisector_p_q.is_vertical():
+            self.add_begin_vertical_bisector(bisector_p_q, None)
+        else:
+            self.add_begin_bisector(boundary_p_q_minus, p)
+            self.add_begin_bisector(boundary_p_q_plus, p)
 
         if self._plot_steps:
             self._add_boundaries_to_plot([boundary_p_q_minus, boundary_p_q_plus])
@@ -371,6 +375,15 @@ class VoronoiDiagram:
                 self._remove_boundary_from_figure_traces(boundary2)
                 self._remove_boundary_from_figure_traces(boundary1)
 
+    def add_begin_vertical_bisector(
+        self, bisector: Bisector, y: Optional[Decimal], sign: bool = True
+    ):
+        """Add vertical bisector range."""
+        voronoi_diagram_bisector = self.get_voronoi_diagram_bisectors(
+            [(bisector, sign)]
+        )[0]
+        voronoi_diagram_bisector.add_begin_range_vertical(y)
+
     def add_begin_bisector(self, boundary: Boundary, event: Event) -> None:
         """Get range of the bisector based on the boundary and the intersection."""
         voronoi_diagram_bisector = self.get_voronoi_diagram_bisectors(
@@ -378,6 +391,15 @@ class VoronoiDiagram:
         )[0]
         side = boundary.get_side_where_point_belongs(event.point)
         voronoi_diagram_bisector.add_begin_range(event.point.x, boundary.sign, side)
+
+    def add_end_vertical_bisector(
+        self, bisector: Bisector, y: Decimal, sign: bool = True
+    ):
+        """Add end of vertical bisector range."""
+        voronoi_diagram_bisector = self.get_voronoi_diagram_bisectors(
+            [(bisector, sign)]
+        )[0]
+        voronoi_diagram_bisector.add_end_range_vertical(y)
 
     def add_end_bisector(
         self, boundary: Boundary, intersection: IntersectionEvent
@@ -415,7 +437,12 @@ class VoronoiDiagram:
         boundary_q_s_sign = r_q.site.get_event_point().y > r_s.site.get_event_point().y
         boundary_q_s = self.BOUNDARY_CLASS(bisector_q_s, boundary_q_s_sign)
         self.add_bisector(bisector_q_s, sign=boundary_q_s_sign)
-        self.add_begin_bisector(boundary_q_s, p)
+        if boundary_q_s.bisector.is_vertical():
+            self.add_begin_vertical_bisector(
+                boundary_q_s.bisector, p.vertex.y, boundary_q_s_sign
+            )
+        else:
+            self.add_begin_bisector(boundary_q_s, p)
         left_region_node = intersection_region_node.left_neighbor
         right_region_node = intersection_region_node.right_neighbor
 
@@ -428,9 +455,22 @@ class VoronoiDiagram:
             # Add new boundary
             self._add_boundary_to_plot(boundary_q_s)
 
-        # TODO: Get ranges of x of the Bisector in the Diagram.
-        self.add_end_bisector(intersection_region_node.value.left, p)
-        self.add_end_bisector(intersection_region_node.value.right, p)
+        if intersection_region_node.value.left.bisector.is_vertical():
+            self.add_end_vertical_bisector(
+                intersection_region_node.value.left.bisector,
+                p.vertex.y,
+                intersection_region_node.value.left.sign,
+            )
+        else:
+            self.add_end_bisector(intersection_region_node.value.left, p)
+        if intersection_region_node.value.right.bisector.is_vertical():
+            self.add_end_vertical_bisector(
+                intersection_region_node.value.right.bisector,
+                p.vertex.y,
+                intersection_region_node.value.right.sign,
+            )
+        else:
+            self.add_end_bisector(intersection_region_node.value.right, p)
 
         self.l_list.remove_region(intersection_region_node, boundary_q_s)
 
@@ -545,7 +585,7 @@ class VoronoiDiagram:
                 if trace is not None:
                     self._figure.add_trace(trace)
             plot_sweep_line(self._figure, self._xlim, self._ylim, self.event)
-            #self._figure.show()
+            # self._figure.show()
 
 
 class FortunesAlgorithm:
@@ -562,7 +602,7 @@ class FortunesAlgorithm:
     ) -> VoronoiDiagram:
         """Calculate Voronoi Diagram."""
         if names is None or len(points) != len(names):
-            names = [str(i+1) for i in range(len(points))]
+            names = [str(i + 1) for i in range(len(points))]
         sites = [
             Site(points[i].x, points[i].y, name=names[i]) for i in range(len(points))
         ]
@@ -584,12 +624,15 @@ class FortunesAlgorithm:
         xlim: Limit = (-100, 100),
         ylim: Limit = (-100, 100),
         mode: int = STATIC_MODE,
+        names: Optional[List[str]] = None,
     ) -> VoronoiDiagram:
         """Calculate AW Voronoi Diagram."""
         sites = []
+        if names is None or len(points_and_weights) != len(names):
+            names = [str(i + 1) for i in range(len(points_and_weights))]
         for i in range(len(points_and_weights)):
             point, weight = points_and_weights[i]
-            site = WeightedSite(point.x, point.y, weight, name=str(i + 1))
+            site = WeightedSite(point.x, point.y, weight, name=names[i])
             sites.append(site)
 
         voronoi_diagram = VoronoiDiagram(

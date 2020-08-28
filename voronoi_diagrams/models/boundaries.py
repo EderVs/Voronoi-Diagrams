@@ -301,7 +301,7 @@ class WeightedPointBoundary(Boundary):
                 are_close(
                     point.x,
                     min(p.point.x, q.point.x) + (distance / Decimal(2)),
-                    Decimal(0.000001),
+                    Decimal("0.0001"),
                 )
                 and not self.sign
             )
@@ -316,7 +316,7 @@ class WeightedPointBoundary(Boundary):
                 if not self.sign:
                     return point.x <= self.get_site().point.x
                 else:
-                    return self.get_site().point.x <= point.x
+                    return self.get_site().point.x < point.x
 
         return False
 
@@ -387,13 +387,13 @@ class WeightedPointBoundary(Boundary):
             # of the whole boundary function.
             changes_of_sign_in_x = self.bisector.get_changes_of_sign_in_x()
             for change_of_sign_in_x in changes_of_sign_in_x:
-                if are_close(change_of_sign_in_x, point.x, Decimal(0.0000001)):
+                if are_close(change_of_sign_in_x, point.x, Decimal("0.0001")):
                     return are_close(
                         super(WeightedPointBoundary, self).formula_y(
                             change_of_sign_in_x
                         )[0],
                         point.y,
-                        Decimal(0.0000001),
+                        Decimal("0.0001"),
                     )
             else:
                 # If the the projection in the boundary is not a change of sign then we just check
@@ -427,6 +427,6 @@ class WeightedPointBoundary(Boundary):
         """Get where point belongs."""
         if self.is_boundary_concave_to_y():
             ys = self.formula_y(point.x)
-            if are_close(point.y, max(ys), Decimal(0.000001),):
+            if are_close(point.y, max(ys), Decimal("0.0001"),):
                 return 1
         return 0

@@ -33,27 +33,40 @@ class PlotVDView(View):
     def get(self, request):
         """Get voronoi diagram."""
         # TODO: Add serializer of sites.
-        body_unicode = request.body.decode("utf-8")
-        if not body_unicode:
+        body = request.GET["body"]
+        if not body:
             return http.HttpResponseNotFound()
 
-        body_data = json.loads(body_unicode)
+        body_data = json.loads(body)
         if not body_data.get("sites", False):
             return http.HttpResponseNotFound()
 
         sites = []
         names = []
-        for x, y, name in body_data["sites"]:
-            sites.append(Point(Decimal(x), Decimal(y)))
-            names.append(name)
 
-        voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(
-            sites, False, names=names
+        vd_type = body_data.get("vd_type", "vd")
+        print(vd_type)
+        if vd_type == "vd":
+            for x, y, name in body_data["sites"]:
+                sites.append(Point(Decimal(x), Decimal(y)))
+                names.append(name)
+            voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(
+                sites, False, names=names
+            )
+        elif vd_type == "aw_vd":
+            for x, y, w, name in body_data["sites"]:
+                sites.append((Point(Decimal(x), Decimal(y)), Decimal(w)))
+                names.append(name)
+            voronoi_diagram = FortunesAlgorithm.calculate_aw_voronoi_diagram(
+                sites, False, names=names
+            )
+        xlim = (
+            Decimal(body_data.get("limit_x0", "-100")),
+            Decimal(body_data.get("limit_x1", "100")),
         )
-        plot_div = get_vd_html(
-            voronoi_diagram,
-            [],
-            (Decimal(-100), Decimal(100)),
-            (Decimal(-100), Decimal(100)),
+        ylim = (
+            Decimal(body_data.get("limit_y0", "-100")),
+            Decimal(body_data.get("limit_y1", "100")),
         )
+        plot_div = get_vd_html(voronoi_diagram, [], xlim, ylim)
         return http.HttpResponse(plot_div)

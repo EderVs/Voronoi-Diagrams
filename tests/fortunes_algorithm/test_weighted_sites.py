@@ -130,6 +130,78 @@ class TestWeightedSites:
             voronoi_diagram, expected_bisectors, expected_vertices
         )
 
+    def test_3_with_vertical(self):
+        """Test 3 sties with vertical bisector."""
+        p1 = Point(Decimal(2), Decimal(10))
+        p1_w = Decimal(2)
+        p2 = Point(Decimal(6), Decimal(10))
+        p2_w = Decimal(4)
+        p3 = Point(Decimal(10), Decimal(10))
+        p3_w = Decimal(2)
+        site_p1 = WeightedSite(p1.x, p1.y, p1_w)
+        site_p2 = WeightedSite(p2.x, p2.y, p2_w)
+        site_p3 = WeightedSite(p3.x, p3.y, p3_w)
+        points_and_weights = ((p1, p1_w), (p2, p2_w), (p3, p3_w))
+        bisector_p1_p2 = WeightedPointBisector((site_p1, site_p2))
+        bisector_p1_p3 = WeightedPointBisector((site_p1, site_p3))
+        bisector_p2_p3 = WeightedPointBisector((site_p2, site_p3))
+        voronoi_diagram = FortunesAlgorithm.calculate_aw_voronoi_diagram(
+            points_and_weights
+        )
+        expected_bisectors = [
+            bisector_p1_p2,
+            bisector_p1_p3,
+            bisector_p2_p3,
+        ]
+        expected_vertices = [
+            Point(
+                Decimal("6"),
+                Decimal("6.99999999999999911182158029987476766109466552734375"),
+            ),
+            Point(
+                Decimal("6"),
+                Decimal("13.0000000000000017763568394002504646778106689453125"),
+            ),
+        ]
+        self._check_bisectors_and_vertex(
+            voronoi_diagram, expected_bisectors, expected_vertices
+        )
+
+        p1 = Point(Decimal(2), Decimal(10))
+        p1_w = Decimal(2)
+        p2 = Point(Decimal("5.5"), Decimal(10))
+        p2_w = Decimal(4)
+        p3 = Point(Decimal(10), Decimal(10))
+        p3_w = Decimal(2)
+        site_p1 = WeightedSite(p1.x, p1.y, p1_w)
+        site_p2 = WeightedSite(p2.x, p2.y, p2_w)
+        site_p3 = WeightedSite(p3.x, p3.y, p3_w)
+        points_and_weights = ((p1, p1_w), (p2, p2_w), (p3, p3_w))
+        bisector_p1_p2 = WeightedPointBisector((site_p1, site_p2))
+        bisector_p1_p3 = WeightedPointBisector((site_p1, site_p3))
+        bisector_p2_p3 = WeightedPointBisector((site_p2, site_p3))
+        voronoi_diagram = FortunesAlgorithm.calculate_aw_voronoi_diagram(
+            points_and_weights
+        )
+        expected_bisectors = [
+            bisector_p1_p2,
+            bisector_p1_p3,
+            bisector_p2_p3,
+        ]
+        expected_vertices = [
+            Point(
+                Decimal("6"),
+                Decimal("6.99999999999999911182158029987476766109466552734375"),
+            ),
+            Point(
+                Decimal("6"),
+                Decimal("13.0000000000000017763568394002504646778106689453125"),
+            ),
+        ]
+        self._check_bisectors_and_vertex(
+            voronoi_diagram, expected_bisectors, expected_vertices
+        )
+
     def test_3_sites_no_vertices(self):
         """Test 3 sites.
 
@@ -852,4 +924,4 @@ class TestWeightedSites:
         )
 
 
-TestWeightedSites().test_5_sites()
+TestWeightedSites().test_3_with_vertical()

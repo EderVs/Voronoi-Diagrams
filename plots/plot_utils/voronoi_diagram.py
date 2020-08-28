@@ -71,22 +71,13 @@ def plot_vertices_and_bisectors(
     bisector_class: Type[Bisector],
 ) -> None:
     """Plot bisectors in diagram."""
-    if len(voronoi_diagram.vertices) == 0:
-        # print(voronoi_diagram.bisectors)  # Debugging
-        if len(voronoi_diagram.bisectors) == 1:
-            plot_voronoi_diagram_bisector(
-                figure,
-                voronoi_diagram.bisectors[0],
-                xlim=xlim,
-                ylim=ylim,
-                bisector_class=bisector_class,
-            )
-        return
-
     vertices_passed = set()
     for vd_bisector in voronoi_diagram.bisectors:
         print("//////////////////////////////////////////////////")
         print(vd_bisector)  # Debugging
+        print("-", vd_bisector.ranges_b_minus)
+        print("+", vd_bisector.ranges_b_plus)
+        print("|", vd_bisector.ranges_vertical)
         if not is_a_limit_bisector(
             vd_bisector, limit_sites, bisector_class=bisector_class
         ):
@@ -101,6 +92,7 @@ def plot_vertices_and_bisectors(
 
         print("-", vd_bisector.ranges_b_minus)
         print("+", vd_bisector.ranges_b_plus)
+        print("|", vd_bisector.ranges_vertical)
 
 
 def get_vd_figure(
@@ -150,10 +142,11 @@ def get_vd_html(
     limit_sites: List[SiteToUse],
     xlim: Limit,
     ylim: Limit,
-    site_class: Type[Site] = Site,
 ) -> None:
     """Plot voronoi diagram."""
-    figure = get_vd_figure(voronoi_diagram, limit_sites, xlim, ylim, site_class)
+    figure = get_vd_figure(
+        voronoi_diagram, limit_sites, xlim, ylim, voronoi_diagram.SITE_CLASS
+    )
     html = figure.to_html()
     return html
 

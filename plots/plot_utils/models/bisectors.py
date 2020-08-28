@@ -58,7 +58,7 @@ def plot_voronoi_diagram_bisector(
 
     This bisector has 2 vertices.
     """
-    x_range, y_range = vd_bisector.get_ranges(xlim)
+    x_range, y_range = vd_bisector.get_ranges(xlim, ylim)
     plot_bisector(
         figure,
         vd_bisector.bisector,

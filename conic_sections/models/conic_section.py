@@ -50,7 +50,7 @@ class ConicSection:
         xs = roots([a, b, c])
         to_return = []
         for x in xs:
-            if Decimal(x.imag) < Decimal("0.001"):
+            if are_close(Decimal(x.imag), Decimal("0"), Decimal("0.001")):
                 to_return.append(Decimal(x.real))
         return to_return
 
@@ -67,7 +67,7 @@ class ConicSection:
         xs = roots([a, b, c])
         to_return = []
         for x in xs:
-            if Decimal(x.imag) < Decimal("0.001"):
+            if are_close(Decimal(x.imag), Decimal("0"), Decimal("0.001")):
                 to_return.append(Decimal(x.real))
         return to_return
 
@@ -94,7 +94,7 @@ class ConicSection:
         """Get intersections using polinomial roots."""
         intersections: List[Tuple[Decimal, Decimal]] = []
         for x in roots(ps):
-            if Decimal(x.imag) < Decimal("0.001"):
+            if are_close(Decimal(x.imag), Decimal("0"), Decimal("0.001")):
                 intersections += self.__get_ys_of_intersections(
                     Decimal(x.real), conic_section
                 )
@@ -106,7 +106,7 @@ class ConicSection:
         """Get intersections of a vertical line."""
         intersections = []
         for x in roots(ps):
-            if Decimal(x.imag) < Decimal("0.001"):
+            if are_close(Decimal(x.imag), Decimal("0"), Decimal("0.001")):
                 other_ys = conic_section.y_formula(Decimal(x))
                 for other_y in other_ys:
                     intersections.append((Decimal(x), Decimal(other_y)))
@@ -283,6 +283,6 @@ class ConicSection:
         c = self.e ** Decimal(2) - Decimal(4) * self.c * self.f
         xs = []
         for x in roots([a, b, c]):
-            if Decimal(x.imag) < Decimal("0.001"):
+            if are_close(Decimal(x.imag), Decimal("0"), Decimal("0.001")):
                 xs.append(Decimal(x.real))
         return xs

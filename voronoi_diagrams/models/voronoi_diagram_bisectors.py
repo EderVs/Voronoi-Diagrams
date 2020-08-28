@@ -24,6 +24,7 @@ class VoronoiDiagramBisector:
     ranges_b_minus: List[Range]
     boundary_plus: Boundary
     boundary_minus: Boundary
+    ranges_vertical: List[Tuple[Optional[Decimal], Optional[Decimal]]]
 
     def __init__(
         self,
@@ -42,6 +43,7 @@ class VoronoiDiagramBisector:
             self.vertices.append(vertex2)
         self.ranges_b_plus = []
         self.ranges_b_minus = []
+        self.ranges_vertical = []
         self.boundary_plus = boundary_plus
         self.boundary_minus = boundary_minus
 
@@ -87,43 +89,70 @@ class VoronoiDiagramBisector:
             return
         self.vertices.append(vertex)
 
+    def get_x(self, y: Decimal) -> Optional[Decimal]:
+        """Get x given y of the bisector.
+        
+        Used in vertical bisectors.
+        """
+        xs = self.bisector.formula_x(y)
+        if len(xs) == 0:
+            return None
+        return xs[0]
+
     def get_ranges(
-        self, xlim: Tuple[Decimal, Decimal]
+        self, xlim: Tuple[Decimal, Decimal], ylim: Tuple[Decimal, Decimal]
     ) -> Tuple[List[Optional[Decimal]], List[Optional[Decimal]]]:
         """Get Ranges to plot."""
         x_ranges = []
         y_ranges = []
-        step = Decimal("0.01")
-        for x1, x0, side in self.ranges_b_minus[::-1]:
-            if x0 is None:
-                if side == 0:
-                    x0 = xlim[0]
+
+        self.complete_ranges()
+        if self.bisector.is_vertical():
+            for y0, y1 in self.ranges_vertical:
+                if y0 is None:
+                    y0 = ylim[0]
+                if y1 is None:
+                    y1 = ylim[1]
+                step = abs(y0 - y1) / Decimal("1000")
+                y_range = np.arange(y0, y1, step)
+                x_range = [self.get_x(y) for y in y_range]
+                x_ranges.append(x_range)
+                y_ranges.append(y_range)
+        else:
+            self.complete_ranges()
+            for x1, x0, side in self.ranges_b_minus[::-1]:
+                if x0 is None:
+                    if side == 0:
+                        x0 = xlim[0]
+                    else:
+                        x0 = xlim[1]
+                step = abs(x0 - x1) / Decimal("1000")
+                if side == 1:
+                    x_range = np.arange(x0, x1, -step)
                 else:
-                    x0 = xlim[1]
-            if side == 1:
-                x_range = np.arange(x0, x1, -step)
-            else:
-                x_range = np.arange(x0, x1, step)
-            y_range = []
-            for x in x_range:
-                y_range.append(self.get_y_by_side(x, side))
-            x_ranges.append(x_range)
-            y_ranges.append(y_range)
-        for x0, x1, side in self.ranges_b_plus:
-            if x1 is None:
-                if side == 0:
-                    x1 = xlim[1]
+                    x_range = np.arange(x0, x1, step)
+                y_range = []
+                for x in x_range:
+                    y_range.append(self.get_y_by_side(x, side))
+                x_ranges.append(x_range)
+                y_ranges.append(y_range)
+            for x0, x1, side in self.ranges_b_plus:
+                if x1 is None:
+                    if side == 0:
+                        x1 = xlim[1]
+                    else:
+                        x1 = xlim[0]
+                step = abs(x0 - x1) / Decimal("1000")
+                if side == 1:
+                    x_range = np.arange(x0, x1, -step)
                 else:
-                    x1 = xlim[0]
-            if side == 1:
-                x_range = np.arange(x0, x1, -step)
-            else:
-                x_range = np.arange(x0, x1, step)
-            y_range = []
-            for x in x_range:
-                y_range.append(self.get_y_by_side(x, side))
-            x_ranges.append(x_range)
-            y_ranges.append(y_range)
+                    x_range = np.arange(x0, x1, step)
+                y_range = []
+                for x in x_range:
+                    y_range.append(self.get_y_by_side(x, side))
+                x_ranges.append(x_range)
+                y_ranges.append(y_range)
+
         ranges = (np.concatenate(x_ranges), np.concatenate(y_ranges))
         return ranges
 
@@ -140,10 +169,22 @@ class VoronoiDiagramBisector:
         else:
             self.ranges_b_minus.append((x, None, side))
 
+    def add_begin_range_vertical(self, y: Optional[Decimal]):
+        """Add new vertical range."""
+        self.ranges_vertical.append((y, None))
+
     def add_end_range(
         self, x: Decimal, boundary_sign: bool, side: BisectorSide
     ) -> None:
-        """Add new of the the bisector to be graphed."""
+        """Add end of the bisector to be ploted."""
+        raise NotImplementedError
+
+    def add_end_range_vertical(self, y: Decimal):
+        """Add end of the vertical range."""
+        self.ranges_vertical[-1] = (self.ranges_vertical[-1][0], y)
+
+    def complete_ranges(self):
+        """Add a new range if neccessary."""
         raise NotImplementedError
 
 
@@ -179,6 +220,10 @@ class VoronoiDiagramPointBisector(VoronoiDiagramBisector):
             return None
         return ys[0]
 
+    def complete_ranges(self):
+        """Add a new range if neccessary."""
+        pass
+
 
 class VoronoiDiagramWeightedPointBisector(VoronoiDiagramBisector):
     """Weighted Point Bisector representation in Voronoi Diagram."""
@@ -195,7 +240,7 @@ class VoronoiDiagramWeightedPointBisector(VoronoiDiagramBisector):
         super().__init__(bisector, boundary_plus, boundary_minus, vertex1, vertex2)
 
     def add_end_range(
-        self, x: Decimal, boundary_sign: bool, side: BisectorSide
+        self, x: Optional[Decimal], boundary_sign: bool, side: BisectorSide
     ) -> None:
         """Add new of the the bisector to be graphed."""
         if boundary_sign:
@@ -227,3 +272,23 @@ class VoronoiDiagramWeightedPointBisector(VoronoiDiagramBisector):
             if side == 1:
                 return max(ys)
             return min(ys)
+
+    def complete_ranges(self):
+        """Add a new range if neccessary."""
+        if len(self.ranges_b_minus) > 0:
+            x1, x0, side = self.ranges_b_minus[-1]
+            if (
+                x0 is None
+                and side == 0
+                and self.boundary_minus.is_boundary_concave_to_y()
+            ):
+                self.add_end_range(None, False, 1)
+                return
+        if len(self.ranges_b_plus) > 0:
+            x0, x1, side = self.ranges_b_plus[-1]
+            if (
+                x1 is None
+                and side == 0
+                and self.boundary_plus.is_boundary_concave_to_y()
+            ):
+                self.add_end_range(None, True, 1)

@@ -111,6 +111,10 @@ class Bisector:
             sites_tuple[1].get_object_to_hash(),
         )
 
+    def is_vertical(self) -> bool:
+        """Get if the bisector is vertical."""
+        raise NotImplementedError
+
 
 class PointBisector(Bisector):
     """Bisector defined by point sites."""
@@ -154,6 +158,12 @@ class PointBisector(Bisector):
         a = Decimal(-((q.x - p.x) / (q.y - p.y)))
         b = Decimal((q.x ** 2 - p.x ** 2 + q.y ** 2 - p.y ** 2) / (2 * (q.y - p.y)))
         return [a * x + b]
+
+    def is_vertical(self) -> bool:
+        """Get if the bisector is vertical."""
+        p_site = self.sites[0]
+        q_site = self.sites[1]
+        return q_site.point.y == p_site.point.y
 
     def get_intersection_points(self, bisector: Bisector) -> List[Point]:
         """Get the point of intersection between two bisectors."""
@@ -258,6 +268,12 @@ class WeightedPointBisector(Bisector):
         self.conic_section = ConicSection(
             self.a, self.b, self.c, self.d, self.e, self.f
         )
+
+    def is_vertical(self) -> bool:
+        """Get if the bisector is vertical."""
+        p_site = self.sites[0]
+        q_site = self.sites[1]
+        return q_site.point.y == p_site.point.y and q_site.weight == p_site.weight
 
     def _set_polynomial_parameters(self) -> None:
         """Set parameters of general conic formula.
