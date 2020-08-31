@@ -14,7 +14,7 @@ db: Dict[Session, Tuple[datetime, VoronoiDiagram]] = {}
 
 def get_vd(session: Session) -> Optional[VoronoiDiagram]:
     """Get VD with a given session."""
-    _, vd = db.get(session, None)
+    _, vd = db.get(session, (None, None))
     return vd
 
 
