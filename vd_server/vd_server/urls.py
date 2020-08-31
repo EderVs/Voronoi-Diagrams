@@ -16,4 +16,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-urlpatterns = [path("admin/", admin.site.urls), path("", include("vd_plot.urls"))]
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("", include("vd_plot.urls")),
+    path("steps/", include("vd_steps.urls")),
+]
