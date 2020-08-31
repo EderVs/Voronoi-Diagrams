@@ -134,6 +134,9 @@ class PlotNextStepView(StepView):
     def handle_get(self, request):
         """GET method."""
         vd = db.get_vd(self.ip)
-        if vd is None:
+        if vd is None or not vd.is_next_step():
             return http.HttpResponseNotFound("")
+
+        vd.next_step()
+
         return http.HttpResponse(vd)

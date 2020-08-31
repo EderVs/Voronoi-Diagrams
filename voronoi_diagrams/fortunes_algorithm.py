@@ -64,6 +64,7 @@ class VoronoiDiagram:
     _figure: Optional[go.Figure]
     _figure_traces: int
     _boundary_plot_dict: Dict[str, int]
+    _begin_event: bool
 
     def __init__(
         self,
@@ -119,6 +120,7 @@ class VoronoiDiagram:
 
         # Mode.
         self.mode = mode
+        self._begin_event = True
         self._init_structures()
         if self.mode == STATIC_MODE:
             self._calculate_diagram()
@@ -540,8 +542,8 @@ class VoronoiDiagram:
         self.l_list = LList(r_p)
         self._plot_step()
 
-    def calculate_next_event(self):
-        """Calculate next event in the Queue."""
+    def move_to_next_event(self):
+        """Move to next event in Queue."""
         # Step 4.
         if self.q_queue.is_empty():
             print("It has finished.")
@@ -550,6 +552,11 @@ class VoronoiDiagram:
         # Step 5.
         self.event = self.q_queue.dequeue()
         self._plot_step()
+        self._begin_event = False
+
+    def calculate_event(self):
+        """Calculate actual event."""
+        self._plot_step()
         # Step 6 and 7.
         if self.event.is_site:
             self._handle_site(self.event)
@@ -557,6 +564,23 @@ class VoronoiDiagram:
         else:
             self._handle_intersection(self.event)
         self._plot_step()
+        self._begin_event = True
+
+    def calculate_next_event(self):
+        """Calculate next event in the Queue."""
+        self.move_to_next_event()
+        self.calculate_event()
+
+    def next_step(self):
+        """Calculate next step."""
+        if self._begin_event:
+            self.move_to_next_event()
+        else:
+            self.calculate_event()
+
+    def is_next_step(self):
+        """Get if there is a next step to calculate."""
+        return not self.q_queue.is_empty() or not self._begin_event
 
     def _calculate_diagram(self):
         """Calculate point diagram."""
