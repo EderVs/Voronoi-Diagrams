@@ -39,6 +39,28 @@ class StepView(View):
         else:
             self.ip = request.META.get("REMOTE_ADDR")
 
+    def get(self, request):
+        """GET method."""
+        self.set_visitors_ip(request)
+        return self.handle_get(request)
+
+    def post(self, request):
+        """POST method."""
+        self.set_visitors_ip(request)
+        return self.handle_post(request)
+
+    def handle_get(self, request):
+        """Handle GET Request."""
+        raise NotImplementedError
+
+    def handle_post(self, request):
+        """Handle POST Request."""
+        raise NotImplementedError
+
+
+class FirstStepView(StepView):
+    """Init VD and get first step."""
+
     def set_body(self, request):
         """Set body."""
         body = request.GET.get("body")
@@ -76,56 +98,18 @@ class StepView(View):
         self.ylim = ylim
         self.vd_type = vd_type
 
-    def get(self, request):
-        """GET method."""
-        self.set_visitors_ip(request)
+    def handle_get(self, request):
+        """GET Method."""
         err = self.set_body(request)
         if err is not None:
             return err
-        return self.handle_get(request)
 
-    def post(self, request):
-        """POST method."""
-        self.set_visitors_ip(request)
-        return self.handle_post(request)
+        db.save_vd(self.ip, self.sites, self.names, self.xlim, self.ylim, self.vd_type)
+        step, ok = db.get_current_step(self.ip)
+        if not ok:
+            return http.HttpResponseNotFound()
 
-    def handle_get(self, request):
-        """Handle GET Request."""
-        raise NotImplementedError
-
-    def handle_post(self, request):
-        """Handle POST Request."""
-        raise NotImplementedError
-
-
-class FirstStepView(StepView):
-    """Init VD and get first step."""
-
-    def handle_get(self, request):
-        """GET Method."""
-        body = request.GET["body"]
-        if self.vd_type == "vd":
-            voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(
-                self.sites,
-                False,
-                xlim=self.xlim,
-                ylim=self.ylim,
-                mode=DYNAMIC_MODE,
-                names=self.names,
-            )
-        elif self.vd_type == "aw_vd":
-            voronoi_diagram = FortunesAlgorithm.calculate_aw_voronoi_diagram(
-                self.sites,
-                False,
-                xlim=self.xlim,
-                ylim=self.ylim,
-                mode=DYNAMIC_MODE,
-                names=self.names,
-            )
-
-        db.save_vd(self.ip, voronoi_diagram)
-
-        return redirect(f"{reverse('plot_next')}?body={body}")
+        return http.HttpResponse(step)
 
 
 class PlotNextStepView(StepView):
@@ -133,10 +117,31 @@ class PlotNextStepView(StepView):
 
     def handle_get(self, request):
         """GET method."""
+        step, ok = db.get_next_step(self.ip)
+        if not ok:
+            return http.HttpResponseNotFound()
+
+        return http.HttpResponse(step)
+
+
+class PlotPrevStepView(StepView):
+    """Plot prev step view."""
+
+    def handle_get(self, request):
+        """GET method."""
+        step, ok = db.get_prev_step(self.ip)
+        if not ok:
+            return http.HttpResponseNotFound()
+
+        return http.HttpResponse(step)
+
+
+class StepInfoView(StepView):
+    """Step info view."""
+
+    def handle_get(self, request):
+        """GET method."""
         vd = db.get_vd(self.ip)
-        if vd is None or not vd.is_next_step():
-            return http.HttpResponseNotFound("")
+        response = {"is_next_step": vd.is_next_step()}
 
-        vd.next_step()
-
-        return http.HttpResponse(vd)
+        return http.HttpResponse(response)

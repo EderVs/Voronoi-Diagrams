@@ -69,12 +69,99 @@ var vd_form = $('#vd_form')
 
 vd_form.submit(function (event) {
     event.preventDefault();
-
-    sendData();
 });
 
-function sendData() {
+$('#plot-vd').click(function () {
     data = getFormData(vd_form);
+    data["sites"] = get_sites();
+    $('#loading').html("LOADING");
+    $.ajax({
+        type: 'GET',
+        url: '/plot-vd/',
+        dataType: 'html',
+        data: { body: JSON.stringify(data) },
+        success: function (resp) {
+            $('#plot').html(resp);
+            $('#loading').html("")
+        },
+        error: function (resp) {
+            $('#loading').html("")
+            console.log(resp);
+        }
+    });
+})
+
+$('#first-step').click(function () {
+    data = getFormData(vd_form);
+    data["sites"] = get_sites();
+    $('#loading').html("LOADING");
+    // TODO: Disable plot VD?
+    $.ajax({
+        type: 'GET',
+        url: '/steps/first/',
+        dataType: 'html',
+        data: { body: JSON.stringify(data) },
+        success: function (resp) {
+            $('#plot').html(resp);
+            $('#loading').html("")
+            // TODO: Call to get info about VD.
+            // TODO: Print L List and Q Queue.
+            // TODO: Enable Next step.
+        },
+        error: function (resp) {
+            $('#loading').html("")
+            console.log(resp);
+        }
+    });
+})
+
+$('#next-step').click(function () {
+    $('#loading').html("LOADING");
+    // TODO: Disable plot VD?
+    $.ajax({
+        type: 'GET',
+        url: '/steps/next/',
+        dataType: 'html',
+        data: { body: JSON.stringify(data) },
+        success: function (resp) {
+            $('#plot').html(resp);
+            $('#loading').html("")
+            // TODO: Call to get info about VD.
+            // TODO: Print L List and Q Queue.
+            // TODO: Enable Next step.
+        },
+        error: function (resp) {
+            $('#loading').html("")
+            console.log(resp);
+        }
+    });
+})
+
+$('#prev-step').click(function () {
+    $('#loading').html("LOADING");
+    // TODO: Disable plot VD?
+    $.ajax({
+        type: 'GET',
+        url: '/steps/prev/',
+        dataType: 'html',
+        data: { body: JSON.stringify(data) },
+        success: function (resp) {
+            $('#plot').html(resp);
+            $('#loading').html("")
+            // TODO: Call to get info about VD.
+            // TODO: Print L List and Q Queue.
+            // TODO: Enable Next step.
+        },
+        error: function (resp) {
+            $('#loading').html("")
+            console.log(resp);
+        }
+    });
+})
+
+// TODO: Enable Prev step when next step is clicked.
+
+function get_sites() {
     var site_divs = $('.site');
     var sites = [];
     for (var i = 0; i < site_divs.length; i++) {
@@ -89,19 +176,5 @@ function sendData() {
         }
         sites.push(site);
     }
-    data["sites"] = sites;
-    $('#loading').html("LOADING");
-    $.ajax({
-        type: 'GET',
-        url: '/plot-vd/',
-        dataType: 'html',
-        data: { body: JSON.stringify(data) },
-        success: function (resp) {
-            $('#plot').html(resp);
-            $('#loading').html("")
-        },
-        error: function (resp) {
-            $('#loading').html("")
-        }
-    });
+    return sites;
 }

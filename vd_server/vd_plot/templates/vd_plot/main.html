@@ -27,10 +27,11 @@
                     <input type="number" step="any" placeholder="limit_y1" name="limit_y1" value="100" required>
                 </div>
                 <div id="steps">
-                    <label for="steps">Plot each step?</label><input type="checkbox" placeholder="limit_x0" name="step"
-                        value="100">
+                    <button type="submit" id="first-step">First Step</button>
+                    <button type="submit" id="prev-step">Previous Step?</button>
+                    <button type="submit" id="next-step">Next Step</button>
                 </div>
-                <button type="submit" id="go">Go!</button>
+                <button type="submit" id="plot-vd">Plot Voronoi Diagram</button>
                 <div id="sites">
                     <input type="number" name="num_sites" id="num_sites" value=0>
                     <input type="number" name="actual_sites" id="actual_sites" value=0>

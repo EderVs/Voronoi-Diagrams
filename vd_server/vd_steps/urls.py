@@ -5,6 +5,7 @@ from django.urls import path, include
 from . import views
 
 urlpatterns = [
-    path("plot-next/", views.PlotNextStepView.as_view(), name="plot_next"),
-    path("first-step/", views.FirstStepView.as_view(), name="first_step"),
+    path("next/", views.PlotNextStepView.as_view(), name="next_step"),
+    path("first/", views.FirstStepView.as_view(), name="first_step"),
+    path("prev/", views.PlotPrevStepView.as_view(), name="prev_step"),
 ]
