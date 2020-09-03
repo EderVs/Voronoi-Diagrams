@@ -1,10 +1,10 @@
 """Sites representations in plot."""
 
-from typing import Iterable
+from typing import Iterable, Union, Tuple, Type
 from random import randint
 
 # Models.
-from voronoi_diagrams.models import Site, WeightedSite, Event
+from voronoi_diagrams.models import Site, WeightedSite, Event, Point
 
 # Plot.
 from plotly import graph_objects as go
@@ -16,10 +16,13 @@ import numpy as np
 from decimal import Decimal
 
 # Plot Models.
-from .points import plot_point, get_point_trace
+from .points import get_point_trace
 
 # Conic sections.
 from .conic_sections import get_circle_ranges
+
+
+SiteToUse = Union[Point, Tuple[Point, Decimal]]
 
 
 def create_weighted_site(x: Decimal, y: Decimal, w: Decimal) -> WeightedSite:
@@ -72,9 +75,23 @@ def plot_sweep_line(figure: go.Figure, xlim, ylim, event: Event):
     step = Decimal("1")
     x_range = np.arange(xlim[0], xlim[1], step)
     y_range = [y for _ in x_range]
-    line_properties = {"width": 3.5}
+    line_properties = {"width": 3.5, "dash": "dash"}
     figure.add_trace(
         go.Scatter(
             x=x_range, y=y_range, mode="lines", name="Sweep line", line=line_properties
         )
     )
+
+
+def is_equal_limit_site(
+    site: SiteToUse, limit_site: SiteToUse, site_class: Type[Site]
+) -> None:
+    """Check if site is a limit site."""
+    if site_class == Site:
+        return site.point.x == limit_site.x and site.point.y == limit_site.y
+    elif site_class == WeightedSite:
+        return (
+            site.point.x == limit_site[0].x
+            and site.point.y == limit_site[0].y
+            and site.weight == limit_site[1]
+        )

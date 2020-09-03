@@ -36,6 +36,7 @@ from decimal import Decimal
 from plotly import graph_objects as go
 from plots.plot_utils.models.events import plot_site, plot_sweep_line, get_site_traces
 from plots.plot_utils.models.boundaries import get_plot_scatter_boundary
+from plots.plot_utils.models.bisectors import plot_vertices_and_bisectors
 from plots.plot_utils.data_structures.l_list import plot_l_list
 
 # Types
@@ -605,7 +606,10 @@ class VoronoiDiagram:
             print(self.q_queue)
             print(self.event)
             self._figure.data = []
-            for trace in self._traces:
+            actual_diagram_traces = plot_vertices_and_bisectors(
+                self.bisectors, [], self._xlim, self._ylim, self.BISECTOR_CLASS
+            )
+            for trace in self._traces + actual_diagram_traces:
                 if trace is not None:
                     self._figure.add_trace(trace)
             plot_sweep_line(self._figure, self._xlim, self._ylim, self.event)

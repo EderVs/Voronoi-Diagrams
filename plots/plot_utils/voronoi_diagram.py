@@ -22,77 +22,13 @@ from voronoi_diagrams.models import (
 from plotly import graph_objects as go
 import plotly.offline as py
 import numpy as np
-from plots.plot_utils.models.bisectors import (
-    plot_bisector,
-    plot_voronoi_diagram_bisector,
-)
-from plots.plot_utils.models.events import plot_site
+from plots.plot_utils.models.bisectors import plot_bisector, plot_vertices_and_bisectors
+from plots.plot_utils.models.events import plot_site, is_equal_limit_site
 from plots.plot_utils.models.vertices import plot_vertex
-from plots.plot_utils.models.points import plot_point
 
 
 SiteToUse = Union[Point, Tuple[Point, Decimal]]
 Limit = Tuple[Decimal, Decimal]
-
-
-def is_a_limit_bisector(
-    vd_bisector: VoronoiDiagramBisector,
-    limit_sites: List[SiteToUse],
-    bisector_class: Type[Bisector],
-) -> None:
-    """Check if current bisector is a bisector with a limit site."""
-    for site in vd_bisector.bisector.get_sites_tuple():
-        for limit_site in limit_sites:
-            if is_equal_limit_site(site, limit_site, bisector_class=bisector_class):
-                return True
-    return False
-
-
-def is_equal_limit_site(
-    site: SiteToUse, limit_site: SiteToUse, bisector_class: Type[Bisector]
-) -> None:
-    """Check if site is a limit site."""
-    if bisector_class == PointBisector:
-        return site.point.x == limit_site.x and site.point.y == limit_site.y
-    elif bisector_class == WeightedPointBisector:
-        return (
-            site.point.x == limit_site[0].x
-            and site.point.y == limit_site[0].y
-            and site.weight == limit_site[1]
-        )
-
-
-def plot_vertices_and_bisectors(
-    figure: go.Figure,
-    voronoi_diagram: VoronoiDiagram,
-    limit_sites: List[SiteToUse],
-    xlim: Limit,
-    ylim: Limit,
-    bisector_class: Type[Bisector],
-) -> None:
-    """Plot bisectors in diagram."""
-    vertices_passed = set()
-    for vd_bisector in voronoi_diagram.bisectors:
-        print("//////////////////////////////////////////////////")
-        print(vd_bisector)  # Debugging
-        print("-", vd_bisector.ranges_b_minus)
-        print("+", vd_bisector.ranges_b_plus)
-        print("|", vd_bisector.ranges_vertical)
-        if not is_a_limit_bisector(
-            vd_bisector, limit_sites, bisector_class=bisector_class
-        ):
-            for bisector_vertex in vd_bisector.vertices:
-                if id(bisector_vertex) in vertices_passed:
-                    continue
-                vertices_passed.add(id(bisector_vertex))
-                plot_vertex(figure, bisector_vertex)
-            plot_voronoi_diagram_bisector(
-                figure, vd_bisector, xlim=xlim, ylim=ylim, bisector_class=bisector_class
-            )
-
-        print("-", vd_bisector.ranges_b_minus)
-        print("+", vd_bisector.ranges_b_plus)
-        print("|", vd_bisector.ranges_vertical)
 
 
 def get_vd_figure(
@@ -121,15 +57,21 @@ def get_vd_figure(
     # Sites.
     for site in voronoi_diagram.sites:
         for limit_site in limit_sites:
-            if is_equal_limit_site(site, limit_site, bisector_class=bisector_class):
+            if is_equal_limit_site(site, limit_site, site_class=site_class):
                 break
         else:
             plot_site(figure, site, site_class)
 
     # Diagram.
-    plot_vertices_and_bisectors(
-        figure, voronoi_diagram, limit_sites, xlim, ylim, bisector_class
+    traces = plot_vertices_and_bisectors(
+        voronoi_diagram.bisectors,
+        limit_sites,
+        xlim,
+        ylim,
+        bisector_class=bisector_class,
     )
+    for trace in traces:
+        figure.add_trace(trace)
 
     # plt.xlim(*xlim)
     # plt.ylim(*ylim)

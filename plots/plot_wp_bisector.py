@@ -17,7 +17,6 @@ from plots.plot_utils.models.bisectors import (
     plot_intersections,
 )
 from plots.plot_utils.models.events import create_weighted_site
-from plots.plot_utils.models.points import plot_point
 
 # Math
 from decimal import Decimal

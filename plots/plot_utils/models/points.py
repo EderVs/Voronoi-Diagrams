@@ -35,7 +35,6 @@ def get_point_trace(
 
 
 def plot_point(
-    figure: go.Figure,
     x: Decimal,
     y: Decimal,
     color: str = "",
@@ -43,7 +42,7 @@ def plot_point(
     name: str = "",
     symbol: str = "",
     size: Optional[int] = None,
-) -> None:
+) -> go.Scatter:
     """Plot a Point."""
-    figure.add_trace(get_point_trace(x, y, color, marker, name, symbol, size))
+    return get_point_trace(x, y, color, marker, name, symbol, size)
     # plt.plot(x, y, f"{color}{marker}", markersize=5)

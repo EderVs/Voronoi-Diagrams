@@ -1,6 +1,6 @@
 """Bisectors representations in plots."""
 # Standard Library.
-from typing import Iterable, Tuple, Optional, Any
+from typing import Iterable, Tuple, Optional, Any, List, Type
 
 # Models.
 from voronoi_diagrams.models import (
@@ -11,7 +11,8 @@ from voronoi_diagrams.models import (
 )
 
 # Utils.
-from .events import create_weighted_site
+from .events import create_weighted_site, is_equal_limit_site, SiteToUse
+from .vertices import plot_vertex
 from .points import plot_point
 
 # Plot.
@@ -21,6 +22,8 @@ import numpy as np
 
 # Math
 from decimal import Decimal
+
+Limit = Tuple[Decimal, Decimal]
 
 
 def create_weighted_point_bisector(
@@ -48,19 +51,17 @@ def is_plot_in_x(
 
 
 def plot_voronoi_diagram_bisector(
-    figure: go.Figure,
     vd_bisector: VoronoiDiagramBisector,
     xlim,
     ylim,
     bisector_class: Any = PointBisector,
-):
+) -> List[go.Scatter]:
     """Plot Bisector in a Voronoi Diagram.
 
     This bisector has 2 vertices.
     """
     x_range, y_range = vd_bisector.get_ranges(xlim, ylim)
-    plot_bisector(
-        figure,
+    return plot_bisector(
         vd_bisector.bisector,
         xlim,
         ylim,
@@ -71,18 +72,18 @@ def plot_voronoi_diagram_bisector(
 
 
 def plot_bisector(
-    figure: go.Figure,
     bisector: Bisector,
     xlim: Tuple[Decimal, Decimal],
     ylim: Tuple[Decimal, Decimal],
     x_range: Optional[Iterable] = None,
     y_range: Optional[Iterable] = None,
     bisector_class: Any = PointBisector,
-) -> None:
+) -> List[go.Scatter]:
     """Plot a WeightedPointBisector.
 
     x_range: values of xs that will be plotted.
     """
+    traces = []
     if x_range is None and y_range is None:
         # error
         return
@@ -112,7 +113,7 @@ def plot_bisector(
                 y_lists[i].append(None)
 
         for i in range(num_lists):
-            figure.add_trace(
+            traces.append(
                 go.Scatter(
                     x=x_range,
                     y=y_lists[i],
@@ -140,7 +141,7 @@ def plot_bisector(
                 x_lists[i].append(None)
 
         for i in range(num_lists):
-            figure.add_trace(
+            traces.append(
                 go.Scatter(
                     x=x_lists[i],
                     y=y_range,
@@ -151,7 +152,7 @@ def plot_bisector(
             )
             # plt.plot(x_lists[i], y_range, "k")
     else:
-        figure.add_trace(
+        traces.append(
             go.Scatter(
                 x=x_range,
                 y=y_range,
@@ -160,6 +161,7 @@ def plot_bisector(
                 connectgaps=True,
             )
         )
+    return traces
 
 
 def plot_intersections(
@@ -170,4 +172,52 @@ def plot_intersections(
     """Plot intersections between 2 bisectors."""
     intersections = bisector1.get_intersection_points(bisector2)
     for intersection in intersections:
-        plot_point(figure, intersection[0], intersection[1][0])
+        trace = plot_point(intersection[0], intersection[1][0])
+        figure.add_trace(trace)
+
+
+def is_a_limit_bisector(
+    vd_bisector: VoronoiDiagramBisector,
+    limit_sites: List[SiteToUse],
+    bisector_class: Type[Bisector],
+) -> None:
+    """Check if current bisector is a bisector with a limit site."""
+    for site in vd_bisector.bisector.get_sites_tuple():
+        for limit_site in limit_sites:
+            if is_equal_limit_site(site, limit_site, bisector_class=bisector_class):
+                return True
+    return False
+
+
+def plot_vertices_and_bisectors(
+    bisectors: List[VoronoiDiagramBisector],
+    limit_sites: List[SiteToUse],
+    xlim: Limit,
+    ylim: Limit,
+    bisector_class: Type[Bisector],
+) -> List[go.Scatter]:
+    """Plot bisectors in diagram."""
+    vertices_passed = set()
+    traces = []
+    for vd_bisector in bisectors:
+        print("//////////////////////////////////////////////////")
+        print(vd_bisector)  # Debugging
+        print("-", vd_bisector.ranges_b_minus)
+        print("+", vd_bisector.ranges_b_plus)
+        print("|", vd_bisector.ranges_vertical)
+        if not is_a_limit_bisector(
+            vd_bisector, limit_sites, bisector_class=bisector_class
+        ):
+            for bisector_vertex in vd_bisector.vertices:
+                if id(bisector_vertex) in vertices_passed:
+                    continue
+                vertices_passed.add(id(bisector_vertex))
+                traces.append(plot_vertex(bisector_vertex))
+            traces += plot_voronoi_diagram_bisector(
+                vd_bisector, xlim=xlim, ylim=ylim, bisector_class=bisector_class,
+            )
+
+        print("-", vd_bisector.ranges_b_minus)
+        print("+", vd_bisector.ranges_b_plus)
+        print("|", vd_bisector.ranges_vertical)
+    return traces

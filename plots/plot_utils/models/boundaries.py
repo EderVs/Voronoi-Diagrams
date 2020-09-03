@@ -91,7 +91,12 @@ def get_plot_scatter_boundary(
                     y_list.append(None)
 
     return go.Scatter(
-        x=x_list, y=y_list, mode="lines", name=str(boundary), connectgaps=True
+        x=x_list,
+        y=y_list,
+        mode="lines",
+        name=str(boundary),
+        connectgaps=True,
+        line={"dash": "dot"},
     )
 
 
