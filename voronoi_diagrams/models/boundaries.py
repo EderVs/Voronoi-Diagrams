@@ -82,7 +82,7 @@ class Boundary:
             sign_str = "+"
         else:
             sign_str = "-"
-        return f"B*{sign_str}({self.bisector})"
+        return f"B*{sign_str}{self.bisector.get_sites_names()}"
 
     def __repr__(self):
         """Get boundary representation."""
@@ -379,6 +379,13 @@ class WeightedPointBoundary(Boundary):
 
         # Get the projection of x in the boundary.
         ys_in_boundary = super(WeightedPointBoundary, self).formula_y(point.x)
+        sites = self.bisector.get_sites_tuple()
+        are_sites_in_same_y = (
+            sites[0].get_event_point().y == sites[1].get_event_point().y
+        )
+        if are_sites_in_same_y and len(ys_in_boundary) == 1:
+            # Both site events are in the same y.
+            return True
         if len(ys_in_boundary) == 0:
             # There is no point in boundary to compare
             return False

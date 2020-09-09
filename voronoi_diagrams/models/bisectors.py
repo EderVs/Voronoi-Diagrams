@@ -57,7 +57,11 @@ class Bisector:
 
     def small_str(self):
         """Get bisector small string representation."""
-        return f"B({self.sites[0].name}, {self.sites[1].name})"
+        return f"B{self.get_sites_names()}"
+
+    def get_sites_names(self):
+        """Get bisector small string representation."""
+        return f"({self.sites[0].name}, {self.sites[1].name})"
 
     def __repr__(self):
         """Get Bisector representation."""
@@ -99,7 +103,7 @@ class Bisector:
         return self.get_sites_tuple()[0]
 
     @abstractmethod
-    def get_sites_tuple(self):
+    def get_sites_tuple(self) -> Tuple[Site, Site]:
         """Get sites tuple sorted."""
         raise NotImplementedError
 
@@ -224,7 +228,7 @@ class PointBisector(Bisector):
         )
         return delta_y_is_zero or delta_x_is_zero or both_deltas_are_the_same
 
-    def get_sites_tuple(self):
+    def get_sites_tuple(self) -> Tuple[Site, Site]:
         """Get the site tuple sorted."""
         site1 = self.sites[0]
         site2 = self.sites[1]
@@ -401,7 +405,7 @@ class WeightedPointBisector(Bisector):
 
         return valid_xs
 
-    def get_sites_tuple(self):
+    def get_sites_tuple(self) -> Tuple[WeightedSite, WeightedSite]:
         """Get site tuple sorted."""
         site1 = self.sites[0]
         site2 = self.sites[1]

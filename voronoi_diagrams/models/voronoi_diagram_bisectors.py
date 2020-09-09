@@ -119,7 +119,6 @@ class VoronoiDiagramBisector:
                 x_ranges.append(x_range)
                 y_ranges.append(y_range)
         else:
-            self.complete_ranges()
             for x1, x0, side in self.ranges_b_minus[::-1]:
                 if x0 is None:
                     if side == 0:
@@ -292,3 +291,17 @@ class VoronoiDiagramWeightedPointBisector(VoronoiDiagramBisector):
                 and self.boundary_plus.is_boundary_concave_to_y()
             ):
                 self.add_end_range(None, True, 1)
+
+        sites = self.bisector.get_sites_tuple()
+        are_sites_in_same_y = (
+            sites[0].get_event_point().y == sites[1].get_event_point().y
+        )
+        if not self.bisector.is_vertical() and are_sites_in_same_y:
+            for i, (_, _, side) in enumerate(self.ranges_b_plus):
+                if side == 0:
+                    del self.ranges_b_plus[i]
+                    break
+            for i, (_, _, side) in enumerate(self.ranges_b_minus):
+                if side == 0:
+                    del self.ranges_b_minus[i]
+                    break

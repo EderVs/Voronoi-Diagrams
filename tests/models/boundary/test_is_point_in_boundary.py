@@ -28,9 +28,9 @@ class TestWeightedPointBoundaryIsPointInAllRegion:
         boundary_minus = WeightedPointBoundary(bisector=bisector, sign=False)
 
         # Points in boundary
-        # Point in both boundaries
+        # Point in event point
         point = Point(Decimal("40"), Decimal("16"))
-        assert boundary_plus.is_point_in_boundary(point)
+        assert not boundary_plus.is_point_in_boundary(point)
         assert boundary_minus.is_point_in_boundary(point)
         # Point in Boundary-
         point = Point(Decimal("36"), Decimal("16.17424305044159994757531098"))
@@ -84,10 +84,10 @@ class TestWeightedPointBoundaryIsPointInAllRegion:
         boundary_minus = WeightedPointBoundary(bisector=bisector, sign=False)
 
         # Points in boundary
-        # Point in both boundaries
+        # Point in event point
         point = Point(Decimal("40"), Decimal("36"))
         assert boundary_minus.is_point_in_boundary(point)
-        assert boundary_plus.is_point_in_boundary(point)
+        assert not boundary_plus.is_point_in_boundary(point)
         # Point in Boundary+
         point = Point(Decimal("70"), Decimal("44.51646544245032821756886326"))
         assert not boundary_minus.is_point_in_boundary(point)
@@ -123,10 +123,10 @@ class TestWeightedPointBoundaryIsPointInAllRegion:
         boundary_minus = WeightedPointBoundary(bisector=bisector, sign=False)
 
         # Points in boundary
-        # Point in both boundaries
+        # Point in event point
         point = Point(Decimal("30"), Decimal("20"))
         assert boundary_minus.is_point_in_boundary(point)
-        assert boundary_plus.is_point_in_boundary(point)
+        assert not boundary_plus.is_point_in_boundary(point)
         # Point in Boundary+
         point = Point(Decimal("60"), Decimal("26.94980694980695009479400205"))
         assert not boundary_minus.is_point_in_boundary(point)

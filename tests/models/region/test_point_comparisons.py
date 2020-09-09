@@ -540,7 +540,7 @@ class TestIsLeftWeightedPointSite:
         point = p.get_highest_site_point()
         assert not region.is_left(point)
         point = r.get_highest_site_point()
-        assert not region.is_left(point)
+        assert region.is_left(point)
         # Point in right boundary.
         x = Decimal(-0)
         y = region.right.formula_y(x)[0]

@@ -191,11 +191,11 @@ class TestWeightedSites:
         expected_vertices = [
             Point(
                 Decimal("6"),
-                Decimal("6.99999999999999911182158029987476766109466552734375"),
+                Decimal("7.10536595577264762368940864689648151397705078125"),
             ),
             Point(
-                Decimal("6"),
-                Decimal("13.0000000000000017763568394002504646778106689453125"),
+                Decimal("6.0000001581526287708356903749518096446990966796875"),
+                Decimal("12.894634297774786091395071707665920257568359375"),
             ),
         ]
         self._check_bisectors_and_vertex(
@@ -736,6 +736,67 @@ class TestWeightedSites:
             voronoi_diagram, expected_bisectors, expected_vertices
         )
 
+    def test_sites_in_same_y(self):
+        """Test sites in same y."""
+        p1 = Point(Decimal("-20"), Decimal("10"))
+        p1_w = Decimal("1")
+        p2 = Point(Decimal("40"), Decimal("15"))
+        p2_w = Decimal("2")
+        p3 = Point(Decimal("10"), Decimal("8"))
+        p3_w = Decimal("3")
+        p4 = Point(Decimal("11"), Decimal("40"))
+        p4_w = Decimal("4")
+        p5 = Point(Decimal("-25"), Decimal("35"))
+        p5_w = Decimal("5")
+        site_p1 = WeightedSite(p1.x, p1.y, p1_w)
+        site_p2 = WeightedSite(p2.x, p2.y, p2_w)
+        site_p3 = WeightedSite(p3.x, p3.y, p3_w)
+        site_p4 = WeightedSite(p4.x, p4.y, p4_w)
+        site_p5 = WeightedSite(p5.x, p5.y, p5_w)
+        points_and_weights = (
+            (p1, p1_w),
+            (p2, p2_w),
+            (p3, p3_w),
+            (p4, p4_w),
+            (p5, p5_w),
+        )
+        bisector_p1_p3 = WeightedPointBisector((site_p1, site_p3))
+        bisector_p1_p4 = WeightedPointBisector((site_p1, site_p4))
+        bisector_p1_p5 = WeightedPointBisector((site_p1, site_p5))
+        bisector_p2_p3 = WeightedPointBisector((site_p2, site_p3))
+        bisector_p2_p4 = WeightedPointBisector((site_p2, site_p4))
+        bisector_p3_p4 = WeightedPointBisector((site_p3, site_p4))
+        bisector_p4_p5 = WeightedPointBisector((site_p4, site_p5))
+        voronoi_diagram = FortunesAlgorithm.calculate_aw_voronoi_diagram(
+            points_and_weights
+        )
+        expected_bisectors = [
+            bisector_p1_p3,
+            bisector_p1_p4,
+            bisector_p1_p5,
+            bisector_p2_p3,
+            bisector_p2_p4,
+            bisector_p3_p4,
+            bisector_p4_p5,
+        ]
+        expected_vertices = [
+            Point(
+                Decimal("21.343778547920823740469131735153496265411376953125"),
+                Decimal("24.265201667101234050960556487552821636199951171875"),
+            ),
+            Point(
+                Decimal("-2.455770410233987011139333844766952097415924072265625"),
+                Decimal("25.049067098689359767149653634987771511077880859375"),
+            ),
+            Point(
+                Decimal("-6.39719423990470570373645387007854878902435302734375"),
+                Decimal("29.160222207705533747912340913899242877960205078125"),
+            ),
+        ]
+        self._check_bisectors_and_vertex(
+            voronoi_diagram, expected_bisectors, expected_vertices
+        )
+
     def test_site_in_site(self):
         """Test site inside another site."""
         p1 = Point(Decimal("36.7"), Decimal("1.6"))
@@ -924,4 +985,4 @@ class TestWeightedSites:
         )
 
 
-TestWeightedSites().test_3_with_vertical()
+TestWeightedSites().test_sites_in_same_y()

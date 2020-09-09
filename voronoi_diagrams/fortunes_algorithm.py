@@ -34,9 +34,18 @@ from decimal import Decimal
 
 # Plot
 from plotly import graph_objects as go
-from plots.plot_utils.models.events import plot_site, plot_sweep_line, get_site_traces
+from plots.plot_utils.models.events import (
+    plot_site,
+    plot_sweep_line,
+    get_site_traces,
+    plot_events_traces,
+)
 from plots.plot_utils.models.boundaries import get_plot_scatter_boundary
-from plots.plot_utils.models.bisectors import plot_vertices_and_bisectors
+from plots.plot_utils.models.bisectors import (
+    plot_vertices_and_bisectors,
+    plot_voronoi_diagram_bisector,
+)
+from plots.plot_utils.models.vertices import plot_vertex
 from plots.plot_utils.data_structures.l_list import plot_l_list
 
 # Types
@@ -65,6 +74,7 @@ class VoronoiDiagram:
     _figure: Optional[go.Figure]
     _figure_traces: int
     _boundary_plot_dict: Dict[str, int]
+    _bisector_plot_dict: Dict[Tuple[str, bool], int]
     _begin_event: bool
 
     def __init__(
@@ -116,6 +126,7 @@ class VoronoiDiagram:
             self._figure_traces = 0
             self._traces = []
             self._boundary_plot_dict = {}
+            self._bisector_plot_dict = {}
         else:
             self._figure = None
 
@@ -143,6 +154,9 @@ class VoronoiDiagram:
             for vd_bisector in vd_bisectors:
                 vd_vertex.add_bisector(vd_bisector)
                 vd_bisector.add_vertex(vd_vertex)
+
+        if self._plot_steps:
+            self._add_vertex_trace(vd_vertex)
 
     def add_bisector(self, bisector: Bisector, sign: Optional[bool] = True) -> None:
         """Add point in the vertex list."""
@@ -269,6 +283,39 @@ class VoronoiDiagram:
             # TODO: Change to use complete_string()
             self._boundary_plot_dict[str(boundary)] = self._figure_traces - 1
 
+    def _add_bisector_to_plot(self, bisector: Bisector, sign: Optional[bool]):
+        """Add boundary to plot."""
+        if self._plot_steps:
+            if sign is None:
+                vd_bisector = self.get_voronoi_diagram_bisectors([(bisector, True)])[0]
+            else:
+                vd_bisector = self.get_voronoi_diagram_bisectors([(bisector, sign)])[0]
+            traces = plot_voronoi_diagram_bisector(
+                vd_bisector, self._xlim, self._ylim, self.BISECTOR_CLASS
+            )
+            self._traces += traces
+            traces_numbers = list(
+                range(self._figure_traces, self._figure_traces + len(traces))
+            )
+            if sign is None:
+                self._bisector_plot_dict[
+                    (str(bisector.get_object_to_hash()), True)
+                ] = traces_numbers
+                self._bisector_plot_dict[
+                    (str(bisector.get_object_to_hash()), False)
+                ] = traces_numbers
+            else:
+                self._bisector_plot_dict[
+                    (str(bisector.get_object_to_hash()), sign)
+                ] = traces_numbers
+            self._figure_traces += len(traces)
+            print("//////////////////////////////////////////////////////")
+            print(traces_numbers)
+            print("-------------------------------------------------------")
+            print(traces)
+            print("-------------------------------------------------------")
+            print(self._traces[traces_numbers[0] : traces_numbers[-1] + 1])
+
     def _add_boundaries_to_plot(self, boundaries: List[Boundary]):
         """Add boundaries to plot."""
         if self._plot_steps:
@@ -312,6 +359,9 @@ class VoronoiDiagram:
 
         if self._plot_steps:
             self._add_boundaries_to_plot([boundary_p_q_minus, boundary_p_q_plus])
+            self._add_bisector_to_plot(
+                bisector_p_q, None
+            )  # It doesn't matter the sign here.
 
         # Step 11.
         # Delete from Q the intersection between the left and right boundary of R*q, if any.
@@ -357,6 +407,37 @@ class VoronoiDiagram:
         if boundary is None:
             return
         self._traces[self._boundary_plot_dict[str(boundary)]] = None
+
+    def _update_boundaries_bisectors_figure_traces(
+        self, boundaries: List[Optional[Boundary]]
+    ):
+        """Update boundaries bisectors' figure traces."""
+        for boundary in boundaries:
+            if boundary is None:
+                continue
+            self._update_bisector_figure_traces(boundary.bisector, boundary.sign)
+
+    def _update_bisector_figure_traces(self, bisector: Bisector, sign: bool):
+        """Update bisector's figure traces."""
+        print("Updating bisector:", bisector)
+        bisector_traces = self._bisector_plot_dict[
+            (str(bisector.get_object_to_hash()), sign)
+        ]
+        bisector_other_sign_traces = self._bisector_plot_dict.get(
+            (str(bisector.get_object_to_hash()), not sign), []
+        )
+        if bisector_traces == bisector_other_sign_traces:
+            sign = None
+        for bisector_trace_i in bisector_traces:
+            print("trace to delete:", self._traces[bisector_trace_i])
+            self._traces[bisector_trace_i] = None
+        self._add_bisector_to_plot(bisector, sign)
+
+    def _add_vertex_trace(self, vertex: VoronoiDiagramVertex):
+        """Add vertex to vd trace."""
+        trace = plot_vertex(vertex)
+        self._traces.append(trace)
+        self._figure_traces += 1
 
     def _remove_boundaries_from_figure_traces(
         self, boundary1: Optional[Boundary], boundary2: Optional[Boundary]
@@ -449,15 +530,6 @@ class VoronoiDiagram:
         left_region_node = intersection_region_node.left_neighbor
         right_region_node = intersection_region_node.right_neighbor
 
-        if self._plot_steps:
-            # Remove
-            self._remove_boundaries_from_figure_traces(
-                intersection_region_node.value.left,
-                intersection_region_node.value.right,
-            )
-            # Add new boundary
-            self._add_boundary_to_plot(boundary_q_s)
-
         if intersection_region_node.value.left.bisector.is_vertical():
             self.add_end_vertical_bisector(
                 intersection_region_node.value.left.bisector,
@@ -474,6 +546,23 @@ class VoronoiDiagram:
             )
         else:
             self.add_end_bisector(intersection_region_node.value.right, p)
+
+        if self._plot_steps:
+            # Remove
+            self._remove_boundaries_from_figure_traces(
+                intersection_region_node.value.left,
+                intersection_region_node.value.right,
+            )
+            self._update_boundaries_bisectors_figure_traces(
+                [
+                    intersection_region_node.value.left,
+                    intersection_region_node.value.right,
+                ]
+            )
+            # Add new boundary
+            self._add_boundary_to_plot(boundary_q_s)
+            # Add new bisector
+            self._add_bisector_to_plot(bisector_q_s, boundary_q_s_sign)
 
         self.l_list.remove_region(intersection_region_node, boundary_q_s)
 
@@ -605,14 +694,13 @@ class VoronoiDiagram:
             print(self.l_list)
             print(self.q_queue)
             print(self.event)
+            print("In plot step")
             self._figure.data = []
-            actual_diagram_traces = plot_vertices_and_bisectors(
-                self.bisectors, [], self._xlim, self._ylim, self.BISECTOR_CLASS
-            )
-            for trace in self._traces + actual_diagram_traces:
+            for trace in self._traces:
                 if trace is not None:
                     self._figure.add_trace(trace)
             plot_sweep_line(self._figure, self._xlim, self._ylim, self.event)
+            plot_events_traces(self._figure, self.q_queue)
             # self._figure.show()
 
 
