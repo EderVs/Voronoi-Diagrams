@@ -413,14 +413,12 @@ class WeightedPointBisector(Bisector):
             (site1.get_highest_site_point().y > site2.get_highest_site_point().y)
             or (
                 site1.get_highest_site_point().y == site2.get_highest_site_point().y
-                and site1.get_rightest_site_point().x
-                > site2.get_rightest_site_point().x
+                and site1.compare_weights(site2) > 0
             )
             or (
                 site1.get_highest_site_point().y == site2.get_highest_site_point().y
-                and site1.get_rightest_site_point().x
-                == site2.get_rightest_site_point().x
-                and site1.compare_weights(site2) >= 0
+                and site1.compare_weights(site2) == 0
+                and site1.get_highest_site_point().x >= site2.get_highest_site_point().x
             )
         ):
             return (site1, site2)

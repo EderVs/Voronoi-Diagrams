@@ -59,6 +59,14 @@ class Event:
         """Check if this event is dominated to other event."""
         raise NotImplementedError
 
+    def get_comparison(self, event: Any) -> Decimal:
+        """Get comparison between 2 events."""
+        event_point = self.get_event_point()
+        other_event_point = event.get_event_point()
+        if other_event_point.y == event_point.y:
+            return event_point.x - other_event_point.x
+        return event_point.y - other_event_point.y
+
 
 class Site(Event):
     """Site to handle in Fortune's Algorithm."""
@@ -184,7 +192,7 @@ class WeightedSite(Site):
         )
 
     def compare_weights(self, site: Any) -> int:
-        """Compare weight between sites"""
+        """Compare weight between sites."""
         if self.weight >= 0:
             return self.weight - site.weight
         else:
@@ -311,3 +319,19 @@ class WeightedSite(Site):
     def get_object_to_hash(self) -> Any:
         """Get object to hash this site."""
         return (self.point.x, self.point.y, self.weight)
+
+    def get_comparison(self, event: Event) -> Decimal:
+        """Get comparison between 2 events."""
+        if not event.is_site:
+            return super().get_comparison(event)
+
+        # We now know that event is a Weighted site.
+        event_point = self.get_event_point()
+        other_event_point = event.get_event_point()
+        if other_event_point.y == event_point.y:
+            if self.weight == event.weight:
+                return event_point.x - other_event_point.x
+            # The smallest site will be first.
+            return self.weight - event.weight
+        print(event_point.y, other_event_point.y)
+        return event_point.y - other_event_point.y

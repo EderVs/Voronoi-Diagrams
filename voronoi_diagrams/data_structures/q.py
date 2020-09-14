@@ -23,25 +23,20 @@ class QNode(AVLNode):
 
     def is_contained(self, value: Event, *args: Any, **kwargs: Any) -> bool:
         """Value is contained in the Node."""
-        if self.value.is_site == value.is_site:
-            return value == self.value
-        return False
+        comparison = self.value.get_comparison(value)
+        return comparison == 0
 
     def is_left(self, value: Event, *args: Any, **kwargs: Any) -> bool:
         """Value is to the left of Node."""
-        event_point = self.value.get_event_point()
-        other_event_point = value.get_event_point()
-        if other_event_point.y == event_point.y:
-            return other_event_point.x < event_point.x
-        return other_event_point.y < event_point.y
+        comparison = self.value.get_comparison(value)
+        print("comparison")
+        print(comparison)
+        return comparison > 0
 
     def is_right(self, value: Event, *args: Any, **kwargs: Any) -> bool:
         """Value is to the right of Node."""
-        event_point = self.value.get_event_point()
-        other_event_point = value.get_event_point()
-        if other_event_point.y == event_point.y:
-            return other_event_point.x > event_point.x
-        return other_event_point.y > event_point.y
+        comparison = self.value.get_comparison(value)
+        return comparison < 0
 
 
 class QQueue:
