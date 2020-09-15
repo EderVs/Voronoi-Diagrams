@@ -48,17 +48,19 @@ def get_plot_scatter_boundary(
         else:
             step = abs(Decimal(xlim[0]) - boundary.get_site().point.x) / Decimal("1000")
             x_list = np.arange(Decimal(xlim[0]), boundary.get_site().point.x, step)
-        for x in x_list:
-            if x < xlim[0] or x > xlim[1]:
-                y_list.append(None)
-                continue
-            ys = boundary.formula_y(Decimal(x))
-            if len(ys) == 0:
-                y_list.append(None)
-            elif ys[0] >= ylim[0] and ys[0] <= ylim[1]:
-                y_list.append(ys[0])
-            else:
-                y_list.append(None)
+
+        if y_list == []:
+            for x in x_list:
+                if x < xlim[0] or x > xlim[1]:
+                    y_list.append(None)
+                    continue
+                ys = boundary.formula_y(Decimal(x))
+                if len(ys) == 0:
+                    y_list.append(None)
+                elif ys[0] >= ylim[0] and ys[0] <= ylim[1]:
+                    y_list.append(ys[0])
+                else:
+                    y_list.append(None)
     elif bisector_class == WeightedPointBisector:
         x_list = []
         y_list = []

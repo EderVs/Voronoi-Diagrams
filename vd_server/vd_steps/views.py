@@ -12,6 +12,7 @@ from django import http
 
 # VD
 from . import db
+from .utils import get_event_dict
 from voronoi_diagrams.fortunes_algorithm import (
     VoronoiDiagram,
     FortunesAlgorithm,
@@ -141,7 +142,8 @@ class StepInfoView(StepView):
 
     def handle_get(self, request):
         """GET method."""
-        vd = db.get_vd(self.ip)
-        response = {"is_next_step": vd.is_next_step()}
+        step_info, ok = db.get_current_step_info(self.ip)
+        if not ok:
+            return http.HttpResponseNotFound()
 
-        return http.HttpResponse(response)
+        return http.JsonResponse(step_info)

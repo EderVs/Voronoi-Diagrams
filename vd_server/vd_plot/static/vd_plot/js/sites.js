@@ -104,8 +104,7 @@ $('#first-step').click(function () {
         success: function (resp) {
             $('#plot').html(resp);
             $('#loading').html("")
-            // TODO: Call to get info about VD.
-            // TODO: Print L List and Q Queue.
+            get_info()
             // TODO: Enable Next step.
         },
         error: function (resp) {
@@ -126,8 +125,7 @@ $('#next-step').click(function () {
         success: function (resp) {
             $('#plot').html(resp);
             $('#loading').html("")
-            // TODO: Call to get info about VD.
-            // TODO: Print L List and Q Queue.
+            get_info()
             // TODO: Enable Next step.
         },
         error: function (resp) {
@@ -148,8 +146,7 @@ $('#prev-step').click(function () {
         success: function (resp) {
             $('#plot').html(resp);
             $('#loading').html("")
-            // TODO: Call to get info about VD.
-            // TODO: Print L List and Q Queue.
+            get_info()
             // TODO: Enable Next step.
         },
         error: function (resp) {
@@ -177,4 +174,43 @@ function get_sites() {
         sites.push(site);
     }
     return sites;
+}
+
+
+function get_info() {
+    $('#qqueue').html("LOADING")
+    $('#llist').html("LOADING")
+    $('#actual_event').html("LOADING")
+    $.ajax({
+        type: 'GET',
+        url: '/steps/info/',
+        dataType: 'json',
+        success: function (resp) {
+            $('#qqueue').html("")
+            $('#llist').html("")
+            $('#actual_event').html("")
+            for (let i = 0; i < resp.q_queue.length; i++) {
+                var event = resp.q_queue[i]
+                var event_str = ""
+                if (event.is_site) {
+                    event_str = "S(" + event.name + ")<br>"
+                } else {
+                    event_str = "I(" + event.point.x.toString() + ", " + event.point.y.toString() + ")<br>"
+                }
+                $('#qqueue').append(event_str);
+            }
+            var actual_event = resp.actual_event
+            var actual_event_str = ""
+            if (actual_event != null && actual_event.is_site) {
+                actual_event_str = "S(" + actual_event.name + ")<br>"
+            } else if (actual_event != null) {
+                actual_event_str = "I(" + actual_event.point.x.toString() + ", " + actual_event.point.y.toString() + ")<br>"
+            }
+            $('#actual_event').html(actual_event_str);
+            // TODO: Print L List.
+        },
+        error: function (resp) {
+            console.log(resp);
+        }
+    });
 }
