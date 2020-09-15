@@ -35,7 +35,7 @@ def get_site_traces(site: Site, site_class=Site):
     """Get site traces."""
     color = f"rgb({randint(0, 255)}, {randint(0, 255)}, {randint(0, 255)})"
     traces = []
-    if site_class == WeightedSite:
+    if site_class == WeightedSite and site.weight > 0:
         x_range, y_range = get_circle_ranges(
             site.point.x, site.point.y, site.weight, "r"
         )
