@@ -4,6 +4,9 @@
     <title>Voronoi diagrams</title>
     {% load static %}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="{% static 'vd_plot/js/sites.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'vd_plot/css/sites.css' %}">
+    <link rel="stylesheet" href="{% static 'vd_plot/css/steps.css' %}">
 </head>
 
 <body>
@@ -12,6 +15,27 @@
         <div id="plot"></div>
     </div>
     <div id="right">
+        <div id="steps">
+            <button type="submit" id="prev-step">Previous Step?</button>
+            <button type="submit" id="next-step">Next Step</button>
+        </div>
+        <div id="step_info">
+            <div id="actual_event_container">
+                <h4>Actual event</h4>
+                <div id="actual_event">
+                </div>
+            </div>
+            <div id="llist_container">
+                <h4>L List</h4>
+                <div id="llist">
+                </div>
+            </div>
+            <div id="qqueue_container">
+                <h4>Q Queue</h4>
+                <div id="qqueue">
+                </div>
+            </div>
+        </div>
         <div id="input">
             <form id="vd_form">
                 <div id="vd_type">
@@ -21,39 +45,22 @@
                     <label for="aw_vd">AW Voronoi Diagram</label>
                 </div>
                 <div id="limits">
+                    <label for="limit_x0">Limit x to left</label>
                     <input type="number" step="any" placeholder="limit_x0" name="limit_x0" value="-100" required>
+                    <label for="limit_x1">Limit x to right</label>
                     <input type="number" step="any" placeholder="limit_x1" name="limit_x1" value="100" required>
+                    <label for="limit_y0">Limit y to left</label>
                     <input type="number" step="any" placeholder="limit_y0" name="limit_y0" value="-100" required>
+                    <label for="limit_y1">Limit y to right</label>
                     <input type="number" step="any" placeholder="limit_y1" name="limit_y1" value="100" required>
                 </div>
-                <div id="steps">
-                    <button type="submit" id="first-step">First Step</button>
-                    <button type="submit" id="prev-step">Previous Step?</button>
-                    <button type="submit" id="next-step">Next Step</button>
-                </div>
-                <div id="step_info">
-                    <div id="actual_event_container">
-                        <h4>Actual event</h4>
-                        <div id="actual_event">
-                        </div>
-                    </div>
-                    <div id="qqueue_container">
-                        <h4>Q Queue</h4>
-                        <div id="qqueue">
-                        </div>
-                    </div>
-                    <div id="llist_container">
-                        <h4>L List</h4>
-                        <div id="llist">
-                        </div>
-                    </div>
-                </div>
+                <button type="submit" id="first-step">Each Step</button>
                 <button type="submit" id="plot-vd">Plot Voronoi Diagram</button>
+                <button type="button" id="add_site">Add site</button>
                 <div id="sites">
                     <input type="number" name="num_sites" id="num_sites" value=0>
                     <input type="number" name="actual_sites" id="actual_sites" value=0>
                 </div>
-                <button type="button" id="add_site">Add another site</button>
             </form>
         </div>
     </div>

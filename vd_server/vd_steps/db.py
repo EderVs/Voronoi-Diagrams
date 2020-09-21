@@ -12,7 +12,7 @@ from voronoi_diagrams.fortunes_algorithm import (
     DYNAMIC_MODE,
 )
 
-from .utils import get_event_dict
+from .utils import get_event_dict, get_region_dict
 
 Session = str
 Step = str
@@ -25,6 +25,8 @@ class VDStepInfo:
     q_queue: Dict[str, Any]
     l_list: Dict[str, Any]
     is_next_step: bool
+    is_prev_step: bool
+    is_diagram: bool
     actual_event: Dict[str, Any]
 
     def __init__(
@@ -32,12 +34,16 @@ class VDStepInfo:
         q_queue: List[Dict[str, Any]],
         l_list: List[Dict[str, Any]],
         is_next_step: bool,
+        is_prev_step: bool,
+        is_diagram: bool,
         actual_event: Optional[Dict[str, Any]],
     ):
         """Step info constructor."""
         self.q_queue = q_queue
         self.l_list = l_list
         self.is_next_step = is_next_step
+        self.is_prev_step = is_prev_step
+        self.is_diagram = is_diagram
         self.actual_event = actual_event
 
 
@@ -57,31 +63,43 @@ class VDEntry:
         """Create entry."""
         self.vd = vd
         self.created_at = datetime.now()
-        self.finished = False
         self.is_diagram = False
         self.steps = [self.vd._figure.to_html()]
         self.step_infos = []
         self.current_step = 0
+        self.finished = not vd.is_next_step()
         self.save_step_info()
 
     def save_step_info(self) -> None:
         """Save snapshot info of the current step."""
-        q_queue = []
-        for current_event in self.vd.q_queue.get_all_events():
-            q_queue.append(get_event_dict(current_event))
-        l_list = []
+        # Q Queue
+        q_queue_dict = []
+        for event in self.vd.q_queue.get_all_events():
+            q_queue_dict.append(get_event_dict(event))
+
+        l_list_dict = []
         if self.finished and self.is_diagram:
-            current_event = None
+            actual_event = None
         else:
-            current_event = get_event_dict(self.vd.event)
+            actual_event = get_event_dict(self.vd.event)
+            # L List
+            for region in self.vd.l_list.get_all_regions():
+                l_list_dict.append(get_region_dict(region))
+
         self.step_infos.append(
-            VDStepInfo(q_queue, l_list, self.vd.is_next_step(), current_event)
+            VDStepInfo(
+                q_queue=q_queue_dict,
+                l_list=l_list_dict,
+                is_next_step=self.vd.is_next_step(),
+                is_prev_step=self.current_step != 0,
+                is_diagram=self.is_diagram,
+                actual_event=actual_event,
+            )
         )
 
     def get_step_info(self) -> Dict[str, Any]:
         """Get current step info in a dict."""
         step_info = self.step_infos[self.current_step].__dict__.copy()
-        print(step_info)
         return step_info
 
 
@@ -141,12 +159,12 @@ def get_next_step(session: Session) -> (Step, bool):
     entry = db.get(session, None)
     if entry is None:
         return ("", False)
-    if entry.current_step == len(entry.steps) - 1:
+    entry.current_step += 1
+    if entry.current_step - 1 == len(entry.steps) - 1:
         ok = add_step(session)
         if not ok:
             return ("", False)
 
-    entry.current_step += 1
     return (entry.steps[entry.current_step], True)
 
 

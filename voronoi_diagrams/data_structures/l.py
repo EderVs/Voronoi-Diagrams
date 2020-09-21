@@ -1,7 +1,7 @@
 """L list implementation."""
 
 # Standard Library
-from typing import Any, Optional, Tuple
+from typing import Any, Optional, Tuple, List
 
 # AVL
 from .avl_tree import AVLTree, AVLNode
@@ -186,3 +186,14 @@ class LList:
         self.update_neighbors(left_neighbor, right_neighbor)
         self.update_boundaries(left_neighbor, new_boundary, right_neighbor)
         self.t.remove_node(region_node)
+
+    def get_all_regions(self) -> List[Region]:
+        """Get all region in the L List."""
+        if self.head is None:
+            return []
+        region_list = []
+        node = self.head
+        while node is not None:
+            region_list.append(node.value)
+            node = node.right_neighbor
+        return region_list

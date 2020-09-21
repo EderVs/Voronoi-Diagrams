@@ -22,19 +22,36 @@ function get_weighted_site_div(site_id) {
     </div>`
 }
 
-$(function () {
-    $('#add_site').click(function () {
-        if ($('input[name=vd_type]:checked', '#vd_form').val() == 'vd') {
-            $('#sites').append(get_site_div($('#actual_sites').attr("value")))
-        } else {
-            $('#sites').append(get_weighted_site_div($('#actual_sites').attr("value")))
-        }
-        $('#num_sites').attr("value", parseInt($('#num_sites').attr("value")) + 1)
-        $('#actual_sites').attr("value", parseInt($('#actual_sites').attr("value")) + 1)
-    });
-});
+function evaluate_start_buttons() {
+    if (parseInt($('#num_sites').attr("value")) >= 1) {
+        $('#first-step').removeAttr('disabled');
+        $('#plot-vd').removeAttr('disabled');
+    } else {
+        $('#first-step').attr('disabled', 'disabled');
+        $('#plot-vd').attr('disabled', 'disabled');
+    }
+}
 
-$('input[name=vd_type]', '#vd_form').click(function () {
+function add_site() {
+    if ($('input[name=vd_type]:checked', '#vd_form').val() == 'vd') {
+        $('#sites').append(get_site_div($('#actual_sites').attr("value")));
+    } else {
+        $('#sites').append(get_weighted_site_div($('#actual_sites').attr("value")));
+    }
+    $('#num_sites').attr("value", parseInt($('#num_sites').attr("value")) + 1);
+    $('#actual_sites').attr("value", parseInt($('#actual_sites').attr("value")) + 1);
+    evaluate_start_buttons();
+}
+
+$('#add_site').click(add_site);
+
+function remove_site(site_id) {
+    $('#site_' + site_id).remove()
+    $('#num_sites').attr("value", parseInt($('#num_sites').attr("value")) - 1)
+    evaluate_start_buttons();
+}
+
+function change_vd_type() {
     var all_input_w = $('input[class=site_w]', '#vd_form');
     if ($('input[name=vd_type]:checked', '#vd_form').val() == 'vd') {
         for (var i = 0; i < all_input_w.length; i++) {
@@ -47,12 +64,9 @@ $('input[name=vd_type]', '#vd_form').click(function () {
             all_input_w[i].required = true;
         }
     }
-});
-
-function remove_site(site_id) {
-    $('#site_' + site_id).remove()
-    $('#num_sites').attr("value", parseInt($('#num_sites').attr("value")) - 1)
 }
+
+$('input[name=vd_type]', '#vd_form').click(change_vd_type);
 
 function getFormData(form) {
     var unindexed_array = form.serializeArray();
@@ -105,7 +119,6 @@ $('#first-step').click(function () {
             $('#plot').html(resp);
             $('#loading').html("")
             get_info()
-            // TODO: Enable Next step.
         },
         error: function (resp) {
             $('#loading').html("")
@@ -156,8 +169,6 @@ $('#prev-step').click(function () {
     });
 })
 
-// TODO: Enable Prev step when next step is clicked.
-
 function get_sites() {
     var site_divs = $('.site');
     var sites = [];
@@ -176,6 +187,22 @@ function get_sites() {
     return sites;
 }
 
+function get_boundary_div(boundary) {
+    var boundary_div = "<div class='LBoundary' style='display: inline;'>";
+    if (boundary == null) {
+        boundary_div += "Null";
+    } else {
+        boundary_div += "B*"
+        if (boundary.sign) {
+            boundary_div += "+"
+        } else {
+            boundary_div += "-"
+        }
+        boundary_div += "(" + boundary.sites[0].name + ", " + boundary.sites[1].name + ")"
+    }
+    boundary_div += "</div>"
+    return boundary_div
+}
 
 function get_info() {
     $('#qqueue').html("LOADING")
@@ -186,9 +213,25 @@ function get_info() {
         url: '/steps/info/',
         dataType: 'json',
         success: function (resp) {
-            $('#qqueue').html("")
-            $('#llist').html("")
-            $('#actual_event').html("")
+            $('#qqueue').html("");
+            $('#llist').html("");
+            $('#actual_event').html("");
+
+            // L List
+            console.log(resp)
+            if (resp.l_list.length > 0) {
+                $('#llist').append(get_boundary_div(resp.l_list[0].left));
+            }
+            for (let i = 0; i < resp.l_list.length; i++) {
+                var region = resp.l_list[i]
+                var region_div = "<div class='LRegion' style='display: inline;'>";
+                region_div += "R(" + region.site.name + ")"
+                region_div += "</div>";
+                $('#llist').append(region_div);
+                $('#llist').append(get_boundary_div(resp.l_list[i].right));
+            }
+
+            // Q Queue
             for (let i = 0; i < resp.q_queue.length; i++) {
                 var event = resp.q_queue[i]
                 var event_str = ""
@@ -199,6 +242,8 @@ function get_info() {
                 }
                 $('#qqueue').append(event_str);
             }
+
+            // Actual Event
             var actual_event = resp.actual_event
             var actual_event_str = ""
             if (actual_event != null && actual_event.is_site) {
@@ -207,10 +252,26 @@ function get_info() {
                 actual_event_str = "I(" + actual_event.point.x.toString() + ", " + actual_event.point.y.toString() + ")<br>"
             }
             $('#actual_event').html(actual_event_str);
-            // TODO: Print L List.
+
+            // Steps
+            if (resp.is_next_step || !resp.is_diagram) {
+                $('#next-step').removeAttr('disabled');
+            } else {
+                $('#next-step').attr('disabled', 'disabled');
+            }
+            if (resp.is_prev_step) {
+                $('#prev-step').removeAttr('disabled');
+            } else {
+                $('#prev-step').attr('disabled', 'disabled');
+            }
         },
         error: function (resp) {
             console.log(resp);
         }
     });
 }
+
+$('#prev-step').attr('disabled', 'disabled');
+$('#next-step').attr('disabled', 'disabled');
+evaluate_start_buttons();
+add_site();
