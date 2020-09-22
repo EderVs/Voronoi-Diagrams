@@ -1,0 +1,9 @@
+
+#plot {
+    height: 750px;
+}
+
+#loading {
+    position: absolute;
+    z-index: 1000;
+}

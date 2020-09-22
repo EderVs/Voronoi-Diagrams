@@ -116,7 +116,7 @@ class VoronoiDiagram:
         self._plot_steps = plot_steps
         if self._plot_steps:
             self._figure = go.Figure()
-            layout = go.Layout(height=1000, width=1400,)
+            layout = go.Layout(height=750, width=800)
             template = dict(layout=layout)
             self._figure.update_layout(title="VD", template=template)
             self._figure.update_xaxes(range=list(xlim))

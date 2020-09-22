@@ -2,16 +2,37 @@ var site_name_index = 0;
 var site_x_index = 1;
 var site_y_index = 2;
 var site_w_index = 3;
+var session = Date.now().toString();
+var csrftoken = "";
+
+window.addEventListener("load", function () {
+    csrftoken = $('[name=csrfmiddlewaretoken]').attr("value");
+});
+
+window.addEventListener("beforeunload", function (e) {
+    $.ajax({
+        type: 'POST',
+        url: '/steps/delete/',
+        dataType: 'json',
+        data: { session: session },
+        headers: { 'X-CSRFToken': csrftoken }
+    });
+});
 
 function get_site_div(site_id) {
-    return `<div class="site" id="site_` + site_id + `">
-    <input type="text" class="site_name" placeholder="Name" name="site`+ site_id + `_name">
-    <input type="number" step="any" class="site_x" placeholder="Site x" name="site`+ site_id + `_x" required>
-    <input type="number" step="any" class="site_y" placeholder="Site y" name="site`+ site_id + `_y" required>
-    <input type="number" step="any" class="site_w" placeholder="Site weight" name="site`+ site_id + `_w" value="" style="display:none">
-    <button type="button" id="remove_site_`+ site_id + `" onclick="remove_site(` + site_id + `)">Remove Site</button>
+    return `<div class="site col" id="site_` + site_id + `">
+    <div class="row">
+        <input type="text" class="site_name" placeholder="Name" name="site`+ site_id + `_name">
+        <button type="button" id="remove_site_`+ site_id + `" onclick="remove_site(` + site_id + `)">Remove Site</button>
+    </div>
+    <div class="row">
+        <input type="number" step="any" class="site_x" placeholder="Site x" name="site`+ site_id + `_x" required>
+        <input type="number" step="any" class="site_y" placeholder="Site y" name="site`+ site_id + `_y" required>
+        <input type="number" step="any" class="site_w" placeholder="Site weight" name="site`+ site_id + `_w" value="" style="display:none">
+    </div>
     </div>`
 }
+
 function get_weighted_site_div(site_id) {
     return `<div class="site" id="site_` + site_id + `">
     <input type="text" class="site_name" placeholder="Name" name="site`+ site_id + `_name">
@@ -93,7 +114,7 @@ $('#plot-vd').click(function () {
         type: 'GET',
         url: '/plot-vd/',
         dataType: 'html',
-        data: { body: JSON.stringify(data) },
+        data: { body: JSON.stringify(data), session: session },
         success: function (resp) {
             $('#plot').html(resp);
             $('#loading').html("")
@@ -109,12 +130,11 @@ $('#first-step').click(function () {
     data = getFormData(vd_form);
     data["sites"] = get_sites();
     $('#loading').html("LOADING");
-    // TODO: Disable plot VD?
     $.ajax({
         type: 'GET',
         url: '/steps/first/',
         dataType: 'html',
-        data: { body: JSON.stringify(data) },
+        data: { body: JSON.stringify(data), session: session },
         success: function (resp) {
             $('#plot').html(resp);
             $('#loading').html("")
@@ -129,17 +149,15 @@ $('#first-step').click(function () {
 
 $('#next-step').click(function () {
     $('#loading').html("LOADING");
-    // TODO: Disable plot VD?
     $.ajax({
         type: 'GET',
         url: '/steps/next/',
         dataType: 'html',
-        data: { body: JSON.stringify(data) },
+        data: { body: JSON.stringify(data), session: session },
         success: function (resp) {
             $('#plot').html(resp);
             $('#loading').html("")
             get_info()
-            // TODO: Enable Next step.
         },
         error: function (resp) {
             $('#loading').html("")
@@ -150,17 +168,15 @@ $('#next-step').click(function () {
 
 $('#prev-step').click(function () {
     $('#loading').html("LOADING");
-    // TODO: Disable plot VD?
     $.ajax({
         type: 'GET',
         url: '/steps/prev/',
         dataType: 'html',
-        data: { body: JSON.stringify(data) },
+        data: { body: JSON.stringify(data), session: session },
         success: function (resp) {
             $('#plot').html(resp);
             $('#loading').html("")
             get_info()
-            // TODO: Enable Next step.
         },
         error: function (resp) {
             $('#loading').html("")
@@ -173,13 +189,13 @@ function get_sites() {
     var site_divs = $('.site');
     var sites = [];
     for (var i = 0; i < site_divs.length; i++) {
-        var site_name = site_divs[i].children[site_name_index].value;
-        var site_x = site_divs[i].children[site_x_index].value;
-        var site_y = site_divs[i].children[site_y_index].value;
+        var site_name = $(site_divs.get(i)).find('input[class="site_name"]')[0].value;
+        var site_x = $(site_divs.get(i)).find('input[class="site_x"]')[0].value;
+        var site_y = $(site_divs.get(i)).find('input[class="site_y"]')[0].value;
         if ($('input[name=vd_type]:checked', '#vd_form').val() == 'vd') {
             var site = [site_x, site_y, site_name];
         } else {
-            var site_w = site_divs[i].children[site_w_index].value;
+            var site_w = $(site_divs.get(i)).find('input[class="site_w"]')[0].value;
             var site = [site_x, site_y, site_w, site_name];
         }
         sites.push(site);
@@ -212,6 +228,7 @@ function get_info() {
         type: 'GET',
         url: '/steps/info/',
         dataType: 'json',
+        data: { session: session },
         success: function (resp) {
             $('#qqueue').html("");
             $('#llist').html("");
@@ -275,3 +292,21 @@ $('#prev-step').attr('disabled', 'disabled');
 $('#next-step').attr('disabled', 'disabled');
 evaluate_start_buttons();
 add_site();
+
+$(document).ready(function () {
+    $('#sidebarOpen').on('click', function () {
+        console.log("hello0");
+        $('#sidebar').toggleClass('active');
+    });
+    $('#sidebarCollapse').on('click', function () {
+        console.log("hello1");
+        $('#sidebar').toggleClass('active');
+    });
+    $('#left').on('click', function () {
+        if ($('#sidebar').hasClass('active')) {
+            console.log("hello");
+            $('#sidebar').toggleClass('active');
+        }
+    });
+
+});

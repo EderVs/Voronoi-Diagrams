@@ -9,4 +9,5 @@ urlpatterns = [
     path("first/", views.FirstStepView.as_view(), name="first_step"),
     path("prev/", views.PlotPrevStepView.as_view(), name="prev_step"),
     path("info/", views.StepInfoView.as_view(), name="step_info"),
+    path("delete/", views.DeleteSession.as_view(), name="delete_session"),
 ]

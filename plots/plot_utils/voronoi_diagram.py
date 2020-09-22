@@ -39,9 +39,8 @@ def get_vd_figure(
     site_class: Type[Site] = Site,
 ) -> go.Figure:
     """Get figure of voronoi diagram."""
-
     figure = go.Figure()
-    layout = go.Layout(height=1000, width=1000,)
+    layout = go.Layout(height=750, width=800)
     template = dict(layout=layout)
     figure.update_layout(title="VD", template=template)
     figure.update_xaxes(range=list(xlim))

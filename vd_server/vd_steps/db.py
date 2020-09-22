@@ -3,6 +3,7 @@
 # Standard Library
 from typing import Optional, Dict, List, Any
 from datetime import datetime
+import threading
 
 # Voronoi Diagrams
 from plots.plot_utils.voronoi_diagram import get_vd_html
@@ -190,9 +191,20 @@ def get_current_step(session: Session) -> (Step, bool):
 
 
 def get_current_step_info(session: Session) -> (Dict[str, Any], bool):
-    """Get currutne step info."""
+    """Get current step info."""
     entry = db.get(session, None)
     if entry is None:
         return ({}, False)
 
     return (entry.get_step_info(), True)
+
+
+lock = threading.Lock()
+
+
+def remove_session(session: Session) -> None:
+    """Remove session VD."""
+    with lock:
+        if session in db:
+            print(f"session {session} deleted")
+            del db[session]

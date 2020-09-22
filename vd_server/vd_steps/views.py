@@ -24,30 +24,29 @@ from voronoi_diagrams.models import Point
 class StepView(View):
     """Step View that will have the visitor's ip."""
 
-    ip: str
+    session: str
     sites: List[Any]
     names: List[Any]
     xlim: Tuple[Decimal, Decimal]
     ylim: Tuple[Decimal, Decimal]
     vd_type: str
 
-    def set_visitors_ip(self, request):
-        """Set visitors ip."""
-        x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
-
-        if x_forwarded_for:
-            self.ip = x_forwarded_for.split(",")[0]
+    def set_visitors_session(self, request):
+        """Set visitors session."""
+        if request.method == "GET":
+            self.session = request.GET.get("session")
         else:
-            self.ip = request.META.get("REMOTE_ADDR")
+            self.session = request.POST.get("session")
+        print(self.session)
 
     def get(self, request):
         """GET method."""
-        self.set_visitors_ip(request)
+        self.set_visitors_session(request)
         return self.handle_get(request)
 
     def post(self, request):
         """POST method."""
-        self.set_visitors_ip(request)
+        self.set_visitors_session(request)
         return self.handle_post(request)
 
     def handle_get(self, request):
@@ -86,10 +85,12 @@ class FirstStepView(StepView):
         )
         if vd_type == "vd":
             for x, y, name in body_data["sites"]:
+                print(x, y, name)
                 sites.append(Point(Decimal(x), Decimal(y)))
                 names.append(name)
         elif vd_type == "aw_vd":
             for x, y, w, name in body_data["sites"]:
+                print(x, y, w, name)
                 sites.append((Point(Decimal(x), Decimal(y)), Decimal(w)))
                 names.append(name)
 
@@ -105,8 +106,10 @@ class FirstStepView(StepView):
         if err is not None:
             return err
 
-        db.save_vd(self.ip, self.sites, self.names, self.xlim, self.ylim, self.vd_type)
-        step, ok = db.get_current_step(self.ip)
+        db.save_vd(
+            self.session, self.sites, self.names, self.xlim, self.ylim, self.vd_type
+        )
+        step, ok = db.get_current_step(self.session)
         if not ok:
             return http.HttpResponseNotFound()
 
@@ -118,7 +121,7 @@ class PlotNextStepView(StepView):
 
     def handle_get(self, request):
         """GET method."""
-        step, ok = db.get_next_step(self.ip)
+        step, ok = db.get_next_step(self.session)
         if not ok:
             return http.HttpResponseNotFound()
 
@@ -130,7 +133,7 @@ class PlotPrevStepView(StepView):
 
     def handle_get(self, request):
         """GET method."""
-        step, ok = db.get_prev_step(self.ip)
+        step, ok = db.get_prev_step(self.session)
         if not ok:
             return http.HttpResponseNotFound()
 
@@ -142,8 +145,17 @@ class StepInfoView(StepView):
 
     def handle_get(self, request):
         """GET method."""
-        step_info, ok = db.get_current_step_info(self.ip)
+        step_info, ok = db.get_current_step_info(self.session)
         if not ok:
             return http.HttpResponseNotFound()
 
         return http.JsonResponse(step_info)
+
+
+class DeleteSession(StepView):
+    """Delete Session VD."""
+
+    def handle_post(self, request):
+        """Post method."""
+        db.remove_session(self.session)
+        return http.HttpResponse()

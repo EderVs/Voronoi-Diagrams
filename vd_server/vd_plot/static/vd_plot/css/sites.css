@@ -2,3 +2,46 @@
 #num_sites, #actual_sites {
     display: none
 }
+
+#sidebar {
+    background-color: white;
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: -500px;
+    min-width: 500px;
+    max-width: 500px;
+    min-height: 100vh;
+    transition: all 0.3s;
+    border-left: solid 2px rgb(50, 50, 50);
+}
+
+#sidebar.active {
+    position: absolute;
+    right: 0;
+}
+
+#sidebar input[type=number], #sidebar input[type=text], #sidebar .site button {
+    width: 106px
+}
+
+#sidebar .input-category {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+#sidebar .site input, #sidebar .site button {
+    margin: 1em 1em 0em 0em;
+    height: 2em;
+}
+
+#sidebar .site {
+    padding-bottom: 1em;
+    border-bottom: solid 1px rgb(165, 165, 165);
+}
+
+
+#sidebarOpen {
+    position: absolute;
+    right: 0;
+}
