@@ -14,6 +14,7 @@ def get_event_dict(event: Event) -> Dict[str, Any]:
     final_event_dict["point"] = event.point.__dict__.copy()
     final_event_dict["is_site"] = event.is_site
     final_event_dict["name"] = event.name
+    final_event_dict["event_str"] = event.get_event_str()
     if event.is_site and "weight" in event_dict:
         final_event_dict["weight"] = event_dict["weight"]
     return final_event_dict

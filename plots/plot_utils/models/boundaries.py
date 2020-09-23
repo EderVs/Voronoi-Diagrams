@@ -138,6 +138,7 @@ def get_plot_scatter_boundary(
         name=str(boundary),
         connectgaps=True,
         line={"dash": "dot"},
+        legendgroup="boundaries",
     )
 
 

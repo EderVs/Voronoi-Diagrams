@@ -51,6 +51,14 @@ class Event:
         event_str = self.get_str()
         return f"{self.name} {event_str}"
 
+    def get_display_str(self):
+        """Get string representation in plot."""
+        return f"{self.name} S({self.get_point_str()})"
+
+    def get_event_str(self):
+        """Get event str."""
+        raise NotImplementedError
+
     def __repr__(self):
         """Get object representation."""
         return self.__str__()
@@ -82,6 +90,14 @@ class Site(Event):
     def __eq__(self, site: Any) -> bool:
         """Get equality between sites."""
         return self.point.x == site.point.x and self.point.y == site.point.y
+
+    def get_display_str(self):
+        """Get string representation in plot."""
+        return f"{self.name} S({self.get_point_str()})"
+
+    def get_event_str(self):
+        """Get event str."""
+        return f"S {self.name}"
 
     def get_x_frontier_pointing_to_point(self, point: Point) -> Decimal:
         """Get the last point of the site pointing to given point."""
@@ -160,6 +176,10 @@ class IntersectionEvent(Event):
     def get_str(self):
         """Get string representation of Site."""
         return f"I({self.get_point_str()})"
+
+    def get_event_str(self):
+        """Get event str."""
+        return self.get_str()
 
     def get_event_point(self) -> Point:
         """Get event point to evaluate."""

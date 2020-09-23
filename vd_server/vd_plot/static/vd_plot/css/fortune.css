@@ -1,6 +1,7 @@
 
 #plot {
     height: 750px;
+    border: solid 1px black;
 }
 
 #loading {

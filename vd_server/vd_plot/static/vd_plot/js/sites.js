@@ -34,12 +34,16 @@ function get_site_div(site_id) {
 }
 
 function get_weighted_site_div(site_id) {
-    return `<div class="site" id="site_` + site_id + `">
-    <input type="text" class="site_name" placeholder="Name" name="site`+ site_id + `_name">
-    <input type="number" step="any" class="site_x" placeholder="Site x" name="site`+ site_id + `_x" required>
-    <input type="number" step="any" class="site_y" placeholder="Site y" name="site`+ site_id + `_y" required>
-    <input type="number" step="any" class="site_w" placeholder="Site weight" name="site`+ site_id + `_w" required>
-    <button type="button" id="remove_site_`+ site_id + `" onclick="remove_site(` + site_id + `)">Remove Site</button>
+    return `<div class="site col" id="site_` + site_id + `">
+    <div class="row">
+        <input type="text" class="site_name" placeholder="Name" name="site`+ site_id + `_name">
+        <button type="button" id="remove_site_`+ site_id + `" onclick="remove_site(` + site_id + `)">Remove Site</button>
+    </div>
+    <div class="row">
+        <input type="number" step="any" class="site_x" placeholder="Site x" name="site`+ site_id + `_x" required>
+        <input type="number" step="any" class="site_y" placeholder="Site y" name="site`+ site_id + `_y" required>
+        <input type="number" step="any" class="site_w" placeholder="Site weight" name="site`+ site_id + `_w" value="">
+    </div>
     </div>`
 }
 
@@ -111,17 +115,40 @@ $('#plot-vd').click(function () {
     data["sites"] = get_sites();
     $('#loading').html("LOADING");
     $.ajax({
-        type: 'GET',
-        url: '/plot-vd/',
-        dataType: 'html',
-        data: { body: JSON.stringify(data), session: session },
-        success: function (resp) {
-            $('#plot').html(resp);
-            $('#loading').html("")
+        type: 'POST',
+        url: '/steps/delete/',
+        dataType: 'json',
+        data: { session: session },
+        headers: { 'X-CSRFToken': csrftoken },
+        success: function (r) {
+            $.ajax({
+                type: 'GET',
+                url: '/plot-vd/',
+                dataType: 'html',
+                data: { body: JSON.stringify(data), session: session },
+                success: function (resp) {
+                    console.log("yep");
+                    $('#plot').html(resp);
+                    $('#loading').html("")
+                    // Step buttons.
+                    $('#next-step').attr('disabled', 'disabled');
+                    $('#prev-step').attr('disabled', 'disabled');
+                    // Actual Event
+                    $('#actual_event').html("");
+                    // Queue
+                    $('#qqueue').html("");
+                    // LList
+                    $('#llist').html("");
+                },
+                error: function (resp) {
+                    console.log(resp);
+                    $('#loading').html("")
+                }
+            });
         },
         error: function (resp) {
-            $('#loading').html("")
             console.log(resp);
+            $('#loading').html("")
         }
     });
 })
@@ -251,24 +278,14 @@ function get_info() {
             // Q Queue
             for (let i = 0; i < resp.q_queue.length; i++) {
                 var event = resp.q_queue[i]
-                var event_str = ""
-                if (event.is_site) {
-                    event_str = "S(" + event.name + ")<br>"
-                } else {
-                    event_str = "I(" + event.point.x.toString() + ", " + event.point.y.toString() + ")<br>"
-                }
-                $('#qqueue').append(event_str);
+                var event_div = "<div class='event'>" + event.event_str + "</div>"
+                $('#qqueue').append(event_div);
             }
 
             // Actual Event
             var actual_event = resp.actual_event
-            var actual_event_str = ""
-            if (actual_event != null && actual_event.is_site) {
-                actual_event_str = "S(" + actual_event.name + ")<br>"
-            } else if (actual_event != null) {
-                actual_event_str = "I(" + actual_event.point.x.toString() + ", " + actual_event.point.y.toString() + ")<br>"
-            }
-            $('#actual_event').html(actual_event_str);
+            var actual_event_div = "<div class='event'>" + actual_event.event_str + "</div>"
+            $('#actual_event').html(actual_event_div);
 
             // Steps
             if (resp.is_next_step || !resp.is_diagram) {

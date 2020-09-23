@@ -1,0 +1,13 @@
+#steps {
+    margin-top: 2em;
+    height: 60px;
+}
+
+#actual_event {
+    height: 4em;
+}
+
+#qqueue {
+    height: 650px;
+    overflow: scroll;
+}

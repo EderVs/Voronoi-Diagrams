@@ -158,4 +158,4 @@ class DeleteSession(StepView):
     def handle_post(self, request):
         """Post method."""
         db.remove_session(self.session)
-        return http.HttpResponse()
+        return http.JsonResponse({})

@@ -13,5 +13,10 @@ from .points import plot_point
 def plot_vertex(vertex: VoronoiDiagramVertex):
     """Plot vertex."""
     return plot_point(
-        vertex.point.x, vertex.point.y, name=str(vertex), symbol="star-dot", size=10,
+        vertex.point.x,
+        vertex.point.y,
+        name=str(vertex),
+        symbol="star-dot",
+        size=10,
+        group="vertices",
     )

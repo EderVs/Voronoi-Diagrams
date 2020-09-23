@@ -35,6 +35,15 @@ def get_site_traces(site: Site, site_class=Site):
     """Get site traces."""
     color = f"rgb({randint(0, 255)}, {randint(0, 255)}, {randint(0, 255)})"
     traces = []
+    traces.append(
+        get_point_trace(
+            site.point.x,
+            site.point.y,
+            name=f"{site.get_display_str()}",
+            color=color,
+            group="sites",
+        )
+    )
     if site_class == WeightedSite and site.weight > 0:
         x_range, y_range = get_circle_ranges(
             site.point.x, site.point.y, site.weight, "r"
@@ -45,14 +54,12 @@ def get_site_traces(site: Site, site_class=Site):
                 x=x_range,
                 y=y_range,
                 mode="lines",
-                name=f"Weight {str(site)}",
+                name=f"{str(site.name)} weight: {'{0:.4f}'.format(site.weight)}",
                 line=line_properties,
                 connectgaps=True,
+                legendgroup="sites",
             )
         )
-    traces.append(
-        get_point_trace(site.point.x, site.point.y, name=f"{str(site)}", color=color)
-    )
     return traces
 
 
@@ -79,7 +86,12 @@ def plot_sweep_line(figure: go.Figure, xlim, ylim, event: Event):
     line_properties = {"width": 3.5, "dash": "dash"}
     figure.add_trace(
         go.Scatter(
-            x=x_range, y=y_range, mode="lines", name="Sweep line", line=line_properties
+            x=x_range,
+            y=y_range,
+            mode="lines",
+            name="Sweep line",
+            line=line_properties,
+            legendgroup="sweepline",
         )
     )
 
@@ -106,9 +118,10 @@ def plot_events_traces(figure: go.Figure, q_queue: QQueue):
             get_point_trace(
                 event.get_event_point().x,
                 event.get_event_point().y,
-                name=f"{str(event.get_str())}",
+                name=f"{event.get_event_str()}",
                 color=color,
                 symbol="diamond",
                 size=8,
+                group="events",
             )
         )
