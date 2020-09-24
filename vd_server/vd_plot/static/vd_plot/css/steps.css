@@ -3,11 +3,38 @@
     height: 60px;
 }
 
+#steps-responsive {
+    margin-top: 2em;
+    height: 60px;
+}
+
 #actual_event {
     height: 4em;
 }
 
+#actual_event-responsive {
+    height: 4em;
+}
+
 #qqueue {
-    height: 650px;
+    height: 522px;
     overflow: scroll;
+}
+
+#qqueue-responsive {
+    height: 522px;
+    overflow: scroll;
+}
+
+#bottom-responsive {
+    display: none;
+}
+
+@media screen and (max-width: 1320px) {
+    #bottom-responsive {
+        display: inline-block;
+    }
+    #right {
+        display: none;
+    }
 }

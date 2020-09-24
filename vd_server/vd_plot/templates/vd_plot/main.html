@@ -28,39 +28,62 @@
 <body>
     <div class="container" id="wrapper">
         <div>
-            <div id="fortune" class="row">
-                <div id="left" class="col-9">
-                    <div id="loading"></div>
-                    <div id="plot"></div>
-                    <div id="llist_container">
-                        <h4>L List</h4>
-                        <div id="llist">
+            <div id="fortune" class="col">
+                <div id="top" class="row">
+                    <div id="left" class="col-xl-9">
+                        <div id="loading"></div>
+                        <div id="plot"></div>
+                    </div>
+                    <div id="right" class="col-3">
+                        <div id="steps">
+                            <button type="submit" id="prev-step">Prev Step</button>
+                            <button type="submit" id="next-step">Next Step</button>
+                            <button type="button" id="sidebarOpen" class="btn btn-info">
+                                <i class="fas fa-align-left"></i>
+                            </button>
+                        </div>
+                        <div id="step_info">
+                            <div id="actual_event_container">
+                                <h4>Actual event</h4>
+                                <div id="actual_event">
+                                </div>
+                            </div>
+                            <div id="qqueue_container">
+                                <h4>Q Queue</h4>
+                                <div id="qqueue">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div id="right" class="col-3">
-                    <div id="steps">
-                        <button type="submit" id="prev-step">Prev Step</button>
-                        <button type="submit" id="next-step">Next Step</button>
-                        <button type="button" id="sidebarOpen" class="btn btn-info">
+                <div id="llist_container" class="col">
+                    <h4 class="row">L List</h4>
+                    <div id="llist" class="row">
+                    </div>
+                </div>
+                <div id="bottom-responsive" class="col">
+                    <div id="steps-responsive">
+                        <button type="submit" id="prev-step-responsive">Prev Step</button>
+                        <button type="submit" id="next-step-responsive">Next Step</button>
+                        <button type="button" id="sidebarOpen-responsive" class="btn btn-info">
                             <i class="fas fa-align-left"></i>
                         </button>
                     </div>
-                    <div id="step_info">
-                        <div id="actual_event_container">
+                    <div id="step_info-responsive">
+                        <div id="actual_event_container-responsive">
                             <h4>Actual event</h4>
-                            <div id="actual_event">
+                            <div id="actual_event-responsive">
                             </div>
                         </div>
-                        <div id="qqueue_container">
+                        <div id="qqueue_container-responsive">
                             <h4>Q Queue</h4>
-                            <div id="qqueue">
+                            <div id="qqueue-responsive">
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div id="sidebar" class="col">
+            <div id="sidebar">
                 <div>
                     <button type="button" id="sidebarCollapse" class="btn btn-info sidebar-button">
                         <i class="fas fa-align-left"></i>

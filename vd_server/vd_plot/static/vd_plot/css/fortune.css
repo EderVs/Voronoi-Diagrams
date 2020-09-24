@@ -8,3 +8,24 @@
     position: absolute;
     z-index: 1000;
 }
+
+#llist_container {
+    padding-top: 1em;
+    height: 160px;
+    overflow: scroll;
+}
+
+.LBoundary, .LRegion {
+    border: solid 1px;
+    margin-right: 0.5em;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+}
+
+.LBoundary {
+    border-color: pink;
+}
+
+.LRegion {
+    border-color: teal;
+}

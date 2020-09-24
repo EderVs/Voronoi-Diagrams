@@ -132,7 +132,9 @@ $('#plot-vd').click(function () {
                     $('#loading').html("")
                     // Step buttons.
                     $('#next-step').attr('disabled', 'disabled');
+                    $('#next-step-responsive').attr('disabled', 'disabled');
                     $('#prev-step').attr('disabled', 'disabled');
+                    $('#prev-step-responsive').attr('disabled', 'disabled');
                     // Actual Event
                     $('#actual_event').html("");
                     // Queue
@@ -174,7 +176,7 @@ $('#first-step').click(function () {
     });
 })
 
-$('#next-step').click(function () {
+function next_step() {
     $('#loading').html("LOADING");
     $.ajax({
         type: 'GET',
@@ -191,9 +193,13 @@ $('#next-step').click(function () {
             console.log(resp);
         }
     });
-})
+}
 
-$('#prev-step').click(function () {
+$('#next-step').click(next_step)
+
+$('#next-step-responsive').click(next_step)
+
+function prev_step() {
     $('#loading').html("LOADING");
     $.ajax({
         type: 'GET',
@@ -210,7 +216,10 @@ $('#prev-step').click(function () {
             console.log(resp);
         }
     });
-})
+}
+
+$('#prev-step').click(prev_step)
+$('#prev-step-responsive').click(prev_step)
 
 function get_sites() {
     var site_divs = $('.site');
@@ -231,7 +240,7 @@ function get_sites() {
 }
 
 function get_boundary_div(boundary) {
-    var boundary_div = "<div class='LBoundary' style='display: inline;'>";
+    var boundary_div = "<div class='LBoundary'>";
     if (boundary == null) {
         boundary_div += "Null";
     } else {
@@ -247,6 +256,13 @@ function get_boundary_div(boundary) {
     return boundary_div
 }
 
+function get_region_div(region) {
+    var region_div = "<div class='LRegion' style='display: inline;'>";
+    region_div += "R(" + region.site.name + ")";
+    region_div += "</div>";
+    return region_div;
+}
+
 function get_info() {
     $('#qqueue').html("LOADING")
     $('#llist').html("LOADING")
@@ -257,9 +273,12 @@ function get_info() {
         dataType: 'json',
         data: { session: session },
         success: function (resp) {
+            console.log(resp);
             $('#qqueue').html("");
+            $('#qqueue-responsive').html("");
             $('#llist').html("");
             $('#actual_event').html("");
+            $('#actual_event-responsive').html("");
 
             // L List
             console.log(resp)
@@ -268,10 +287,7 @@ function get_info() {
             }
             for (let i = 0; i < resp.l_list.length; i++) {
                 var region = resp.l_list[i]
-                var region_div = "<div class='LRegion' style='display: inline;'>";
-                region_div += "R(" + region.site.name + ")"
-                region_div += "</div>";
-                $('#llist').append(region_div);
+                $('#llist').append(get_region_div(region));
                 $('#llist').append(get_boundary_div(resp.l_list[i].right));
             }
 
@@ -280,23 +296,31 @@ function get_info() {
                 var event = resp.q_queue[i]
                 var event_div = "<div class='event'>" + event.event_str + "</div>"
                 $('#qqueue').append(event_div);
+                $('#qqueue-responsive').append(event_div);
             }
 
             // Actual Event
-            var actual_event = resp.actual_event
-            var actual_event_div = "<div class='event'>" + actual_event.event_str + "</div>"
-            $('#actual_event').html(actual_event_div);
+            if (resp.actual_event) {
+                var actual_event = resp.actual_event
+                var actual_event_div = "<div class='event'>" + actual_event.event_str + "</div>"
+                $('#actual_event').html(actual_event_div);
+                $('#actual_event-responsive').html(actual_event_div);
+            }
 
             // Steps
             if (resp.is_next_step || !resp.is_diagram) {
                 $('#next-step').removeAttr('disabled');
+                $('#next-step-responsive').removeAttr('disabled');
             } else {
                 $('#next-step').attr('disabled', 'disabled');
+                $('#next-step-responsive').attr('disabled', 'disabled');
             }
             if (resp.is_prev_step) {
                 $('#prev-step').removeAttr('disabled');
+                $('#prev-step-responsive').removeAttr('disabled');
             } else {
                 $('#prev-step').attr('disabled', 'disabled');
+                $('#prev-step-responsive').attr('disabled', 'disabled');
             }
         },
         error: function (resp) {
@@ -307,23 +331,35 @@ function get_info() {
 
 $('#prev-step').attr('disabled', 'disabled');
 $('#next-step').attr('disabled', 'disabled');
+$('#prev-step-responsive').attr('disabled', 'disabled');
+$('#next-step-responsive').attr('disabled', 'disabled');
 evaluate_start_buttons();
 add_site();
 
 $(document).ready(function () {
     $('#sidebarOpen').on('click', function () {
-        console.log("hello0");
+        $('#sidebar').toggleClass('active');
+    });
+    $('#sidebarOpen-responsive').on('click', function () {
         $('#sidebar').toggleClass('active');
     });
     $('#sidebarCollapse').on('click', function () {
-        console.log("hello1");
         $('#sidebar').toggleClass('active');
     });
     $('#left').on('click', function () {
         if ($('#sidebar').hasClass('active')) {
-            console.log("hello");
             $('#sidebar').toggleClass('active');
         }
     });
-
+    $('#step_info').on('click', function () {
+        if ($('#sidebar').hasClass('active')) {
+            $('#sidebar').toggleClass('active');
+        }
+    });
+    $('#llist_container').on('click', function () {
+        if ($('#sidebar').hasClass('active')) {
+            $('#sidebar').toggleClass('active');
+        }
+    });
+    $('#sidebar').toggleClass('active');
 });
