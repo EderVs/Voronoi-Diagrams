@@ -121,6 +121,7 @@ def plot_bisector(
                     name=bisector.small_str(),
                     connectgaps=True,
                     legendgroup="bisectors",
+                    hoverinfo="name",
                 )
             )
             # plt.plot(x_range, y_lists[i], "k")
@@ -150,6 +151,7 @@ def plot_bisector(
                     mode="lines",
                     connectgaps=True,
                     legendgroup="bisectors",
+                    hoverinfo="name",
                 )
             )
             # plt.plot(x_lists[i], y_range, "k")
@@ -162,6 +164,7 @@ def plot_bisector(
                 name=bisector.small_str(),
                 connectgaps=True,
                 legendgroup="bisectors",
+                hoverinfo="name",
             )
         )
     return traces

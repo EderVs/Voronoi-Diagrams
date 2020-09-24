@@ -58,6 +58,7 @@ def get_site_traces(site: Site, site_class=Site):
                 line=line_properties,
                 connectgaps=True,
                 legendgroup="sites",
+                hoverinfo="name",
             )
         )
     return traces

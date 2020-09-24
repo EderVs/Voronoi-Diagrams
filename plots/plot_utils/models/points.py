@@ -39,6 +39,7 @@ def get_point_trace(
         legendgroup=group,
         name=name,
         marker=marker_properties,
+        hoverinfo="name",
     )
 
 

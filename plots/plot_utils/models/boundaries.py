@@ -139,6 +139,7 @@ def get_plot_scatter_boundary(
         connectgaps=True,
         line={"dash": "dot"},
         legendgroup="boundaries",
+        hoverinfo="name",
     )
 
 

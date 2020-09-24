@@ -40,7 +40,7 @@ def get_vd_figure(
 ) -> go.Figure:
     """Get figure of voronoi diagram."""
     figure = go.Figure()
-    layout = go.Layout(height=745, width=815,)
+    layout = go.Layout(height=745, width=815, hovermode="closest",)
     template = dict(layout=layout)
     figure.update_layout(title="VD", template=template)
     figure.update_xaxes(range=list(xlim))
