@@ -116,7 +116,12 @@ class VoronoiDiagram:
         self._plot_steps = plot_steps
         if self._plot_steps:
             self._figure = go.Figure()
-            layout = go.Layout(height=745, width=815, hovermode="closest")
+            layout = go.Layout(
+                height=745,
+                width=815,
+                hovermode="closest",
+                legend={"itemclick": "toggleothers", "itemdoubleclick": "toggle"},
+            )
             template = dict(layout=layout)
             self._figure.update_layout(title="VD", template=template)
             self._figure.update_xaxes(range=list(xlim))

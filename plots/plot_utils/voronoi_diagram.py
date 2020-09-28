@@ -40,7 +40,12 @@ def get_vd_figure(
 ) -> go.Figure:
     """Get figure of voronoi diagram."""
     figure = go.Figure()
-    layout = go.Layout(height=745, width=815, hovermode="closest",)
+    layout = go.Layout(
+        height=745,
+        width=815,
+        hovermode="closest",
+        legend={"itemclick": "toggleothers", "itemdoubleclick": "toggle"},
+    )
     template = dict(layout=layout)
     figure.update_layout(title="VD", template=template)
     figure.update_xaxes(range=list(xlim))
@@ -78,6 +83,15 @@ def get_vd_figure(
     return figure
 
 
+def get_html(figure: go.Figure):
+    """Get html of the Figure."""
+    config = {
+        "modeBarButtonsToRemove": ["toggleSpikelines", "hoverCompareCartesian"],
+        "modeBarButtonsToAdd": ["drawopenpath", "drawclosedpath", "eraseshape"],
+    }
+    return figure.to_html(config=config)
+
+
 def get_vd_html(
     voronoi_diagram: VoronoiDiagram,
     limit_sites: List[SiteToUse],
@@ -88,7 +102,7 @@ def get_vd_html(
     figure = get_vd_figure(
         voronoi_diagram, limit_sites, xlim, ylim, voronoi_diagram.SITE_CLASS
     )
-    html = figure.to_html()
+    html = get_html(figure)
     return html
 
 

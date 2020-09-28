@@ -6,7 +6,7 @@ from datetime import datetime
 import threading
 
 # Voronoi Diagrams
-from plots.plot_utils.voronoi_diagram import get_vd_html
+from plots.plot_utils.voronoi_diagram import get_vd_html, get_html
 from voronoi_diagrams.fortunes_algorithm import (
     VoronoiDiagram,
     FortunesAlgorithm,
@@ -65,7 +65,7 @@ class VDEntry:
         self.vd = vd
         self.created_at = datetime.now()
         self.is_diagram = False
-        self.steps = [self.vd._figure.to_html()]
+        self.steps = [get_html(self.vd._figure)]
         self.step_infos = []
         self.current_step = 0
         self.finished = not vd.is_next_step()
@@ -140,7 +140,7 @@ def add_step(session: Session) -> bool:
         entry.save_step_info()
         return True
     entry.vd.next_step()
-    step = entry.vd._figure.to_html()
+    step = get_html(entry.vd._figure)
     entry.steps.append(step)
     entry.finished = not entry.vd.is_next_step()
     entry.save_step_info()
