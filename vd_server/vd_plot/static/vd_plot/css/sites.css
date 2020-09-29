@@ -3,6 +3,10 @@
     display: none
 }
 
+#num_random_sites {
+    width: 80px;
+}
+
 #sidebar {
     background-color: white;
     position: fixed;
@@ -23,7 +27,7 @@
     right: 0;
 }
 
-#sidebar input[type=number], #sidebar input[type=text], #sidebar .site button {
+#sidebar #sites input[type=number], #sidebar #sites input[type=text], #sidebar .site button {
     width: 106px
 }
 
@@ -32,14 +36,18 @@
     margin-bottom: 1em;
 }
 
+#sidebar .site {
+    padding-bottom: 1em;
+    border-bottom: solid 1px rgb(165, 165, 165);
+}
+
 #sidebar .site input, #sidebar .site button {
     margin: 1em 1em 0em 0em;
     height: 2em;
 }
 
-#sidebar .site {
-    padding-bottom: 1em;
-    border-bottom: solid 1px rgb(165, 165, 165);
+#sidebar #sites .site_name {
+    border: solid 3px black;
 }
 
 

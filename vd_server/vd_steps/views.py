@@ -37,7 +37,9 @@ class StepView(View):
             self.session = request.GET.get("session")
         else:
             self.session = request.POST.get("session")
-        print(self.session)
+
+        # For debuging.
+        # print(self.session)
 
     def get(self, request):
         """GET method."""
@@ -85,12 +87,10 @@ class FirstStepView(StepView):
         )
         if vd_type == "vd":
             for x, y, name in body_data["sites"]:
-                print(x, y, name)
                 sites.append(Point(Decimal(x), Decimal(y)))
                 names.append(name)
         elif vd_type == "aw_vd":
             for x, y, w, name in body_data["sites"]:
-                print(x, y, w, name)
                 sites.append((Point(Decimal(x), Decimal(y)), Decimal(w)))
                 names.append(name)
 

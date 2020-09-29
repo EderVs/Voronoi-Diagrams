@@ -104,38 +104,38 @@
                     <div id="limits" class="col input-category">
                         <div class="row">
                             <div class="col">
-                                <label for="limit_x0">Limit x to left</label>
+                                <label for="limit_x0">Min x</label>
                             </div>
                             <div class="col">
-                                <input type="number" step="any" placeholder="limit_x0" name="limit_x0" value="-100"
-                                    required>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col">
-                                <label for="limit_x1">Limit x to right</label>
-                            </div>
-                            <div class="col">
-                                <input type="number" step="any" placeholder="limit_x1" name="limit_x1" value="100"
-                                    required>
+                                <input type="number" id="limit_x0" step="any" placeholder="limit_x0" name="limit_x0"
+                                    value="-100" required>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col">
-                                <label for="limit_y0">Limit y to left</label>
+                                <label for="limit_x1">Max x</label>
                             </div>
                             <div class="col">
-                                <input type="number" step="any" placeholder="limit_y0" name="limit_y0" value="-100"
-                                    required>
+                                <input type="number" id="limit_x1" step="any" placeholder="limit_x1" name="limit_x1"
+                                    value="100" required>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col">
-                                <label for="limit_y1">Limit y to right</label>
+                                <label for="limit_y0">Min y</label>
                             </div>
                             <div class="col">
-                                <input type="number" step="any" placeholder="limit_y1" name="limit_y1" value="100"
-                                    required>
+                                <input type="number" id="limit_y0" step="any" placeholder="limit_y0" name="limit_y0"
+                                    value="-100" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <label for="limit_y1">Max y</label>
+                            </div>
+                            <div class="col">
+                                <input type="number" id="limit_y1" step="any" placeholder="limit_y1" name="limit_y1"
+                                    value="100" required>
                             </div>
                         </div>
                     </div>
@@ -144,16 +144,27 @@
                             <div class="col-4">
                                 <button type="submit" id="first-step">Each Step</button>
                             </div>
-                            <div class="col-8">
+                            <div class="col">
                                 <button type="submit" id="plot-vd">Plot Voronoi Diagram</button>
                             </div>
                         </div>
                     </div>
-                    <div class="col">
-                        <button type="button" id="add_site">Add site</button>
+                    <div id="init-buttons" class="col input-category">
+                        <div class="row">
+                            <div class="col">
+                                <label for="num_sites">Random sites:</label>
+                                <input type="number" name="num_random_sites" id="num_random_sites" placeholder="max 50">
+                                <button type="button" id="random_sites">Random sites</button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-3">
+                                <button type="button" id="add_site">Add site</button>
+                            </div>
+                        </div>
                     </div>
-                    <input type="number" name="num_sites" id="num_sites" value=0>
                     <input type="number" name="actual_sites" id="actual_sites" value=0>
+                    <input type="number" name="num_sites" id="num_sites" value=0>
                     <div id="sites" class="col input-category">
                     </div>
                 </form>

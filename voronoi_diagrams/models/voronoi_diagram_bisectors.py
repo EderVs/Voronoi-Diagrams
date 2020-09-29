@@ -105,6 +105,7 @@ class VoronoiDiagramBisector:
         """Get Ranges to plot."""
         x_ranges = []
         y_ranges = []
+        num_steps = Decimal("50")
 
         self.complete_ranges()
         if self.bisector.is_vertical():
@@ -113,11 +114,15 @@ class VoronoiDiagramBisector:
                     y0 = ylim[0]
                 if y1 is None:
                     y1 = ylim[1]
-                step = abs(y0 - y1) / Decimal("1000")
-                y_range = np.arange(y0, y1, step)
-                x_range = [self.get_x(y) for y in y_range]
-                x_ranges.append(x_range)
-                y_ranges.append(y_range)
+                step = abs(y0 - y1) / num_steps
+                if step > 0:
+                    y_range = np.arange(y0, y1, step)
+                    x_range = [self.get_x(y) for y in y_range]
+                    x_ranges.append(x_range)
+                    y_ranges.append(y_range)
+                else:
+                    x_ranges.append([])
+                    y_ranges.append([])
         else:
             for x1, x0, side in self.ranges_b_minus[::-1]:
                 if x0 is None:
@@ -125,32 +130,40 @@ class VoronoiDiagramBisector:
                         x0 = xlim[0]
                     else:
                         x0 = xlim[1]
-                step = abs(x0 - x1) / Decimal("1000")
-                if side == 1:
-                    x_range = np.arange(x0, x1, -step)
+                step = abs(x0 - x1) / num_steps
+                if step > 0:
+                    if side == 1:
+                        x_range = np.arange(x0, x1, -step)
+                    else:
+                        x_range = np.arange(x0, x1, step)
+                    y_range = []
+                    for x in x_range:
+                        y_range.append(self.get_y_by_side(x, side))
+                    x_ranges.append(x_range)
+                    y_ranges.append(y_range)
                 else:
-                    x_range = np.arange(x0, x1, step)
-                y_range = []
-                for x in x_range:
-                    y_range.append(self.get_y_by_side(x, side))
-                x_ranges.append(x_range)
-                y_ranges.append(y_range)
+                    x_ranges.append([])
+                    y_ranges.append([])
             for x0, x1, side in self.ranges_b_plus:
                 if x1 is None:
                     if side == 0:
                         x1 = xlim[1]
                     else:
                         x1 = xlim[0]
-                step = abs(x0 - x1) / Decimal("1000")
-                if side == 1:
-                    x_range = np.arange(x0, x1, -step)
+                step = abs(x0 - x1) / num_steps
+                if step > 0:
+                    if side == 1:
+                        x_range = np.arange(x0, x1, -step)
+                    else:
+                        x_range = np.arange(x0, x1, step)
+                    y_range = []
+                    for x in x_range:
+                        y_range.append(self.get_y_by_side(x, side))
+                    x_ranges.append(x_range)
+                    y_ranges.append(y_range)
                 else:
-                    x_range = np.arange(x0, x1, step)
-                y_range = []
-                for x in x_range:
-                    y_range.append(self.get_y_by_side(x, side))
-                x_ranges.append(x_range)
-                y_ranges.append(y_range)
+                    x_ranges.append([])
+                    y_ranges.append([])
 
         ranges = (np.concatenate(x_ranges), np.concatenate(y_ranges))
         return ranges

@@ -432,8 +432,6 @@ class WeightedPointBoundary(Boundary):
 
     def get_side_where_point_belongs(self, point: Point) -> int:
         """Get where point belongs."""
-        print("------------------------------")
-        print(point)
         if self.is_boundary_concave_to_y():
             ys = self.formula_y(point.x)
             if are_close(point.y, max(ys), Decimal("0.0001"),):

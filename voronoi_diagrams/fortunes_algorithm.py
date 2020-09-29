@@ -314,12 +314,13 @@ class VoronoiDiagram:
                     (str(bisector.get_object_to_hash()), sign)
                 ] = traces_numbers
             self._figure_traces += len(traces)
-            print("//////////////////////////////////////////////////////")
-            print(traces_numbers)
-            print("-------------------------------------------------------")
-            print(traces)
-            print("-------------------------------------------------------")
-            print(self._traces[traces_numbers[0] : traces_numbers[-1] + 1])
+            # For debuging.
+            # print("//////////////////////////////////////////////////////")
+            # print(traces_numbers)
+            # print("-------------------------------------------------------")
+            # print(traces)
+            # print("-------------------------------------------------------")
+            # print(self._traces[traces_numbers[0] : traces_numbers[-1] + 1])
 
     def _add_boundaries_to_plot(self, boundaries: List[Boundary]):
         """Add boundaries to plot."""
@@ -424,7 +425,6 @@ class VoronoiDiagram:
 
     def _update_bisector_figure_traces(self, bisector: Bisector, sign: bool):
         """Update bisector's figure traces."""
-        print("Updating bisector:", bisector)
         bisector_traces = self._bisector_plot_dict[
             (str(bisector.get_object_to_hash()), sign)
         ]
@@ -434,7 +434,6 @@ class VoronoiDiagram:
         if bisector_traces == bisector_other_sign_traces:
             sign = None
         for bisector_trace_i in bisector_traces:
-            print("trace to delete:", self._traces[bisector_trace_i])
             self._traces[bisector_trace_i] = None
         self._add_bisector_to_plot(bisector, sign)
 
@@ -641,7 +640,6 @@ class VoronoiDiagram:
         """Move to next event in Queue."""
         # Step 4.
         if self.q_queue.is_empty():
-            print("It has finished.")
             return
 
         # Step 5.
@@ -696,10 +694,11 @@ class VoronoiDiagram:
         """Plot step."""
         if self._plot_steps:
             # keep the sites and clean all other traces.
-            print(self.l_list)
-            print(self.q_queue)
-            print(self.event)
-            print("In plot step")
+            # For debuging.
+            # print(self.l_list)
+            # print(self.q_queue)
+            # print(self.event)
+            # print("In plot step")
             self._figure.data = []
             for trace in self._traces:
                 if trace is not None:

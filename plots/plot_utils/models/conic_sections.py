@@ -20,7 +20,7 @@ def get_circle_ranges(
 ) -> Tuple[Iterable, Iterable]:
     """Plot a circle."""
     y_lists: List[List[Any]] = [[], []]
-    step = 2 * r / Decimal("1000")
+    step = 2 * r / Decimal("100")
     x_range = np.arange(h - r, h + r + step, step)
     for x in x_range:
         ys = get_circle_formula_y(h, k, r, x)

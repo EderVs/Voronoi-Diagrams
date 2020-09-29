@@ -29,8 +29,6 @@ class QNode(AVLNode):
     def is_left(self, value: Event, *args: Any, **kwargs: Any) -> bool:
         """Value is to the left of Node."""
         comparison = self.value.get_comparison(value)
-        print("comparison")
-        print(comparison)
         return comparison > 0
 
     def is_right(self, value: Event, *args: Any, **kwargs: Any) -> bool:

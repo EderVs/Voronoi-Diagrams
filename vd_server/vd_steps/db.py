@@ -206,5 +206,6 @@ def remove_session(session: Session) -> None:
     """Remove session VD."""
     with lock:
         if session in db:
-            print(f"session {session} deleted")
+            # Debuging.
+            # print(f"session {session} deleted")
             del db[session]

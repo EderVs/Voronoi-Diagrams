@@ -353,5 +353,4 @@ class WeightedSite(Site):
                 return event_point.x - other_event_point.x
             # The smallest site will be first.
             return self.weight - event.weight
-        print(event_point.y, other_event_point.y)
         return event_point.y - other_event_point.y

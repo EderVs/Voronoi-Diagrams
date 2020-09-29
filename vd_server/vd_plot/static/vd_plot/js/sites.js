@@ -19,30 +19,30 @@ window.addEventListener("beforeunload", function (e) {
     });
 });
 
-function get_site_div(site_id) {
+function get_site_div(site_id, values) {
     return `<div class="site col" id="site_` + site_id + `">
     <div class="row">
-        <input type="text" class="site_name" placeholder="Name" name="site`+ site_id + `_name">
+        <input type="text" class="site_name" placeholder="Name" name="site`+ site_id + `_name" value=` + (values.name != null ? values.name : `""`) + ` required maxlength="4">
         <button type="button" id="remove_site_`+ site_id + `" onclick="remove_site(` + site_id + `)">Remove Site</button>
     </div>
     <div class="row">
-        <input type="number" step="any" class="site_x" placeholder="Site x" name="site`+ site_id + `_x" required>
-        <input type="number" step="any" class="site_y" placeholder="Site y" name="site`+ site_id + `_y" required>
-        <input type="number" step="any" class="site_w" placeholder="Site weight" name="site`+ site_id + `_w" value="" style="display:none">
+        <input type="number" step="any" class="site_x" placeholder="Site x" name="site`+ site_id + `_x" value=` + (values.x != null ? values.x : `""`) + ` required>
+        <input type="number" step="any" class="site_y" placeholder="Site y" name="site`+ site_id + `_y" value=` + (values.y != null ? values.y : `""`) + ` required>
+        <input type="number" step="any" class="site_w" placeholder="Site weight" name="site`+ site_id + `_w" value=` + (values.w != null ? values.w : `""`) + ` style="display:none">
     </div>
     </div>`
 }
 
-function get_weighted_site_div(site_id) {
+function get_weighted_site_div(site_id, values) {
     return `<div class="site col" id="site_` + site_id + `">
     <div class="row">
-        <input type="text" class="site_name" placeholder="Name" name="site`+ site_id + `_name">
+        <input type="text" class="site_name" placeholder="Name" name="site`+ site_id + `_name" value=` + (values.name != null ? values.name : `""`) + ` required maxlength="4">
         <button type="button" id="remove_site_`+ site_id + `" onclick="remove_site(` + site_id + `)">Remove Site</button>
     </div>
     <div class="row">
-        <input type="number" step="any" class="site_x" placeholder="Site x" name="site`+ site_id + `_x" required>
-        <input type="number" step="any" class="site_y" placeholder="Site y" name="site`+ site_id + `_y" required>
-        <input type="number" step="any" class="site_w" placeholder="Site weight" name="site`+ site_id + `_w" value="">
+        <input type="number" step="any" class="site_x" placeholder="Site x" name="site`+ site_id + `_x" value=` + (values.x != null ? values.x : `""`) + ` required>
+        <input type="number" step="any" class="site_y" placeholder="Site y" name="site`+ site_id + `_y" value=` + (values.y != null ? values.y : `""`) + ` required>
+        <input type="number" step="any" class="site_w" placeholder="Site weight" name="site`+ site_id + `_w" value=` + (values.w != null ? values.w : `""`) + ` required>
     </div>
     </div>`
 }
@@ -57,18 +57,50 @@ function evaluate_start_buttons() {
     }
 }
 
-function add_site() {
-    if ($('input[name=vd_type]:checked', '#vd_form').val() == 'vd') {
-        $('#sites').append(get_site_div($('#actual_sites').attr("value")));
-    } else {
-        $('#sites').append(get_weighted_site_div($('#actual_sites').attr("value")));
-    }
+function add_site(values) {
+    var actual_site = $('#actual_sites').attr("value");
     $('#num_sites').attr("value", parseInt($('#num_sites').attr("value")) + 1);
     $('#actual_sites').attr("value", parseInt($('#actual_sites').attr("value")) + 1);
     evaluate_start_buttons();
+    if ($('input[name=vd_type]:checked', '#vd_form').val() == 'vd') {
+        $('#sites').append(get_site_div(actual_site, values));
+    } else {
+        $('#sites').append(get_weighted_site_div(actual_site, values));
+    }
 }
 
-$('#add_site').click(add_site);
+function add_site_event() {
+    add_site({})
+}
+
+$('#add_site').click(add_site_event);
+$('#random_sites').click(random_sites);
+
+function getRndInteger(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function random_sites() {
+    console.log("hello")
+    $('#sites').html("");
+    $('#num_sites').attr("value", 0);
+    $('#actual_sites').attr("value", 0);
+    var min_x = parseInt($('#limit_x0').val());
+    min_x = (min_x != null ? min_x : -100);
+    var max_x = parseInt($('#limit_x1').val());
+    max_x = (max_x != null ? max_x : 100);
+    var min_y = parseInt($('#limit_y0').val());
+    min_y = (min_y != null ? min_y : -100);
+    var max_y = parseInt($('#limit_y1').val());
+    max_y = (max_y != null ? max_y : 100);
+    var min_w = 0;
+    var max_w = 20;
+    for (let i = 0; i < parseInt($('#num_random_sites').val()); i++) {
+        var values = { x: getRndInteger(min_x, max_x), y: getRndInteger(min_y, max_y), w: getRndInteger(min_w, max_w), name: (i + 1).toString() };
+        console.log(values)
+        add_site(values);
+    }
+}
 
 function remove_site(site_id) {
     $('#site_' + site_id).remove()
@@ -182,7 +214,7 @@ function next_step() {
         type: 'GET',
         url: '/steps/next/',
         dataType: 'html',
-        data: { body: JSON.stringify(data), session: session },
+        data: { session: session },
         success: function (resp) {
             $('#plot').html(resp);
             $('#loading').html("")
@@ -334,7 +366,7 @@ $('#next-step').attr('disabled', 'disabled');
 $('#prev-step-responsive').attr('disabled', 'disabled');
 $('#next-step-responsive').attr('disabled', 'disabled');
 evaluate_start_buttons();
-add_site();
+add_site_event();
 
 $(document).ready(function () {
     $('#sidebarOpen').on('click', function () {
