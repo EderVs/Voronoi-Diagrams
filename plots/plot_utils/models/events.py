@@ -48,7 +48,7 @@ def get_site_traces(site: Site, site_class=Site):
         x_range, y_range = get_circle_ranges(
             site.point.x, site.point.y, site.weight, "r"
         )
-        line_properties = {"width": 2.5, "color": color, "dash": "dashdot"}
+        line_properties = {"width": 1, "color": color}
         traces.append(
             go.Scatter(
                 x=x_range,

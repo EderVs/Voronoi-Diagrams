@@ -4,6 +4,7 @@ var site_y_index = 2;
 var site_w_index = 3;
 var session = Date.now().toString();
 var csrftoken = "";
+var max_sites = 20;
 
 window.addEventListener("load", function () {
     csrftoken = $('[name=csrfmiddlewaretoken]').attr("value");
@@ -58,6 +59,10 @@ function evaluate_start_buttons() {
 }
 
 function add_site(values) {
+    console.log($('#num_sites').val());
+    if ($('#num_sites').val() >= max_sites) {
+        return;
+    }
     var actual_site = $('#actual_sites').attr("value");
     $('#num_sites').attr("value", parseInt($('#num_sites').attr("value")) + 1);
     $('#actual_sites').attr("value", parseInt($('#actual_sites').attr("value")) + 1);
@@ -97,7 +102,6 @@ function random_sites() {
     var max_w = 20;
     for (let i = 0; i < parseInt($('#num_random_sites').val()); i++) {
         var values = { x: getRndInteger(min_x, max_x), y: getRndInteger(min_y, max_y), w: getRndInteger(min_w, max_w), name: (i + 1).toString() };
-        console.log(values)
         add_site(values);
     }
 }
