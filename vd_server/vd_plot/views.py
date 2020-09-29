@@ -45,7 +45,6 @@ class PlotVDView(View):
         names = []
 
         vd_type = body_data.get("vd_type", "vd")
-        print(vd_type)
         if vd_type == "vd":
             for x, y, name in body_data["sites"]:
                 sites.append(Point(Decimal(x), Decimal(y)))

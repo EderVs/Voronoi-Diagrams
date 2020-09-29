@@ -76,6 +76,8 @@ class VoronoiDiagram:
     _boundary_plot_dict: Dict[str, int]
     _bisector_plot_dict: Dict[Tuple[str, bool], int]
     _begin_event: bool
+    _updated_regions: List[Region]
+    _updated_boundaries: List[Boundary]
 
     def __init__(
         self,
@@ -134,6 +136,9 @@ class VoronoiDiagram:
             self._bisector_plot_dict = {}
         else:
             self._figure = None
+
+        self._updated_regions = []
+        self._updated_boundaries = []
 
         # Mode.
         self.mode = mode
@@ -212,6 +217,14 @@ class VoronoiDiagram:
         r_q_right = self.REGION_CLASS(r_q.site, boundary_p_q_plus, r_q.right)
         r_p.left = boundary_p_q_minus
         r_p.right = boundary_p_q_plus
+
+        self._updated_boundaries = [boundary_p_q_minus, boundary_p_q_plus]
+        self._updated_regions = [r_q_left, r_p, r_q_right]
+        for region in self._updated_regions:
+            region.active = True
+        for boundary in self._updated_boundaries:
+            boundary.active = True
+
         # Update L list.
         r_q_left_node, r_p_node, r_q_right_node = self.l_list.update_regions(
             r_q_left, r_p, r_q_right
@@ -568,6 +581,9 @@ class VoronoiDiagram:
             # Add new bisector
             self._add_bisector_to_plot(bisector_q_s, boundary_q_s_sign)
 
+        boundary_q_s.active = True
+        self._updated_boundaries = [boundary_q_s]
+        self._updated_regions = []
         self.l_list.remove_region(intersection_region_node, boundary_q_s)
 
         # Step 17.
@@ -638,6 +654,14 @@ class VoronoiDiagram:
 
     def move_to_next_event(self):
         """Move to next event in Queue."""
+        # Reset active boundaries and regions.
+        for region in self._updated_regions:
+            region.active = False
+        for boundary in self._updated_boundaries:
+            boundary.active = False
+        self._updated_regions = []
+        self._updated_boundaries = []
+
         # Step 4.
         if self.q_queue.is_empty():
             return

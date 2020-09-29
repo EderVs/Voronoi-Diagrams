@@ -25,15 +25,18 @@ class Boundary:
     sign: bool
     left_intersection: Optional[IntersectionEvent]
     right_intersection: Optional[IntersectionEvent]
+    # active says if this boundary is the current added to the LList.
+    active: bool
 
     def __init__(
-        self, bisector: Bisector, sign: bool,
+        self, bisector: Bisector, sign: bool, active: bool = False
     ):
         """Construct Boundary."""
         self.bisector = bisector
         self.sign = sign
         self.left_intersection = None
         self.right_intersection = None
+        self.active = active
 
     def get_site(self) -> Site:
         """Get the site that is highest or more to the right.

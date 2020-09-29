@@ -21,17 +21,20 @@ class Region:
     left: Optional[Boundary]
     right: Optional[Boundary]
     site: Site
+    active: bool
 
     def __init__(
         self,
         site: Site,
         left: Optional[Boundary] = None,
         right: Optional[Boundary] = None,
+        active: bool = False,
     ):
         """Construct Boundary."""
         self.left = left
         self.right = right
         self.site = site
+        self.active = active
 
     def is_contained(self, point: Point, *args: Any, **kwargs: Any) -> bool:
         """Value is contained in the Node."""

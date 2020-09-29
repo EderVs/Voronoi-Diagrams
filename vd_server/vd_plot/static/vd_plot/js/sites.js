@@ -276,8 +276,13 @@ function get_sites() {
 }
 
 function get_boundary_div(boundary) {
-    var boundary_div = "<div class='LBoundary'>";
-    if (boundary == null) {
+    var boundary_div = "";
+    if (boundary.active) {
+        boundary_div = "<div class='LBoundary active-boundary'>";
+    } else {
+        boundary_div = "<div class='LBoundary'>";
+    }
+    if (boundary.is_null) {
         boundary_div += "Null";
     } else {
         boundary_div += "B*"
@@ -293,7 +298,13 @@ function get_boundary_div(boundary) {
 }
 
 function get_region_div(region) {
-    var region_div = "<div class='LRegion' style='display: inline;'>";
+    var region_div = "'>";
+    if (region.active) {
+        region_div = "<div class='LRegion active-region'>";
+    } else {
+        region_div = "<div class='LRegion'>";
+    }
+
     region_div += "R(" + region.site.name + ")";
     region_div += "</div>";
     return region_div;
@@ -319,12 +330,18 @@ function get_info() {
             // L List
             console.log(resp)
             if (resp.l_list.length > 0) {
+                left_boundary = { is_null: true, active: false }
+                resp.l_list[0].left = left_boundary
                 $('#llist').append(get_boundary_div(resp.l_list[0].left));
             }
             for (let i = 0; i < resp.l_list.length; i++) {
                 var region = resp.l_list[i]
+                if (region.right == null) {
+                    right_boundary = { is_null: true, active: false }
+                    region.right = right_boundary
+                }
                 $('#llist').append(get_region_div(region));
-                $('#llist').append(get_boundary_div(resp.l_list[i].right));
+                $('#llist').append(get_boundary_div(region.right));
             }
 
             // Q Queue

@@ -9,6 +9,17 @@
     z-index: 1000;
 }
 
+/* L List */
+
+.active-region {
+    background-color: teal;
+    color: white;
+}
+
+.active-boundary {
+    background-color: pink;
+}
+
 #llist_container {
     padding-top: 1em;
     height: 160px;
@@ -24,6 +35,10 @@
 
 .LBoundary {
     border-color: pink;
+}
+
+.LBoundar, .LRegion {
+    display: inline;
 }
 
 .LRegion {
