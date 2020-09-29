@@ -27,6 +27,7 @@ class Boundary:
     right_intersection: Optional[IntersectionEvent]
     # active says if this boundary is the current added to the LList.
     active: bool
+    is_to_be_deleted: bool
 
     def __init__(
         self, bisector: Bisector, sign: bool, active: bool = False
@@ -37,6 +38,7 @@ class Boundary:
         self.left_intersection = None
         self.right_intersection = None
         self.active = active
+        self.is_to_be_deleted = False
 
     def get_site(self) -> Site:
         """Get the site that is highest or more to the right.

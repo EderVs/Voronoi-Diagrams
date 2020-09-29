@@ -279,6 +279,8 @@ function get_boundary_div(boundary) {
     var boundary_div = "";
     if (boundary.active) {
         boundary_div = "<div class='LBoundary active-boundary'>";
+    } else if (boundary.is_to_be_deleted) {
+        boundary_div = "<div class='LBoundary intersection-boundary'>";
     } else {
         boundary_div = "<div class='LBoundary'>";
     }
@@ -301,6 +303,8 @@ function get_region_div(region) {
     var region_div = "'>";
     if (region.active) {
         region_div = "<div class='LRegion active-region'>";
+    } else if (region.is_to_be_deleted) {
+        region_div = "<div class='LRegion intersection-region'>";
     } else {
         region_div = "<div class='LRegion'>";
     }

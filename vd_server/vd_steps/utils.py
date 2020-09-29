@@ -26,6 +26,7 @@ def get_boundary_dict(boundary: Boundary) -> Dict[str, Any]:
     final_boundary_dict["sign"] = boundary.sign
     final_boundary_dict["sites"] = []
     final_boundary_dict["active"] = boundary.active
+    final_boundary_dict["is_to_be_deleted"] = boundary.is_to_be_deleted
     for site in boundary.bisector.get_sites_tuple():
         final_boundary_dict["sites"].append(get_event_dict(site))
 
@@ -36,6 +37,7 @@ def get_region_dict(region: Region) -> Dict[str, Any]:
     """Get region dict."""
     final_region_dict = {}
     final_region_dict["active"] = region.active
+    final_region_dict["is_to_be_deleted"] = region.is_to_be_deleted
     # Site
     final_region_dict["site"] = get_event_dict(region.site)
     # Boundaries

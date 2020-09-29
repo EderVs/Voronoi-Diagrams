@@ -22,6 +22,7 @@ class Region:
     right: Optional[Boundary]
     site: Site
     active: bool
+    is_to_be_deleted: bool
 
     def __init__(
         self,
@@ -35,6 +36,7 @@ class Region:
         self.right = right
         self.site = site
         self.active = active
+        self.is_to_be_deleted = False
 
     def is_contained(self, point: Point, *args: Any, **kwargs: Any) -> bool:
         """Value is contained in the Node."""

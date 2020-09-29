@@ -20,6 +20,18 @@
     background-color: pink;
 }
 
+.intersection-region {
+    background-color: red;
+    color: white;
+    border-color: red;
+}
+
+.intersection-boundary {
+    background-color: red;
+    color: white;
+    border-color: red;
+}
+
 #llist_container {
     padding-top: 1em;
     height: 160px;

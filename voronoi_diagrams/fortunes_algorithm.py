@@ -649,6 +649,8 @@ class VoronoiDiagram:
 
         # Step 3.
         r_p = self.REGION_CLASS(self.event, None, None)
+        self._updated_regions = [r_p]
+        r_p.active = True
         self.l_list = LList(r_p)
         self._plot_step()
 
@@ -670,6 +672,10 @@ class VoronoiDiagram:
         self.event = self.q_queue.dequeue()
         self._plot_step()
         self._begin_event = False
+        if not self.event.is_site:
+            self.event.region_node.value.is_to_be_deleted = True
+            self.event.region_node.value.left.is_to_be_deleted = True
+            self.event.region_node.value.right.is_to_be_deleted = True
 
     def calculate_event(self):
         """Calculate actual event."""
