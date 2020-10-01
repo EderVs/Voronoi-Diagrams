@@ -146,10 +146,14 @@ vd_form.submit(function (event) {
     event.preventDefault();
 });
 
+async function write_plot(resp) {
+    $('#plot').html(resp);
+}
+
 $('#plot-vd').click(function () {
     data = getFormData(vd_form);
     data["sites"] = get_sites();
-    $('#loading').html("LOADING");
+    $('#loading').html(loading_content());
     $.ajax({
         type: 'POST',
         url: '/steps/delete/',
@@ -163,20 +167,20 @@ $('#plot-vd').click(function () {
                 dataType: 'html',
                 data: { body: JSON.stringify(data), session: session },
                 success: function (resp) {
-                    console.log("yep");
-                    $('#plot').html(resp);
-                    $('#loading').html("")
-                    // Step buttons.
-                    $('#next-step').attr('disabled', 'disabled');
-                    $('#next-step-responsive').attr('disabled', 'disabled');
-                    $('#prev-step').attr('disabled', 'disabled');
-                    $('#prev-step-responsive').attr('disabled', 'disabled');
-                    // Actual Event
-                    $('#actual_event').html("");
-                    // Queue
-                    $('#qqueue').html("");
-                    // LList
-                    $('#llist').html("");
+                    write_plot(resp).then(() => {
+                        $('#loading').html("")
+                        // Step buttons.
+                        $('#next-step').attr('disabled', 'disabled');
+                        $('#next-step-responsive').attr('disabled', 'disabled');
+                        $('#prev-step').attr('disabled', 'disabled');
+                        $('#prev-step-responsive').attr('disabled', 'disabled');
+                        // Actual Event
+                        $('#actual_event').html("");
+                        // Queue
+                        $('#qqueue').html("");
+                        // LList
+                        $('#llist').html("");
+                    });
                 },
                 error: function (resp) {
                     console.log(resp);
@@ -194,16 +198,17 @@ $('#plot-vd').click(function () {
 $('#first-step').click(function () {
     data = getFormData(vd_form);
     data["sites"] = get_sites();
-    $('#loading').html("LOADING");
+    $('#loading').html(loading_content());
     $.ajax({
         type: 'GET',
         url: '/steps/first/',
         dataType: 'html',
         data: { body: JSON.stringify(data), session: session },
         success: function (resp) {
-            $('#plot').html(resp);
-            $('#loading').html("")
-            get_info()
+            write_plot(resp).then(() => {
+                $('#loading').html("")
+                get_info()
+            });
         },
         error: function (resp) {
             $('#loading').html("")
@@ -213,16 +218,17 @@ $('#first-step').click(function () {
 })
 
 function next_step() {
-    $('#loading').html("LOADING");
+    $('#loading').html(loading_content());
     $.ajax({
         type: 'GET',
         url: '/steps/next/',
         dataType: 'html',
         data: { session: session },
         success: function (resp) {
-            $('#plot').html(resp);
-            $('#loading').html("")
-            get_info()
+            write_plot(resp).then(() => {
+                $('#loading').html("")
+                get_info()
+            });
         },
         error: function (resp) {
             $('#loading').html("")
@@ -236,16 +242,17 @@ $('#next-step').click(next_step)
 $('#next-step-responsive').click(next_step)
 
 function prev_step() {
-    $('#loading').html("LOADING");
+    $('#loading').html(loading_content());
     $.ajax({
         type: 'GET',
         url: '/steps/prev/',
         dataType: 'html',
-        data: { body: JSON.stringify(data), session: session },
+        data: { session: session },
         success: function (resp) {
-            $('#plot').html(resp);
-            $('#loading').html("")
-            get_info()
+            write_plot(resp).then(() => {
+                $('#loading').html("")
+                get_info()
+            });
         },
         error: function (resp) {
             $('#loading').html("")
@@ -314,10 +321,19 @@ function get_region_div(region) {
     return region_div;
 }
 
+function loading_content() {
+    return `<span>↓</span>
+        <span style="--delay: 0.1s">↓</span>
+        <span style="--delay: 0.3s">↓</span>
+        <span style="--delay: 0.4s">↓</span>
+        <span style="--delay: 0.5s">↓</span>
+    `
+}
+
 function get_info() {
-    $('#qqueue').html("LOADING")
-    $('#llist').html("LOADING")
-    $('#actual_event').html("LOADING")
+    $('#qqueue').html(loading_content())
+    $('#llist').html(loading_content())
+    $('#actual_event').html(loading_content())
     $.ajax({
         type: 'GET',
         url: '/steps/info/',
