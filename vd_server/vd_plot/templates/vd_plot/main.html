@@ -84,21 +84,23 @@
                 </div>
             </div>
             <div id="sidebar">
-                <div>
+                <div class="col">
                     <button type="button" id="sidebarCollapse" class="btn btn-info sidebar-button">
                         <i class="fas fa-align-left"></i>
                     </button>
                 </div>
                 <form id="vd_form" class="col">
                     {% csrf_token %}
-                    <div id="vd_type" class="input-category row">
-                        <div class="col">
-                            <input type="radio" id="vd_type" name="vd_type" value="vd" checked>
-                            <label for="vd">Voronoi Diagram</label>
-                        </div>
-                        <div class="col">
-                            <input type="radio" id="aw_vd_type" name="vd_type" value="aw_vd">
-                            <label for="aw_vd">AW Voronoi Diagram</label>
+                    <div id="vd_type" class="input-category col">
+                        <div class="row">
+                            <div class="col">
+                                <input type="radio" id="vd_type" name="vd_type" value="vd" checked>
+                                <label for="vd">Voronoi Diagram</label>
+                            </div>
+                            <div class="col">
+                                <input type="radio" id="aw_vd_type" name="vd_type" value="aw_vd">
+                                <label for="aw_vd">AW Voronoi Diagram</label>
+                            </div>
                         </div>
                     </div>
                     <div id="limits" class="col input-category">
@@ -149,7 +151,7 @@
                             </div>
                         </div>
                     </div>
-                    <div id="init-buttons" class="col input-category">
+                    <div id="site-buttons" class="col input-category">
                         <div class="row">
                             <div class="col">
                                 <label for="num_sites">Random sites:</label>

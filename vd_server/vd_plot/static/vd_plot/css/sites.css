@@ -1,3 +1,17 @@
+#init-buttons button {
+    background-color: #0f4c81;
+    color: white;
+}
+
+#init-buttons button:disabled {
+    background-color: #dddddd;
+    color: black;
+}
+
+#site-buttons button, #sites button {
+    background-color: #1b262c;
+    color: white;
+}
 
 #num_sites, #actual_sites {
     display: none
@@ -50,6 +64,10 @@
     border: solid 3px black;
 }
 
+
+#sidebarOpen, #sidebarCollapse, #sidebarOpen-responsive {
+    background-color: #0f4c81;
+}
 
 #sidebarOpen {
     position: absolute;

@@ -32,24 +32,13 @@
 /* L List */
 
 .active-region {
-    background-color: teal;
+    background-color: #0f4c81;
     color: white;
 }
 
 .active-boundary {
-    background-color: pink;
-}
-
-.intersection-region {
-    background-color: red;
-    color: white;
-    border-color: red;
-}
-
-.intersection-boundary {
-    background-color: red;
-    color: white;
-    border-color: red;
+    background-color: #ffbd69;
+    color: black;
 }
 
 #llist_container {
@@ -66,7 +55,7 @@
 }
 
 .LBoundary {
-    border-color: pink;
+    border-color: #ffbd69;
 }
 
 .LBoundar, .LRegion {
@@ -74,5 +63,11 @@
 }
 
 .LRegion {
-    border-color: teal;
+    border-color: #0f4c81;
+}
+
+.intersection {
+    background-color: #ed6663;
+    color: white;
+    border-color: #ed6663;
 }

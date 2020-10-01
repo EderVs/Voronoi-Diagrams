@@ -8,6 +8,16 @@
     height: 60px;
 }
 
+#steps button {
+    background-color: #0f4c81;
+    color: white;
+}
+
+#steps button:disabled {
+    background-color: #dddddd;
+    color: black;
+}
+
 #actual_event {
     height: 4em;
 }
