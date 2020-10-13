@@ -1,0 +1,73 @@
+
+#plot {
+    height: 750px;
+    border: solid 1px black;
+}
+
+/* Loading */
+
+#loading {
+    position: absolute;
+    display: flex;
+    z-index: 1000;
+}
+
+@keyframes arrows {
+    0%,
+    100% {
+        color: black;
+        transform: translateY(0);
+    }
+    50% {
+        color: #3AB493;
+        transform: translateY(20px);
+    }
+}
+
+#loading span {
+    --delay: 0s;
+    animation: arrows 1s var(--delay) infinite ease-in;
+}
+
+/* L List */
+
+.active-region {
+    background-color: #0f4c81;
+    color: white;
+}
+
+.active-boundary {
+    background-color: #ffbd69;
+    color: black;
+}
+
+#llist_container {
+    padding-top: 1em;
+    height: 160px;
+    overflow: scroll;
+}
+
+.LBoundary, .LRegion {
+    border: solid 1px;
+    margin-right: 0.5em;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+}
+
+.LBoundary {
+    border-color: #ffbd69;
+}
+
+.LBoundar, .LRegion {
+    display: inline;
+}
+
+.LRegion {
+    border-color: #0f4c81;
+}
+
+.intersection {
+    background-color: #ed6663;
+    color: white;
+    border-color: #ed6663;
+}

@@ -8,6 +8,10 @@ from .bisectors import (
     Bisector,
     PointBisector,
     WeightedPointBisector,
+)
+from .voronoi_diagram_bisectors import (
     VoronoiDiagramBisector,
+    VoronoiDiagramPointBisector,
+    VoronoiDiagramWeightedPointBisector,
 )
 from .vertices import VoronoiDiagramVertex

@@ -18,64 +18,6 @@ from decimal import Decimal
 from general_utils.numbers import are_close
 
 
-class VoronoiDiagramBisector:
-    """Bisector representation in the Voronoi diagram."""
-
-    bisector: Any
-    vertices: List[Any]
-
-    def __init__(self, bisector: Any, vertex1: Any = None, vertex2: Any = None) -> None:
-        """Constructor."""
-        self.bisector = bisector
-        self.vertices = []
-        if vertex1 is not None:
-            self.vertices.append(vertex1)
-        if vertex2 is not None:
-            self.vertices.append(vertex2)
-
-    def __eq__(self, other: Any) -> bool:
-        """Equallity between VoronoiDiagramBisectors."""
-        return self.bisector == other.bisector and (
-            (self.vertex1 == other.vertex1 and self.vertex2 == other.vertex2)
-            or (self.vertex1 == other.vertex2 and self.vertex2 == other.vertex1)
-        )
-
-    def __str__(self) -> str:
-        """Return string representation."""
-        return f"B({str(self.bisector)}, {str(self.vertices)})"
-
-    def is_to_the_infinity(self) -> bool:
-        """Check if the bisector doesn't have one vertex."""
-        return len(self.vertices) != 2
-
-    def get_vertices(self) -> Tuple[Any, Any]:
-        """Get vertices linked to this bisector."""
-        if len(self.vertices) == 0:
-            vertex1 = None
-            vertex2 = None
-        elif len(self.vertices) == 1:
-            vertex1 = self.vertices[0]
-            vertex2 = None
-        else:
-            if self.vertices[0].vertex.y > self.vertices[1].vertex.y or (
-                self.vertices[0].vertex.y == self.vertices[1].vertex.y
-                and self.vertices[0].vertex.x > self.vertices[1].vertex.x
-            ):
-                vertex1 = self.vertices[1]
-                vertex2 = self.vertices[0]
-            else:
-                vertex1 = self.vertices[0]
-                vertex2 = self.vertices[1]
-
-        return (vertex1, vertex2)
-
-    def add_vertex(self, vertex: Any):
-        """Add vertex."""
-        if len(self.vertices) >= 2:
-            return
-        self.vertices.append(vertex)
-
-
 class Bisector:
     """Bisector representation.
 
@@ -111,7 +53,15 @@ class Bisector:
 
     def __str__(self):
         """Get bisector string representation."""
-        return f"Bisector({self.sites[0]}, {self.sites[1]})"
+        return f"B({self.sites[0]}, {self.sites[1]})"
+
+    def small_str(self):
+        """Get bisector small string representation."""
+        return f"B{self.get_sites_names()}"
+
+    def get_sites_names(self):
+        """Get bisector small string representation."""
+        return f"({self.sites[0].name}, {self.sites[1].name})"
 
     def __repr__(self):
         """Get Bisector representation."""
@@ -153,7 +103,7 @@ class Bisector:
         return self.get_sites_tuple()[0]
 
     @abstractmethod
-    def get_sites_tuple(self):
+    def get_sites_tuple(self) -> Tuple[Site, Site]:
         """Get sites tuple sorted."""
         raise NotImplementedError
 
@@ -164,6 +114,10 @@ class Bisector:
             sites_tuple[0].get_object_to_hash(),
             sites_tuple[1].get_object_to_hash(),
         )
+
+    def is_vertical(self) -> bool:
+        """Get if the bisector is vertical."""
+        raise NotImplementedError
 
 
 class PointBisector(Bisector):
@@ -208,6 +162,12 @@ class PointBisector(Bisector):
         a = Decimal(-((q.x - p.x) / (q.y - p.y)))
         b = Decimal((q.x ** 2 - p.x ** 2 + q.y ** 2 - p.y ** 2) / (2 * (q.y - p.y)))
         return [a * x + b]
+
+    def is_vertical(self) -> bool:
+        """Get if the bisector is vertical."""
+        p_site = self.sites[0]
+        q_site = self.sites[1]
+        return q_site.point.y == p_site.point.y
 
     def get_intersection_points(self, bisector: Bisector) -> List[Point]:
         """Get the point of intersection between two bisectors."""
@@ -268,7 +228,7 @@ class PointBisector(Bisector):
         )
         return delta_y_is_zero or delta_x_is_zero or both_deltas_are_the_same
 
-    def get_sites_tuple(self):
+    def get_sites_tuple(self) -> Tuple[Site, Site]:
         """Get the site tuple sorted."""
         site1 = self.sites[0]
         site2 = self.sites[1]
@@ -313,6 +273,12 @@ class WeightedPointBisector(Bisector):
             self.a, self.b, self.c, self.d, self.e, self.f
         )
 
+    def is_vertical(self) -> bool:
+        """Get if the bisector is vertical."""
+        p_site = self.sites[0]
+        q_site = self.sites[1]
+        return q_site.point.y == p_site.point.y and q_site.weight == p_site.weight
+
     def _set_polynomial_parameters(self) -> None:
         """Set parameters of general conic formula.
 
@@ -328,21 +294,21 @@ class WeightedPointBisector(Bisector):
         qw = q.weight
         if self.point_bisector:
             # The bisector is a line.
-            self.a = 0
-            self.b = 0
-            self.c = 0
-            self.d = 2 * qx - 2 * px
-            self.e = 2 * qy - 2 * py
-            self.f = (px ** 2) + (py ** 2) - (qx ** 2) - (qy ** 2)
+            self.a = Decimal(0)
+            self.b = Decimal(0)
+            self.c = Decimal(0)
+            self.d = Decimal(2 * qx - 2 * px)
+            self.e = Decimal(2 * qy - 2 * py)
+            self.f = Decimal((px ** 2) + (py ** 2) - (qx ** 2) - (qy ** 2))
         else:
             r = (qx ** 2) + (qy ** 2) - (px ** 2) - (py ** 2) - ((pw - qw) ** 2)
             s = 4 * ((pw - qw) ** 2)
-            self.a = s - (((2 * px) - (2 * qx)) ** 2)
-            self.b = (-2) * ((2 * px) - (2 * qx)) * ((2 * py) - (2 * qy))
-            self.c = s - (((2 * py) - (2 * qy)) ** 2)
-            self.d = (-2 * px * s) - (2 * ((2 * px) - (2 * qx)) * r)
-            self.e = (-2 * py * s) - (2 * ((2 * py) - (2 * qy)) * r)
-            self.f = (s * (px ** 2)) + (s * (py ** 2)) - (r ** 2)
+            self.a = Decimal(s - (((2 * px) - (2 * qx)) ** 2))
+            self.b = Decimal((-2) * ((2 * px) - (2 * qx)) * ((2 * py) - (2 * qy)))
+            self.c = Decimal(s - (((2 * py) - (2 * qy)) ** 2))
+            self.d = Decimal((-2 * px * s) - (2 * ((2 * px) - (2 * qx)) * r))
+            self.e = Decimal((-2 * py * s) - (2 * ((2 * py) - (2 * qy)) * r))
+            self.f = Decimal((s * (px ** 2)) + (s * (py ** 2)) - (r ** 2))
 
     def _is_point_part_of_bisector(self, x: Decimal, y: Decimal) -> bool:
         """Get if the point is part of bisector.
@@ -351,13 +317,10 @@ class WeightedPointBisector(Bisector):
         The open branch towards p has the equality distance_to_p + w_p = distance_to_q + w_q
         where w_p is the weight of p, q is the smallest site and w_q the weight of q.
         """
-        big_site_index = int(self.sites[0].weight < self.sites[1].weight)
-        big_site = self.sites[big_site_index]
-        small_site = self.sites[big_site_index ^ 1]
         epsilon = Decimal(0.00001)
         return are_close(
-            big_site.get_distance_to_site_farthest_frontier_from_point(x, y),
-            small_site.get_distance_to_site_farthest_frontier_from_point(x, y),
+            self.sites[0].get_distance_to_site_farthest_frontier_from_point(x, y),
+            self.sites[1].get_distance_to_site_farthest_frontier_from_point(x, y),
             epsilon,
         )
 
@@ -423,11 +386,26 @@ class WeightedPointBisector(Bisector):
         xs = self.conic_section.get_changes_of_sign_in_x()
         valid_xs = []
         for x in xs:
-            if len(self.formula_y(x)) >= 1:
+            decimals = Decimal("4")
+            multiplier = Decimal("10") ** decimals
+            truncated_x = Decimal(int(x * multiplier) / multiplier)
+            ys = self.formula_y(truncated_x)
+            if len(ys) >= 1:
                 valid_xs.append(x)
+            else:
+                # Second chance.
+                ys = self.formula_y(truncated_x + Decimal("0.0001"))
+                if len(ys) >= 1:
+                    valid_xs.append(x)
+                else:
+                    # Third Chance
+                    ys = self.formula_y(truncated_x - Decimal("0.0001"))
+                    if len(ys) >= 1:
+                        valid_xs.append(x)
+
         return valid_xs
 
-    def get_sites_tuple(self):
+    def get_sites_tuple(self) -> Tuple[WeightedSite, WeightedSite]:
         """Get site tuple sorted."""
         site1 = self.sites[0]
         site2 = self.sites[1]
@@ -435,14 +413,12 @@ class WeightedPointBisector(Bisector):
             (site1.get_highest_site_point().y > site2.get_highest_site_point().y)
             or (
                 site1.get_highest_site_point().y == site2.get_highest_site_point().y
-                and site1.get_rightest_site_point().x
-                > site2.get_rightest_site_point().x
+                and site1.compare_weights(site2) > 0
             )
             or (
                 site1.get_highest_site_point().y == site2.get_highest_site_point().y
-                and site1.get_rightest_site_point().x
-                == site2.get_rightest_site_point().x
-                and site1.weight <= site2.weight
+                and site1.compare_weights(site2) == 0
+                and site1.get_highest_site_point().x >= site2.get_highest_site_point().x
             )
         ):
             return (site1, site2)

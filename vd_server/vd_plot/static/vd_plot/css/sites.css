@@ -1,0 +1,90 @@
+#init-buttons button {
+    background-color: #0f4c81;
+    color: white;
+}
+
+#init-buttons button:disabled {
+    background-color: #dddddd;
+    color: black;
+}
+
+#site-buttons button, #sites button {
+    background-color: #1b262c;
+    color: white;
+}
+
+#num_sites, #actual_sites {
+    display: none
+}
+
+#num_random_sites {
+    width: 80px;
+}
+
+#sidebar {
+    background-color: white;
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: -500px;
+    max-width: 500px;
+    width: 500px;
+    min-height: 100vh;
+    transition: all 0.3s;
+    border-left: solid 2px rgb(50, 50, 50);
+    border-bottom: solid 2px rgb(50, 50, 50);
+    padding-top: 2em;
+}
+
+#sidebar.active {
+    position: absolute;
+    right: 0;
+}
+
+#sidebar #sites input[type=number], #sidebar #sites input[type=text], #sidebar .site button {
+    width: 106px
+}
+
+#sidebar .input-category {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+#sidebar .site {
+    padding-bottom: 1em;
+    border-bottom: solid 1px rgb(165, 165, 165);
+}
+
+#sidebar .site input, #sidebar .site button {
+    margin: 1em 1em 0em 0em;
+    height: 2em;
+}
+
+#sidebar #sites .site_name {
+    border: solid 3px black;
+}
+
+
+#sidebarOpen, #sidebarCollapse, #sidebarOpen-responsive {
+    background-color: #0f4c81;
+}
+
+#sidebarOpen {
+    position: absolute;
+    right: 0;
+}
+
+#sidebarOpen-responsive {
+    margin-left: 3em;
+}
+
+#sites {
+    height: 500px;
+    overflow: scroll;
+}
+
+@media screen and (max-width: 500px) {
+    #sidebar {
+        width: 100%;
+    }
+}

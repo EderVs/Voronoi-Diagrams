@@ -19,7 +19,7 @@ class Point:
 
     def __str__(self):
         """Get String representation."""
-        return f"P({self.x}, {self.y})"
+        return f"{'{0:.4f}'.format(self.x)}, {'{0:.4f}'.format(self.y)}"
 
     def __repr__(self):
         """Get object representation."""

@@ -7,7 +7,7 @@ from abc import ABCMeta, abstractmethod
 # Models
 from .points import Point
 from .bisectors import Bisector, PointBisector, WeightedPointBisector
-from .events import IntersectionEvent
+from .events import IntersectionEvent, Site
 
 # Math
 from decimal import Decimal
@@ -25,17 +25,22 @@ class Boundary:
     sign: bool
     left_intersection: Optional[IntersectionEvent]
     right_intersection: Optional[IntersectionEvent]
+    # active says if this boundary is the current added to the LList.
+    active: bool
+    is_to_be_deleted: bool
 
     def __init__(
-        self, bisector: Bisector, sign: bool,
+        self, bisector: Bisector, sign: bool, active: bool = False
     ):
         """Construct Boundary."""
         self.bisector = bisector
         self.sign = sign
         self.left_intersection = None
         self.right_intersection = None
+        self.active = active
+        self.is_to_be_deleted = False
 
-    def get_site(self):
+    def get_site(self) -> Site:
         """Get the site that is highest or more to the right.
 
         This is the site that defines the region of the 2 boundary sibling.
@@ -78,7 +83,11 @@ class Boundary:
 
     def __str__(self):
         """Get boundary string representation."""
-        return f"Boundary({self.bisector}, {self.sign})"
+        if self.sign:
+            sign_str = "+"
+        else:
+            sign_str = "-"
+        return f"B*{sign_str}{self.bisector.get_sites_names()}"
 
     def __repr__(self):
         """Get boundary representation."""
@@ -107,6 +116,10 @@ class Boundary:
     @abstractmethod
     def is_boundary_below(self, point: Point) -> bool:
         """Get if the given point is above the boundary."""
+        raise NotImplementedError
+
+    def get_side_where_point_belongs(self, point: Point) -> int:
+        """Get where point belongs."""
         raise NotImplementedError
 
 
@@ -226,6 +239,10 @@ class PointBoundary(Boundary):
                     )
         return all_intersections
 
+    def get_side_where_point_belongs(self, point: Point) -> int:
+        """Get where point belongs."""
+        return 0
+
 
 class WeightedPointBoundary(Boundary):
     """Boundary of a weighted site point."""
@@ -288,8 +305,8 @@ class WeightedPointBoundary(Boundary):
             return (
                 are_close(
                     point.x,
-                    min(p.point.x, q.point.x) + (distance / 2),
-                    Decimal(0.000001),
+                    min(p.point.x, q.point.x) + (distance / Decimal(2)),
+                    Decimal("0.0001"),
                 )
                 and not self.sign
             )
@@ -304,7 +321,7 @@ class WeightedPointBoundary(Boundary):
                 if not self.sign:
                     return point.x <= self.get_site().point.x
                 else:
-                    return self.get_site().point.x <= point.x
+                    return self.get_site().point.x < point.x
 
         return False
 
@@ -367,6 +384,13 @@ class WeightedPointBoundary(Boundary):
 
         # Get the projection of x in the boundary.
         ys_in_boundary = super(WeightedPointBoundary, self).formula_y(point.x)
+        sites = self.bisector.get_sites_tuple()
+        are_sites_in_same_y = (
+            sites[0].get_event_point().y == sites[1].get_event_point().y
+        )
+        if are_sites_in_same_y and len(ys_in_boundary) == 1:
+            # Both site events are in the same y.
+            return True
         if len(ys_in_boundary) == 0:
             # There is no point in boundary to compare
             return False
@@ -375,13 +399,13 @@ class WeightedPointBoundary(Boundary):
             # of the whole boundary function.
             changes_of_sign_in_x = self.bisector.get_changes_of_sign_in_x()
             for change_of_sign_in_x in changes_of_sign_in_x:
-                if are_close(change_of_sign_in_x, point.x, Decimal(0.0000001)):
+                if are_close(change_of_sign_in_x, point.x, Decimal("0.0001")):
                     return are_close(
                         super(WeightedPointBoundary, self).formula_y(
                             change_of_sign_in_x
                         )[0],
                         point.y,
-                        Decimal(0.0000001),
+                        Decimal("0.0001"),
                     )
             else:
                 # If the the projection in the boundary is not a change of sign then we just check
@@ -410,3 +434,11 @@ class WeightedPointBoundary(Boundary):
             ) and boundary.is_point_in_boundary(intersection_point_star):
                 all_intersections.append((intersection_point, intersection_point_star))
         return all_intersections
+
+    def get_side_where_point_belongs(self, point: Point) -> int:
+        """Get where point belongs."""
+        if self.is_boundary_concave_to_y():
+            ys = self.formula_y(point.x)
+            if are_close(point.y, max(ys), Decimal("0.0001"),):
+                return 1
+        return 0

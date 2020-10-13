@@ -1,6 +1,6 @@
 """AVL Tree."""
 # Standard Library
-from typing import Any, Optional, Iterable
+from typing import Any, Optional, Iterable, List
 from abc import ABCMeta, abstractmethod
 
 
@@ -595,3 +595,22 @@ class AVLTree:
     def is_empty(self) -> bool:
         """Return True if the Tree is Empty."""
         return self.root is None
+
+    def dfs_inorder(self) -> List[Any]:
+        """Get list of elements with dfs inorder."""
+        elements = []
+        stack = []
+        node = self.root
+        while node is not None:
+            stack.append(node)
+            node = node.left
+
+        while stack != []:
+            node = stack.pop()
+            elements.append(node.value)
+            node = node.right
+            while node is not None:
+                stack.append(node)
+                node = node.left
+
+        return elements

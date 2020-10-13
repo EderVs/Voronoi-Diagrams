@@ -3,7 +3,7 @@
 General Solution.
 """
 # Standard Library
-from typing import Iterable, List, Any, Optional, Tuple, Set, Dict
+from typing import Iterable, List, Any, Optional, Tuple, Set, Dict, Type
 
 # Data structures
 from .data_structures import LList, QQueue
@@ -24,11 +24,36 @@ from .models import (
     WeightedPointBisector,
     WeightedPointBoundary,
     VoronoiDiagramBisector,
+    VoronoiDiagramPointBisector,
+    VoronoiDiagramWeightedPointBisector,
     VoronoiDiagramVertex,
 )
 
 # Math
 from decimal import Decimal
+
+# Plot
+from plotly import graph_objects as go
+from plots.plot_utils.models.events import (
+    plot_site,
+    plot_sweep_line,
+    get_site_traces,
+    plot_events_traces,
+)
+from plots.plot_utils.models.boundaries import get_plot_scatter_boundary
+from plots.plot_utils.models.bisectors import (
+    plot_vertices_and_bisectors,
+    plot_voronoi_diagram_bisector,
+)
+from plots.plot_utils.models.vertices import plot_vertex
+from plots.plot_utils.data_structures.l_list import plot_l_list
+
+# Types
+Limit = Tuple[Decimal, Decimal]
+
+# Modes
+STATIC_MODE = 0
+DYNAMIC_MODE = 1
 
 
 class VoronoiDiagram:
@@ -38,13 +63,31 @@ class VoronoiDiagram:
     vertices_list: List[Point]
     bisectors: List[VoronoiDiagramBisector]
     bisectors_list: List[Bisector]
+    mode: int
+    event: Event  # Current Event
 
     _vertices_dict: Dict[Tuple[Decimal, Decimal], VoronoiDiagramVertex]
     _bisectors: Dict[Any, Bisector]
     _active_bisectors: Dict[Any, VoronoiDiagramBisector]
     sites: List[Site]
+    _plot_steps: bool
+    _figure: Optional[go.Figure]
+    _figure_traces: int
+    _boundary_plot_dict: Dict[str, int]
+    _bisector_plot_dict: Dict[Tuple[str, bool], int]
+    _begin_event: bool
+    _updated_regions: List[Region]
+    _updated_boundaries: List[Boundary]
 
-    def __init__(self, sites: Iterable[Site], site_class: Any = Site):
+    def __init__(
+        self,
+        sites: Iterable[Site],
+        site_class: Type[Site] = Site,
+        plot_steps: bool = False,
+        xlim: Optional[Limit] = (-100, 100),
+        ylim: Optional[Limit] = (-100, 100),
+        mode: Optional[int] = STATIC_MODE,
+    ):
         """Construct and calculate Voronoi Diagram."""
         self.vertices = []
         self.vertices_list = []
@@ -55,16 +98,54 @@ class VoronoiDiagram:
         self._bisectors = dict()
         self._active_bisectors = dict()
 
+        # Type of Voronoi diagram.
         self.sites = list(sites)
+        self.SITE_CLASS = site_class
         if site_class == Site:
             self.BISECTOR_CLASS = PointBisector
             self.REGION_CLASS = Region
             self.BOUNDARY_CLASS = PointBoundary
+            self.VD_BISECTOR_CLASS = VoronoiDiagramPointBisector
+            self._site_traces = 1
         elif site_class == WeightedSite:
             self.BISECTOR_CLASS = WeightedPointBisector
             self.REGION_CLASS = Region
             self.BOUNDARY_CLASS = WeightedPointBoundary
-        self._calculate_diagram()
+            self.VD_BISECTOR_CLASS = VoronoiDiagramWeightedPointBisector
+            self._site_traces = 2
+
+        # Plot.
+        self._plot_steps = plot_steps
+        if self._plot_steps:
+            self._figure = go.Figure()
+            layout = go.Layout(
+                height=745,
+                width=815,
+                hovermode="closest",
+                legend={"itemclick": "toggleothers", "itemdoubleclick": "toggle"},
+            )
+            template = dict(layout=layout)
+            self._figure.update_layout(title="VD", template=template)
+            self._figure.update_xaxes(range=list(xlim))
+            self._figure.update_yaxes(range=list(ylim), scaleanchor="x", scaleratio=1)
+            self._xlim = xlim
+            self._ylim = ylim
+            self._figure_traces = 0
+            self._traces = []
+            self._boundary_plot_dict = {}
+            self._bisector_plot_dict = {}
+        else:
+            self._figure = None
+
+        self._updated_regions = []
+        self._updated_boundaries = []
+
+        # Mode.
+        self.mode = mode
+        self._begin_event = True
+        self._init_structures()
+        if self.mode == STATIC_MODE:
+            self._calculate_diagram()
 
     def add_vertex(
         self, point: Point, vd_bisectors: Optional[List[VoronoiDiagramBisector]] = None
@@ -84,24 +165,35 @@ class VoronoiDiagram:
                 vd_vertex.add_bisector(vd_bisector)
                 vd_bisector.add_vertex(vd_vertex)
 
-    def add_bisector(self, bisector: Bisector) -> None:
+        if self._plot_steps:
+            self._add_vertex_trace(vd_vertex)
+
+    def add_bisector(self, bisector: Bisector, sign: Optional[bool] = True) -> None:
         """Add point in the vertex list."""
         hasheable_of_bisector = bisector.get_object_to_hash()
         if hasheable_of_bisector not in self._bisectors:
             self._bisectors[hasheable_of_bisector] = bisector
             self.bisectors_list.append(bisector)
-        vd_bisector = VoronoiDiagramBisector(bisector)
-        self._active_bisectors[hasheable_of_bisector] = vd_bisector
+        vd_bisector = self.VD_BISECTOR_CLASS(
+            bisector,
+            self.BOUNDARY_CLASS(bisector, True),
+            self.BOUNDARY_CLASS(bisector, False),
+        )
         self.bisectors.append(vd_bisector)
+        if sign is None:
+            self._active_bisectors[(hasheable_of_bisector, False)] = vd_bisector
+            self._active_bisectors[(hasheable_of_bisector, True)] = vd_bisector
+        else:
+            self._active_bisectors[(hasheable_of_bisector, sign)] = vd_bisector
 
     def get_voronoi_diagram_bisectors(
-        self, bisectors: List[Bisector]
+        self, bisectors: List[Tuple[Bisector, bool]]
     ) -> List[VoronoiDiagramBisector]:
         """Get voronoi diagram bisectors based on the current state."""
         vd_bisectors = []
-        for bisector in bisectors:
+        for bisector, sign in bisectors:
             hasheable_of_bisector = bisector.get_object_to_hash()
-            vd_bisector = self._active_bisectors[hasheable_of_bisector]
+            vd_bisector = self._active_bisectors[(hasheable_of_bisector, sign)]
             vd_bisectors.append(vd_bisector)
         return vd_bisectors
 
@@ -125,6 +217,14 @@ class VoronoiDiagram:
         r_q_right = self.REGION_CLASS(r_q.site, boundary_p_q_plus, r_q.right)
         r_p.left = boundary_p_q_minus
         r_p.right = boundary_p_q_plus
+
+        self._updated_boundaries = [boundary_p_q_minus, boundary_p_q_plus]
+        self._updated_regions = [r_q_left, r_p, r_q_right]
+        for region in self._updated_regions:
+            region.active = True
+        for boundary in self._updated_boundaries:
+            boundary.active = True
+
         # Update L list.
         r_q_left_node, r_p_node, r_q_right_node = self.l_list.update_regions(
             r_q_left, r_p, r_q_right
@@ -190,6 +290,57 @@ class VoronoiDiagram:
                 right_left_boundary, right_right_boundary, right_region_node
             )
 
+    def _add_boundary_to_plot(self, boundary: Boundary):
+        """Add boundary to plot."""
+        if self._plot_steps:
+            trace = get_plot_scatter_boundary(
+                boundary, self._xlim, self._ylim, self.BISECTOR_CLASS,
+            )
+            self._traces.append(trace)
+            self._figure_traces += 1
+            # TODO: Change to use complete_string()
+            self._boundary_plot_dict[str(boundary)] = self._figure_traces - 1
+
+    def _add_bisector_to_plot(self, bisector: Bisector, sign: Optional[bool]):
+        """Add boundary to plot."""
+        if self._plot_steps:
+            if sign is None:
+                vd_bisector = self.get_voronoi_diagram_bisectors([(bisector, True)])[0]
+            else:
+                vd_bisector = self.get_voronoi_diagram_bisectors([(bisector, sign)])[0]
+            traces = plot_voronoi_diagram_bisector(
+                vd_bisector, self._xlim, self._ylim, self.BISECTOR_CLASS
+            )
+            self._traces += traces
+            traces_numbers = list(
+                range(self._figure_traces, self._figure_traces + len(traces))
+            )
+            if sign is None:
+                self._bisector_plot_dict[
+                    (str(bisector.get_object_to_hash()), True)
+                ] = traces_numbers
+                self._bisector_plot_dict[
+                    (str(bisector.get_object_to_hash()), False)
+                ] = traces_numbers
+            else:
+                self._bisector_plot_dict[
+                    (str(bisector.get_object_to_hash()), sign)
+                ] = traces_numbers
+            self._figure_traces += len(traces)
+            # For debuging.
+            # print("//////////////////////////////////////////////////////")
+            # print(traces_numbers)
+            # print("-------------------------------------------------------")
+            # print(traces)
+            # print("-------------------------------------------------------")
+            # print(self._traces[traces_numbers[0] : traces_numbers[-1] + 1])
+
+    def _add_boundaries_to_plot(self, boundaries: List[Boundary]):
+        """Add boundaries to plot."""
+        if self._plot_steps:
+            for boundary in boundaries:
+                self._add_boundary_to_plot(boundary)
+
     def _handle_site(self, p: Site):
         """Handle when event is a site."""
         # Step 8.
@@ -208,7 +359,7 @@ class VoronoiDiagram:
         # Create Bisector B*pq.
         # Actually we are creating Bpq.
         bisector_p_q = self.BISECTOR_CLASS(sites=(p, r_q.site))
-        self.add_bisector(bisector_p_q)
+        self.add_bisector(bisector_p_q, sign=None)
 
         # Step 10.
         # Update list L so that it contains ...,R*q,C-pq,R*p,C+pq,R*q,... in place of R*q.
@@ -218,6 +369,18 @@ class VoronoiDiagram:
             r_q_left_node,
             r_q_right_node,
         ) = self._update_list_l(r_p, r_q, bisector_p_q)
+
+        if bisector_p_q.is_vertical():
+            self.add_begin_vertical_bisector(bisector_p_q, None)
+        else:
+            self.add_begin_bisector(boundary_p_q_minus, p)
+            self.add_begin_bisector(boundary_p_q_plus, p)
+
+        if self._plot_steps:
+            self._add_boundaries_to_plot([boundary_p_q_minus, boundary_p_q_plus])
+            self._add_bisector_to_plot(
+                bisector_p_q, None
+            )  # It doesn't matter the sign here.
 
         # Step 11.
         # Delete from Q the intersection between the left and right boundary of R*q, if any.
@@ -258,6 +421,99 @@ class VoronoiDiagram:
         r_s = r_s_node.value  # type: ignore
         return r_q, r_s, r_q_node, r_s_node
 
+    def _remove_boundary_from_figure_traces(self, boundary: Optional[Boundary]):
+        """Remove boundary from figure traces."""
+        if boundary is None:
+            return
+        self._traces[self._boundary_plot_dict[str(boundary)]] = None
+
+    def _update_boundaries_bisectors_figure_traces(
+        self, boundaries: List[Optional[Boundary]]
+    ):
+        """Update boundaries bisectors' figure traces."""
+        for boundary in boundaries:
+            if boundary is None:
+                continue
+            self._update_bisector_figure_traces(boundary.bisector, boundary.sign)
+
+    def _update_bisector_figure_traces(self, bisector: Bisector, sign: bool):
+        """Update bisector's figure traces."""
+        bisector_traces = self._bisector_plot_dict[
+            (str(bisector.get_object_to_hash()), sign)
+        ]
+        bisector_other_sign_traces = self._bisector_plot_dict.get(
+            (str(bisector.get_object_to_hash()), not sign), []
+        )
+        if bisector_traces == bisector_other_sign_traces:
+            sign = None
+        for bisector_trace_i in bisector_traces:
+            self._traces[bisector_trace_i] = None
+        self._add_bisector_to_plot(bisector, sign)
+
+    def _add_vertex_trace(self, vertex: VoronoiDiagramVertex):
+        """Add vertex to vd trace."""
+        trace = plot_vertex(vertex)
+        self._traces.append(trace)
+        self._figure_traces += 1
+
+    def _remove_boundaries_from_figure_traces(
+        self, boundary1: Optional[Boundary], boundary2: Optional[Boundary]
+    ):
+        """Remove boundary from figure traces."""
+        if boundary1 is None and boundary2 is None:
+            return
+        if boundary1 is None:
+            self._remove_boundary_from_figure_traces(boundary2)
+        elif boundary2 is None:
+            self._remove_boundary_from_figure_traces(boundary1)
+        else:
+            position1 = self._boundary_plot_dict[str(boundary1)]
+            position2 = self._boundary_plot_dict[str(boundary2)]
+            if position1 > position2:
+                self._remove_boundary_from_figure_traces(boundary1)
+                self._remove_boundary_from_figure_traces(boundary2)
+            else:
+                self._remove_boundary_from_figure_traces(boundary2)
+                self._remove_boundary_from_figure_traces(boundary1)
+
+    def add_begin_vertical_bisector(
+        self, bisector: Bisector, y: Optional[Decimal], sign: bool = True
+    ):
+        """Add vertical bisector range."""
+        voronoi_diagram_bisector = self.get_voronoi_diagram_bisectors(
+            [(bisector, sign)]
+        )[0]
+        voronoi_diagram_bisector.add_begin_range_vertical(y)
+
+    def add_begin_bisector(self, boundary: Boundary, event: Event) -> None:
+        """Get range of the bisector based on the boundary and the intersection."""
+        voronoi_diagram_bisector = self.get_voronoi_diagram_bisectors(
+            [(boundary.bisector, boundary.sign)]
+        )[0]
+        side = boundary.get_side_where_point_belongs(event.point)
+        voronoi_diagram_bisector.add_begin_range(event.point.x, boundary.sign, side)
+
+    def add_end_vertical_bisector(
+        self, bisector: Bisector, y: Decimal, sign: bool = True
+    ):
+        """Add end of vertical bisector range."""
+        voronoi_diagram_bisector = self.get_voronoi_diagram_bisectors(
+            [(bisector, sign)]
+        )[0]
+        voronoi_diagram_bisector.add_end_range_vertical(y)
+
+    def add_end_bisector(
+        self, boundary: Boundary, intersection: IntersectionEvent
+    ) -> None:
+        """Get range of the bisector based on the boundary and the intersection."""
+        voronoi_diagram_bisector = self.get_voronoi_diagram_bisectors(
+            [(boundary.bisector, boundary.sign)]
+        )[0]
+        side = boundary.get_side_where_point_belongs(intersection.point)
+        voronoi_diagram_bisector.add_end_range(
+            intersection.point.x, boundary.sign, side
+        )
+
     def _handle_intersection(self, p: IntersectionEvent):
         """Handle when event is an intersection."""
         # Step 14.
@@ -269,20 +525,65 @@ class VoronoiDiagram:
         intersection_region_node_value_left = intersection_region_node.value.left
         intersection_region_node_value_right = intersection_region_node.value.right
         intersection_left_bisector = intersection_region_node_value_left.bisector
+        intersection_left_bisector_sign = intersection_region_node_value_left.sign
         intersection_right_bisector = intersection_region_node_value_right.bisector
+        intersection_right_bisector_sign = intersection_region_node_value_right.sign
 
         # Step 15.
         # Create bisector B*qs.
         bisector_q_s = self.BISECTOR_CLASS(sites=(r_q.site, r_s.site))
-        self.add_bisector(bisector_q_s)
 
         # Step 16.
         # Update list L so it contains Cqs instead of Cqr, Rr*, Crs
-        boundary_q_s = self.BOUNDARY_CLASS(
-            bisector_q_s, r_q.site.get_event_point().y > r_s.site.get_event_point().y
-        )
+        boundary_q_s_sign = r_q.site.get_event_point().y > r_s.site.get_event_point().y
+        boundary_q_s = self.BOUNDARY_CLASS(bisector_q_s, boundary_q_s_sign)
+        self.add_bisector(bisector_q_s, sign=boundary_q_s_sign)
+        if boundary_q_s.bisector.is_vertical():
+            self.add_begin_vertical_bisector(
+                boundary_q_s.bisector, p.vertex.y, boundary_q_s_sign
+            )
+        else:
+            self.add_begin_bisector(boundary_q_s, p)
         left_region_node = intersection_region_node.left_neighbor
         right_region_node = intersection_region_node.right_neighbor
+
+        if intersection_region_node.value.left.bisector.is_vertical():
+            self.add_end_vertical_bisector(
+                intersection_region_node.value.left.bisector,
+                p.vertex.y,
+                intersection_region_node.value.left.sign,
+            )
+        else:
+            self.add_end_bisector(intersection_region_node.value.left, p)
+        if intersection_region_node.value.right.bisector.is_vertical():
+            self.add_end_vertical_bisector(
+                intersection_region_node.value.right.bisector,
+                p.vertex.y,
+                intersection_region_node.value.right.sign,
+            )
+        else:
+            self.add_end_bisector(intersection_region_node.value.right, p)
+
+        if self._plot_steps:
+            # Remove
+            self._remove_boundaries_from_figure_traces(
+                intersection_region_node.value.left,
+                intersection_region_node.value.right,
+            )
+            self._update_boundaries_bisectors_figure_traces(
+                [
+                    intersection_region_node.value.left,
+                    intersection_region_node.value.right,
+                ]
+            )
+            # Add new boundary
+            self._add_boundary_to_plot(boundary_q_s)
+            # Add new bisector
+            self._add_bisector_to_plot(bisector_q_s, boundary_q_s_sign)
+
+        boundary_q_s.active = True
+        self._updated_boundaries = [boundary_q_s]
+        self._updated_regions = []
         self.l_list.remove_region(intersection_region_node, boundary_q_s)
 
         # Step 17.
@@ -319,57 +620,178 @@ class VoronoiDiagram:
         # Mark p as a vertex and as an endpoint of B*qr, B*rs and B*qs.
         # Add that this vertex is an endpoint of B*qr, B*rs and B*qs.
         vd_bisectors = self.get_voronoi_diagram_bisectors(
-            [intersection_left_bisector, intersection_right_bisector, bisector_q_s]
+            [
+                (intersection_left_bisector, intersection_left_bisector_sign),
+                (intersection_right_bisector, intersection_right_bisector_sign),
+                (bisector_q_s, boundary_q_s_sign),
+            ]
         )
         self.add_vertex(p.vertex, vd_bisectors)
 
-    def _calculate_diagram(self):
-        """Calculate point diagram."""
+    def _set_site_trace(self, site):
+        """Set site trace in traces."""
+        if self._plot_steps:
+            site_traces = get_site_traces(site, self.SITE_CLASS)
+            self._traces += site_traces
+            self._figure_traces += len(site_traces)
+
+    def _init_structures(self):
+        """Init data structures used."""
         # Step 1.
         self.q_queue = QQueue()
         for site in self.sites:
             self.q_queue.enqueue(site)
+            if self._plot_steps:
+                self._set_site_trace(site)
+
         # Step 2.
-        p = self.q_queue.dequeue()
+        self.event = self.q_queue.dequeue()
+
         # Step 3.
-        r_p = self.REGION_CLASS(p, None, None)
+        r_p = self.REGION_CLASS(self.event, None, None)
+        self._updated_regions = [r_p]
+        r_p.active = True
         self.l_list = LList(r_p)
+        self._plot_step()
+
+    def move_to_next_event(self):
+        """Move to next event in Queue."""
+        # Reset active boundaries and regions.
+        for region in self._updated_regions:
+            region.active = False
+        for boundary in self._updated_boundaries:
+            boundary.active = False
+        self._updated_regions = []
+        self._updated_boundaries = []
+
+        # Step 4.
+        if self.q_queue.is_empty():
+            return
+
+        # Step 5.
+        self.event = self.q_queue.dequeue()
+        self._plot_step()
+        self._begin_event = False
+        if not self.event.is_site:
+            self.event.region_node.value.is_to_be_deleted = True
+            self.event.region_node.value.left.is_to_be_deleted = True
+            self.event.region_node.value.right.is_to_be_deleted = True
+
+    def calculate_event(self):
+        """Calculate actual event."""
+        self._plot_step()
+        # Step 6 and 7.
+        if self.event.is_site:
+            self._handle_site(self.event)
+        # Step 13: p is an intersection.
+        else:
+            self._handle_intersection(self.event)
+        self._plot_step()
+        self._begin_event = True
+
+    def calculate_next_event(self):
+        """Calculate next event in the Queue."""
+        self.move_to_next_event()
+        self.calculate_event()
+
+    def next_step(self):
+        """Calculate next step."""
+        if self._begin_event:
+            self.move_to_next_event()
+        else:
+            self.calculate_event()
+
+    def is_next_step(self):
+        """Get if there is a next step to calculate."""
+        return not self.q_queue.is_empty() or not self._begin_event
+
+    def _calculate_diagram(self):
+        """Calculate point diagram."""
         # Step 4.
         while not self.q_queue.is_empty():
             # Step 5.
-            p = self.q_queue.dequeue()
+            self.event = self.q_queue.dequeue()
+            self._plot_step()
             # Step 6 and 7.
-            if p.is_site:
-                self._handle_site(p)
+            if self.event.is_site:
+                self._handle_site(self.event)
             # Step 13: p is an intersection.
             else:
-                self._handle_intersection(p)
+                self._handle_intersection(self.event)
+            self._plot_step()
+
+    def _plot_step(self):
+        """Plot step."""
+        if self._plot_steps:
+            # keep the sites and clean all other traces.
+            # For debuging.
+            # print(self.l_list)
+            # print(self.q_queue)
+            # print(self.event)
+            # print("In plot step")
+            self._figure.data = []
+            for trace in self._traces:
+                if trace is not None:
+                    self._figure.add_trace(trace)
+            plot_sweep_line(self._figure, self._xlim, self._ylim, self.event)
+            plot_events_traces(self._figure, self.q_queue)
+            # self._figure.show()
 
 
 class FortunesAlgorithm:
     """Fortune's Algorithm implementation."""
 
     @staticmethod
-    def calculate_voronoi_diagram(points: List[Point]) -> VoronoiDiagram:
+    def calculate_voronoi_diagram(
+        points: List[Point],
+        plot_steps: bool = False,
+        xlim: Limit = (-100, 100),
+        ylim: Limit = (-100, 100),
+        mode: int = STATIC_MODE,
+        names: Optional[List[str]] = None,
+    ) -> VoronoiDiagram:
         """Calculate Voronoi Diagram."""
+        if names is None or len(points) != len(names):
+            names = [str(i + 1) for i in range(len(points))]
         sites = [
-            Site(points[i].x, points[i].y, name=str(i + 1)) for i in range(len(points))
+            Site(points[i].x, points[i].y, name=names[i]) for i in range(len(points))
         ]
-        voronoi_diagram = VoronoiDiagram(sites, site_class=Site)
+        voronoi_diagram = VoronoiDiagram(
+            sites,
+            site_class=Site,
+            plot_steps=plot_steps,
+            xlim=xlim,
+            ylim=ylim,
+            mode=mode,
+        )
 
         return voronoi_diagram
 
     @staticmethod
     def calculate_aw_voronoi_diagram(
-        points_and_weights: List[Tuple[Point, Decimal]]
+        points_and_weights: List[Tuple[Point, Decimal]],
+        plot_steps: bool = False,
+        xlim: Limit = (-100, 100),
+        ylim: Limit = (-100, 100),
+        mode: int = STATIC_MODE,
+        names: Optional[List[str]] = None,
     ) -> VoronoiDiagram:
         """Calculate AW Voronoi Diagram."""
         sites = []
+        if names is None or len(points_and_weights) != len(names):
+            names = [str(i + 1) for i in range(len(points_and_weights))]
         for i in range(len(points_and_weights)):
             point, weight = points_and_weights[i]
-            site = WeightedSite(point.x, point.y, weight, name=str(i + 1))
+            site = WeightedSite(point.x, point.y, weight, name=names[i])
             sites.append(site)
 
-        voronoi_diagram = VoronoiDiagram(sites, site_class=WeightedSite)
+        voronoi_diagram = VoronoiDiagram(
+            sites,
+            site_class=WeightedSite,
+            plot_steps=plot_steps,
+            xlim=xlim,
+            ylim=ylim,
+            mode=mode,
+        )
 
         return voronoi_diagram

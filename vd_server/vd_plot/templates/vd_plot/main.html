@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Voronoi diagrams</title>
+
+    <!-- Metas -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    {% load static %}
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'vd_plot/css/fortune.css' %}">
+    <link rel="stylesheet" href="{% static 'vd_plot/css/steps.css' %}">
+
+    <!-- Font Awesome JS -->
+    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js"
+        integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ"
+        crossorigin="anonymous"></script>
+    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/fontawesome.js"
+        integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY"
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{% static 'vd_plot/css/sites.css' %}">
+
+</head>
+
+<body>
+    <div class="container" id="wrapper">
+        <div>
+            <div id="fortune" class="col">
+                <div id="top" class="row">
+                    <div id="left" class="col-xl-9">
+                        <div id="loading"></div>
+                        <div id="plot"></div>
+                    </div>
+                    <div id="right" class="col-3">
+                        <div id="steps">
+                            <button type="submit" id="prev-step">Prev Step</button>
+                            <button type="submit" id="next-step">Next Step</button>
+                            <button type="button" id="sidebarOpen" class="btn btn-info">
+                                <i class="fas fa-align-left"></i>
+                            </button>
+                        </div>
+                        <div id="step_info">
+                            <div id="actual_event_container">
+                                <h4>Actual event</h4>
+                                <div id="actual_event">
+                                </div>
+                            </div>
+                            <div id="qqueue_container">
+                                <h4>Q Queue</h4>
+                                <div id="qqueue">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="llist_container" class="col">
+                    <h4 class="row">L List</h4>
+                    <div id="llist" class="row">
+                    </div>
+                </div>
+                <div id="bottom-responsive" class="col">
+                    <div id="steps-responsive">
+                        <button type="submit" id="prev-step-responsive">Prev Step</button>
+                        <button type="submit" id="next-step-responsive">Next Step</button>
+                        <button type="button" id="sidebarOpen-responsive" class="btn btn-info">
+                            <i class="fas fa-align-left"></i>
+                        </button>
+                    </div>
+                    <div id="step_info-responsive">
+                        <div id="actual_event_container-responsive">
+                            <h4>Actual event</h4>
+                            <div id="actual_event-responsive">
+                            </div>
+                        </div>
+                        <div id="qqueue_container-responsive">
+                            <h4>Q Queue</h4>
+                            <div id="qqueue-responsive">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="sidebar">
+                <div class="col">
+                    <button type="button" id="sidebarCollapse" class="btn btn-info sidebar-button">
+                        <i class="fas fa-align-left"></i>
+                    </button>
+                </div>
+                <form id="vd_form" class="col">
+                    {% csrf_token %}
+                    <div id="vd_type" class="input-category col">
+                        <div class="row">
+                            <div class="col">
+                                <input type="radio" id="vd_type" name="vd_type" value="vd" checked>
+                                <label for="vd">Voronoi Diagram</label>
+                            </div>
+                            <div class="col">
+                                <input type="radio" id="aw_vd_type" name="vd_type" value="aw_vd">
+                                <label for="aw_vd">AW Voronoi Diagram</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="limits" class="col input-category">
+                        <div class="row">
+                            <div class="col">
+                                <label for="limit_x0">Min x</label>
+                            </div>
+                            <div class="col">
+                                <input type="number" id="limit_x0" step="any" placeholder="limit_x0" name="limit_x0"
+                                    value="-100" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <label for="limit_x1">Max x</label>
+                            </div>
+                            <div class="col">
+                                <input type="number" id="limit_x1" step="any" placeholder="limit_x1" name="limit_x1"
+                                    value="100" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <label for="limit_y0">Min y</label>
+                            </div>
+                            <div class="col">
+                                <input type="number" id="limit_y0" step="any" placeholder="limit_y0" name="limit_y0"
+                                    value="-100" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <label for="limit_y1">Max y</label>
+                            </div>
+                            <div class="col">
+                                <input type="number" id="limit_y1" step="any" placeholder="limit_y1" name="limit_y1"
+                                    value="100" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="init-buttons" class="col input-category">
+                        <div class="row">
+                            <div class="col-4">
+                                <button type="submit" id="first-step">Each Step</button>
+                            </div>
+                            <div class="col">
+                                <button type="submit" id="plot-vd">Plot Voronoi Diagram</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="site-buttons" class="col input-category">
+                        <div class="row">
+                            <div class="col">
+                                <label for="num_sites">Random sites:</label>
+                                <input type="number" name="num_random_sites" id="num_random_sites" placeholder="max 20">
+                                <button type="button" id="random_sites">Random sites</button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-3">
+                                <button type="button" id="add_site">Add site</button>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="number" name="actual_sites" id="actual_sites" value=0>
+                    <input type="number" name="num_sites" id="num_sites" value=0>
+                    <div id="sites" class="col input-category">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- JS, Popper.js, and jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+        crossorigin="anonymous"></script>
+    <script src="{% static 'vd_plot/js/sites.js' %}"></script>
+
+</body>
+
+</html>

@@ -1,13 +1,13 @@
 """Q Queue implementation."""
 
 # Standard Library
-from typing import Any, Optional
+from typing import Any, Optional, List
 
 # AVL
 from .avl_tree import AVLTree, AVLNode
 
 # Models
-from ..models import Event
+from voronoi_diagrams.models import Event
 
 
 class QNode(AVLNode):
@@ -23,23 +23,18 @@ class QNode(AVLNode):
 
     def is_contained(self, value: Event, *args: Any, **kwargs: Any) -> bool:
         """Value is contained in the Node."""
-        return value == self.value
+        comparison = self.value.get_comparison(value)
+        return comparison == 0
 
     def is_left(self, value: Event, *args: Any, **kwargs: Any) -> bool:
         """Value is to the left of Node."""
-        event_point = self.value.get_event_point()
-        other_event_point = value.get_event_point()
-        if other_event_point.y == event_point.y:
-            return other_event_point.x < event_point.x
-        return other_event_point.y < event_point.y
+        comparison = self.value.get_comparison(value)
+        return comparison > 0
 
     def is_right(self, value: Event, *args: Any, **kwargs: Any) -> bool:
         """Value is to the right of Node."""
-        event_point = self.value.get_event_point()
-        other_event_point = value.get_event_point()
-        if other_event_point.y == event_point.y:
-            return other_event_point.x > event_point.x
-        return other_event_point.y > event_point.y
+        comparison = self.value.get_comparison(value)
+        return comparison < 0
 
 
 class QQueue:
@@ -54,7 +49,7 @@ class QQueue:
 
     def __str__(self) -> str:
         """Get string representation."""
-        return str(self.t)
+        return f"Q: {str(self.get_all_events())}"
 
     def __repr__(self):
         """Get representation."""
@@ -83,3 +78,7 @@ class QQueue:
     def is_empty(self) -> bool:
         """Return True if the Queue is Empty."""
         return self.t.is_empty()
+
+    def get_all_events(self) -> List[Event]:
+        """Get all events sorted."""
+        return self.t.dfs_inorder()

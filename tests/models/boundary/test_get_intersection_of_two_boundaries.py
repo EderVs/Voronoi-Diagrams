@@ -694,6 +694,15 @@ class TestGetIntersectionInWeightedPointBoundary:
         assert intersection_star.x == Decimal("29")
         assert intersection_star.y == Decimal("10.05538513813741662657380817")
 
+        intersections = boundary_qr_plus.get_intersections(boundary_pq_minus)
+        assert len(intersections) == 1
+        intersection = intersections[0]
+        intersection, intersection_star = intersection
+        assert intersection.x == Decimal("29")
+        assert intersection.y == Decimal("1")
+        assert intersection_star.x == Decimal("29")
+        assert intersection_star.y == Decimal("10.05538513813741662657380817")
+
         intersections = boundary_qr_plus.get_intersections(boundary_pq_plus)
         assert len(intersections) == 0
 

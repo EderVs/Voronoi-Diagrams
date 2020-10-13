@@ -38,7 +38,7 @@ class TestEnqueueDequeueRegions:
 
     def test_enqueue_dequeue(self) -> None:
         """Test with just an l list with just one region in it."""
-        expected_list: List[Event] = [Site(0, i) for i in range(100)]
+        expected_list: List[Event] = [Site(0, i) for i in range(1000)]
         q_queue = QQueue()
         for _ in range(100):
             random_list = expected_list.copy()
