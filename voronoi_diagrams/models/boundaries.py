@@ -158,7 +158,7 @@ class PointBoundary(Boundary):
         return p.get_distance_to_site_point_from_point(point.x, point.y)
 
     # Used in formula_x
-    def quadratic_solution(
+    def _quadratic_solution(
         self, a: Decimal, b: Decimal, c: Decimal
     ) -> Optional[Decimal]:
         """Return the solution of the quadratic function based on the sign of the Boundary."""
@@ -186,7 +186,7 @@ class PointBoundary(Boundary):
         e = Decimal(c ** 2 - d ** 2 - p.x ** 2)
         f = Decimal(-1)
         g = Decimal(2 * (-a * (c + d) + p.x))
-        x = self.quadratic_solution(f, g, e)
+        x = self._quadratic_solution(f, g, e)
         return [x]
 
     def is_boundary_below(self, point: Point) -> bool:
