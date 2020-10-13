@@ -19,7 +19,7 @@ from conic_sections.utils.circle import get_circle_formula_x, get_circle_formula
 
 
 class Event:
-    """Event Representation. It can be a Site or an Interception."""
+    """Event Representation. It can be either a Site or an Interception."""
 
     __metaclass__ = ABCMeta
 
@@ -77,7 +77,10 @@ class Event:
 
 
 class Site(Event):
-    """Site to handle in Fortune's Algorithm."""
+    """Site to handle in Fortune's Algorithm.
+
+    By itself it is just a point.
+    """
 
     def __init__(self, x: Decimal, y: Decimal, name: str = ""):
         """Construct point."""
@@ -193,7 +196,7 @@ class Intersection(Event):
 class WeightedSite(Site):
     """Weighted Site to handle in Fortune's Algorithm.
 
-    Is like a site but with a weight.
+    Is a point with weight.
     """
 
     weight: Decimal
