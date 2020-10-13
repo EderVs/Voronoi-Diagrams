@@ -130,9 +130,7 @@ class Site(Event):
         """Get distance to site frontier from point."""
         return self.get_distance_to_site_point_from_point(x, y)
 
-    def get_distance_to_site_farthest_frontier_from_point(
-        self, x: Decimal, y: Decimal
-    ) -> Decimal:
+    def get_weighted_distance(self, x: Decimal, y: Decimal) -> Decimal:
         """Get distance to site frontier from point.
 
         The frontier in this case is the site point itself.
@@ -296,9 +294,7 @@ class WeightedSite(Site):
             x, y
         ) - abs(self.weight)
 
-    def get_distance_to_site_farthest_frontier_from_point(
-        self, x: Decimal, y: Decimal
-    ) -> Decimal:
+    def get_weighted_distance(self, x: Decimal, y: Decimal) -> Decimal:
         """Get distance to site frontier from point.
 
         The frontier in this case is the circle given by the weight as radius.
@@ -326,16 +322,9 @@ class WeightedSite(Site):
     def is_dominated(self, site: Any) -> bool:
         """Check if this event is dominated to other event."""
         if self.weight >= 0:
-            return (
-                self.weight
-                >= site.get_distance_to_site_farthest_frontier_from_point(
-                    self.point.x, self.point.y
-                )
-            )
+            return self.weight >= site.get_weighted_distance(self.point.x, self.point.y)
         else:
-            return abs(
-                site.weight
-            ) >= self.get_distance_to_site_farthest_frontier_from_point(
+            return abs(site.weight) >= self.get_weighted_distance(
                 site.point.x, self.point.y
             )
 

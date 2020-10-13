@@ -257,7 +257,7 @@ class WeightedPointBoundary(Boundary):
         the sites is the same.
         """
         p = self.get_site()
-        return p.get_distance_to_site_farthest_frontier_from_point(point.x, point.y)
+        return p.get_weighted_distance(point.x, point.y)
 
     def is_boundary_concave_to_y(self) -> bool:
         """Check if the boundary is concave to y."""

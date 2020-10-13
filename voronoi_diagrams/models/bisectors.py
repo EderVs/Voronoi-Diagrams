@@ -319,8 +319,8 @@ class WeightedPointBisector(Bisector):
         """
         epsilon = Decimal(0.00001)
         return are_close(
-            self.sites[0].get_distance_to_site_farthest_frontier_from_point(x, y),
-            self.sites[1].get_distance_to_site_farthest_frontier_from_point(x, y),
+            self.sites[0].get_weighted_distance(x, y),
+            self.sites[1].get_weighted_distance(x, y),
             epsilon,
         )
 
