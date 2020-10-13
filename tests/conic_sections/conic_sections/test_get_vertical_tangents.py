@@ -1,4 +1,4 @@
-"""Test get_changes_of_sign_in_x method."""
+"""Test get_vertical_tangents method."""
 
 from conic_sections.models import ConicSection
 from voronoi_diagrams.models import WeightedPointBisector, WeightedSite
@@ -10,8 +10,8 @@ from decimal import Decimal
 from general_utils.numbers import are_close
 
 
-class TestGetChangesOfSignInX:
-    """Test get_changes_of_sign_in_x method."""
+class TestGetVerticalTangents:
+    """Test get_vertical_tangents method."""
 
     def test_there_is_solution(self):
         """Test where there is solution."""
@@ -20,7 +20,7 @@ class TestGetChangesOfSignInX:
         bisector = WeightedPointBisector(sites=(p, q))
         epsilon = Decimal(0.00001)
         conic_section = bisector.conic_section
-        xs = conic_section.get_changes_of_sign_in_x()
+        xs = conic_section.get_vertical_tangents()
         xs.sort()
         expected_xs = [
             Decimal("5.794462938320943834469289868138730525970458984375"),
@@ -36,7 +36,7 @@ class TestGetChangesOfSignInX:
         bisector = WeightedPointBisector(sites=(p, q))
         epsilon = Decimal(0.00001)
         conic_section = bisector.conic_section
-        xs = conic_section.get_changes_of_sign_in_x()
+        xs = conic_section.get_vertical_tangents()
         xs.sort()
         expected_xs = [
             Decimal("2"),
@@ -53,5 +53,5 @@ class TestGetChangesOfSignInX:
         q = WeightedSite(Decimal(3), Decimal(4), Decimal(2))
         bisector = WeightedPointBisector(sites=(p, q))
         conic_section = bisector.conic_section
-        xs = conic_section.get_changes_of_sign_in_x()
+        xs = conic_section.get_vertical_tangents()
         assert len(xs) == 0

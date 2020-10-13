@@ -42,7 +42,7 @@ class TestWeightedPointBoundaryIsPointInAllRegion:
         point = Point(Decimal("45"), Decimal("215.8749217771908888306107530"))
         assert boundary_minus.is_point_in_boundary(point)
         assert not boundary_plus.is_point_in_boundary(point)
-        x = bisector.get_changes_of_sign_in_x()[0]
+        x = bisector.get_vertical_tangents()[0]
         point = Point(x, boundary_minus.formula_y(x)[0])
         assert boundary_minus.is_point_in_boundary(point)
         assert not boundary_plus.is_point_in_boundary(point)
@@ -69,7 +69,7 @@ class TestWeightedPointBoundaryIsPointInAllRegion:
         point = Point(Decimal("0"), Decimal("40"))
         assert not boundary_minus.is_point_in_boundary(point)
         assert not boundary_plus.is_point_in_boundary(point)
-        x = bisector.get_changes_of_sign_in_x()[0]
+        x = bisector.get_vertical_tangents()[0]
         point = Point(x, boundary_minus.formula_y(x)[0] + Decimal(5))
         assert not boundary_minus.is_point_in_boundary(point)
         assert not boundary_minus.is_point_in_boundary(point)

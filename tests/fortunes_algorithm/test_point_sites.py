@@ -442,14 +442,14 @@ class TestPointSites:
         points = (p1, p2, p3, p4)
         bisector_p1_p2 = PointBisector(sites=(site_p1, site_p2))
         bisector_p1_p3 = PointBisector(sites=(site_p1, site_p3))
-        bisector_p2_p3 = PointBisector(sites=(site_p2, site_p3))
+        bisector_p1_p4 = PointBisector(sites=(site_p1, site_p4))
         bisector_p2_p4 = PointBisector(sites=(site_p2, site_p4))
         bisector_p3_p4 = PointBisector(sites=(site_p3, site_p4))
 
         expected_bisectors = [
             bisector_p1_p2,
             bisector_p1_p3,
-            bisector_p2_p3,
+            bisector_p1_p4,
             bisector_p2_p4,
             bisector_p3_p4,
         ]
@@ -508,7 +508,7 @@ class TestPointSites:
         points = (p1, p2, p3, p4, p5)
         bisector_p1_p2 = PointBisector(sites=(site_p1, site_p2))
         bisector_p1_p3 = PointBisector(sites=(site_p1, site_p3))
-        bisector_p2_p3 = PointBisector(sites=(site_p2, site_p3))
+        bisector_p1_p4 = PointBisector(sites=(site_p1, site_p4))
         bisector_p2_p4 = PointBisector(sites=(site_p2, site_p4))
         bisector_p2_p5 = PointBisector(sites=(site_p2, site_p5))
         bisector_p3_p4 = PointBisector(sites=(site_p3, site_p4))
@@ -518,7 +518,7 @@ class TestPointSites:
         expected_bisectors = [
             bisector_p1_p2,
             bisector_p1_p3,
-            bisector_p2_p3,
+            bisector_p1_p4,
             bisector_p2_p5,
             bisector_p2_p4,
             bisector_p3_p4,

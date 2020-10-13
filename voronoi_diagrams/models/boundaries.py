@@ -395,13 +395,13 @@ class WeightedPointBoundary(Boundary):
         elif len(ys_in_boundary) == 1:
             # First we check that the projection in the boundary is where there is a change of sign
             # of the whole boundary function.
-            changes_of_sign_in_x = self.bisector.get_changes_of_sign_in_x()
-            for change_of_sign_in_x in changes_of_sign_in_x:
-                if are_close(change_of_sign_in_x, point.x, Decimal("0.0001")):
+            vertical_tangents = self.bisector.get_vertical_tangents()
+            for vertical_tangent in vertical_tangents:
+                if are_close(vertical_tangent, point.x, Decimal("0.0001")):
                     return are_close(
-                        super(WeightedPointBoundary, self).formula_y(
-                            change_of_sign_in_x
-                        )[0],
+                        super(WeightedPointBoundary, self).formula_y(vertical_tangent)[
+                            0
+                        ],
                         point.y,
                         Decimal("0.0001"),
                     )

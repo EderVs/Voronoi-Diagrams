@@ -358,7 +358,7 @@ class WeightedPointBisector(Bisector):
 
     def get_intersection_points(self, bisector: Any) -> List[Point]:
         """Get the point of intersection between two Weighted Point Bisectors."""
-        all_intersections = self.conic_section.get_intersection(bisector.conic_section)
+        all_intersections = self.conic_section.get_intersections(bisector.conic_section)
         valid_intersections = []
         epsilon = Decimal("0.0001")
         for x, y in all_intersections:
@@ -378,12 +378,12 @@ class WeightedPointBisector(Bisector):
         """Compare if the given bisector slope is the same as the slope of this bisector."""
         return False
 
-    def get_changes_of_sign_in_x(self) -> List[Decimal]:
-        """Get changes of sign in the formula y."""
+    def get_vertical_tangents(self) -> List[Decimal]:
+        """Get vertical tangents in the bisector."""
         if self.point_bisector:
             return []
 
-        xs = self.conic_section.get_changes_of_sign_in_x()
+        xs = self.conic_section.get_vertical_tangents()
         valid_xs = []
         for x in xs:
             decimals = Decimal("4")

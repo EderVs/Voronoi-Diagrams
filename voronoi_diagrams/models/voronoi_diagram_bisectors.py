@@ -262,14 +262,14 @@ class VoronoiDiagramWeightedPointBisector(VoronoiDiagramBisector):
 
         last_side = ranges[-1][2]
         if last_side != side:
-            changes_of_sign_in_x = self.bisector.get_changes_of_sign_in_x()
-            if len(changes_of_sign_in_x) >= 1:
+            vertical_tangents = self.bisector.get_vertical_tangents()
+            if len(vertical_tangents) >= 1:
                 ranges[-1] = (
                     ranges[-1][0],
-                    changes_of_sign_in_x[0],
+                    vertical_tangents[0],
                     last_side,
                 )
-                ranges.append((changes_of_sign_in_x[0], x, side))
+                ranges.append((vertical_tangents[0], x, side))
         else:
             ranges[-1] = (ranges[-1][0], x, side)
 

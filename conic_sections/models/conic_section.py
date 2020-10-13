@@ -112,8 +112,8 @@ class ConicSection:
                     intersections.append((Decimal(x), Decimal(other_y)))
         return intersections
 
-    def get_intersection(self, conic_section: Any) -> List[Tuple[Decimal, Decimal]]:
-        """Get the intersection of 2 conic sections.
+    def get_intersections(self, conic_section: Any) -> List[Tuple[Decimal, Decimal]]:
+        """Get the intersections of 2 conic sections.
 
         The solutions are returned in a list of max length 4.
         """
@@ -276,8 +276,8 @@ class ConicSection:
             )
         return intersections
 
-    def get_changes_of_sign_in_x(self) -> List[Decimal]:
-        """Get changes of sign in the y_formula."""
+    def get_vertical_tangents(self) -> List[Decimal]:
+        """Get vertical tangents in the conic section."""
         a = self.b ** Decimal(2) - Decimal(4) * self.c * self.a
         b = Decimal(2) * self.b * self.e - Decimal(4) * self.c * self.d
         c = self.e ** Decimal(2) - Decimal(4) * self.c * self.f

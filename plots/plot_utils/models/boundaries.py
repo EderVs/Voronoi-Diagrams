@@ -70,7 +70,7 @@ def get_plot_scatter_boundary(
         y_list = []
 
         if boundary.is_boundary_concave_to_y():
-            change_of_x = boundary.bisector.conic_section.get_changes_of_sign_in_x()[0]
+            change_of_x = boundary.bisector.conic_section.get_vertical_tangents()[0]
             x_lists = [[], []]
             if boundary.sign:
                 step = abs(boundary.get_site().point.x - change_of_x) / num_steps
