@@ -16,7 +16,7 @@ from .models import (
     Point,
     Bisector,
     Event,
-    IntersectionEvent,
+    Intersection,
     Region,
     Boundary,
     PointBisector,
@@ -261,7 +261,7 @@ class VoronoiDiagram:
         if intersection_point_tuples:
             # Adding all intersections.
             for vertex, event in intersection_point_tuples:
-                intersection = IntersectionEvent(event, vertex, region_node)
+                intersection = Intersection(event, vertex, region_node)
                 # Insert intersection to Q.
                 self.q_queue.enqueue(intersection)
                 # Save intersection in both boundaries.
@@ -411,7 +411,7 @@ class VoronoiDiagram:
             r_q_right_node,
         )
 
-    def _get_regions_and_nodes_of_intersection(self, p: IntersectionEvent):
+    def _get_regions_and_nodes_of_intersection(self, p: Intersection):
         """Get regions and their nodes of the intersection p."""
         intersection_region_node = p.region_node
         # Left and right neighbor cannot be None because p is an intersection.
@@ -502,9 +502,7 @@ class VoronoiDiagram:
         )[0]
         voronoi_diagram_bisector.add_end_range_vertical(y)
 
-    def add_end_bisector(
-        self, boundary: Boundary, intersection: IntersectionEvent
-    ) -> None:
+    def add_end_bisector(self, boundary: Boundary, intersection: Intersection) -> None:
         """Get range of the bisector based on the boundary and the intersection."""
         voronoi_diagram_bisector = self.get_voronoi_diagram_bisectors(
             [(boundary.bisector, boundary.sign)]
@@ -514,7 +512,7 @@ class VoronoiDiagram:
             intersection.point.x, boundary.sign, side
         )
 
-    def _handle_intersection(self, p: IntersectionEvent):
+    def _handle_intersection(self, p: Intersection):
         """Handle when event is an intersection."""
         # Step 14.
         # Let p be the intersection of boundaries Cqr and Crs.

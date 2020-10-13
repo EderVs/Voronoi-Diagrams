@@ -7,7 +7,7 @@ from abc import ABCMeta, abstractmethod
 # Models
 from .points import Point
 from .bisectors import Bisector, PointBisector, WeightedPointBisector
-from .events import IntersectionEvent, Site
+from .events import Intersection, Site
 
 # Math
 from decimal import Decimal
@@ -23,15 +23,13 @@ class Boundary:
 
     bisector: Bisector
     sign: bool
-    left_intersection: Optional[IntersectionEvent]
-    right_intersection: Optional[IntersectionEvent]
+    left_intersection: Optional[Intersection]
+    right_intersection: Optional[Intersection]
     # active says if this boundary is the current added to the LList.
     active: bool
     is_to_be_deleted: bool
 
-    def __init__(
-        self, bisector: Bisector, sign: bool, active: bool = False
-    ):
+    def __init__(self, bisector: Bisector, sign: bool, active: bool = False):
         """Construct Boundary."""
         self.bisector = bisector
         self.sign = sign
