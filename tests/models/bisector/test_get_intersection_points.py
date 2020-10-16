@@ -29,12 +29,12 @@ class TestGetPointBisectorIntersectionPoint:
         r = Site(Decimal(2), Decimal(-2))
         bisector_pq = PointBisector(sites=(p, q))
         bisector_pr = PointBisector(sites=(p, r))
-        intersections = bisector_pq.get_intersection_points(bisector_pr)
+        intersections = bisector_pq.get_intersections(bisector_pr)
         assert len(intersections) == 1
         intersection = intersections[0]
         assert intersection.x == 2
         assert intersection.y == 0
-        intersections2 = bisector_pr.get_intersection_points(bisector_pq)
+        intersections2 = bisector_pr.get_intersections(bisector_pq)
         assert len(intersections2) == 1
         intersection2 = intersections2[0]
         assert intersection2.x == 2
@@ -54,7 +54,7 @@ class TestGetWeightedPointBisectorIntersectionPoints:
         intersection_x = Decimal("-11.900690721142641592678046436049044132232666015625")
         intersection_y = Decimal("8.251082711903089118684342994")
         epsilon = Decimal(0.00001)
-        intersections = bisector_pq.get_intersection_points(bisector_qr)
+        intersections = bisector_pq.get_intersections(bisector_qr)
         assert len(intersections) == 1
         intersection = intersections[0]
         assert are_close(intersection.x, intersection_x, epsilon)
@@ -91,7 +91,7 @@ class TestGetWeightedPointBisectorIntersectionPoints:
         intersection_y1 = Decimal("44.24693546822346538098926893")
         intersection_y2 = Decimal("-54.24693546822346538098926893")
         epsilon = Decimal("0.0001")
-        intersections = bisector_pq.get_intersection_points(bisector_qr)
+        intersections = bisector_pq.get_intersections(bisector_qr)
         assert len(intersections) == 2
         first = 0
         for i in range(len(intersections)):

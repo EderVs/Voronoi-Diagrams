@@ -111,11 +111,6 @@ class Boundary:
         """
         raise NotImplementedError
 
-    @abstractmethod
-    def is_boundary_below(self, point: Point) -> bool:
-        """Get if the given point is above the boundary."""
-        raise NotImplementedError
-
     def get_side_where_point_belongs(self, point: Point) -> int:
         """Get where point belongs."""
         raise NotImplementedError
@@ -224,9 +219,7 @@ class PointBoundary(Boundary):
 
         all_intersections = []
         if is_intersection_possible:
-            intersection_points = self.bisector.get_intersection_points(
-                boundary.bisector
-            )
+            intersection_points = self.bisector.get_intersections(boundary.bisector)
             for intersection_point in intersection_points:
                 intersection_point_star = self.star(intersection_point)
                 if self.is_boundary_below(
@@ -422,8 +415,8 @@ class WeightedPointBoundary(Boundary):
     def get_intersections(self, boundary: Any) -> List[Tuple[Point, Point]]:
         """Get intersections between two WeightePointBoundaries."""
         all_intersections = []
-        # bisector.get_intersection_points gives us the intersections in the bisectors.
-        intersection_points = self.bisector.get_intersection_points(boundary.bisector)
+        # bisector.get_intersections gives us the intersections in the bisectors.
+        intersection_points = self.bisector.get_intersections(boundary.bisector)
         # Now we need to look that each mapped intersection point is in the boundary.
         for intersection_point in intersection_points:
             intersection_point_star = self.star(intersection_point)

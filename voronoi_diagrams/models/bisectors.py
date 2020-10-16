@@ -68,8 +68,8 @@ class Bisector:
         return self.__str__()
 
     @abstractmethod
-    def get_intersection_points(self, bisector: Any) -> List[Point]:
-        """Get the point of intersection between two bisectors."""
+    def get_intersections(self, bisector: Any) -> List[Point]:
+        """Get the points of intersection between two bisectors."""
         raise NotImplementedError
 
     @abstractmethod
@@ -169,7 +169,7 @@ class PointBisector(Bisector):
         q_site = self.sites[1]
         return q_site.point.y == p_site.point.y
 
-    def get_intersection_points(self, bisector: Bisector) -> List[Point]:
+    def get_intersections(self, bisector: Bisector) -> List[Point]:
         """Get the point of intersection between two bisectors."""
         # No blank spaces after docstring.
         def f_aux_1(xi: Decimal, xj: Decimal, yi: Decimal, yj: Decimal) -> Decimal:
@@ -356,7 +356,7 @@ class WeightedPointBisector(Bisector):
 
         return return_values
 
-    def get_intersection_points(self, bisector: Any) -> List[Point]:
+    def get_intersections(self, bisector: Any) -> List[Point]:
         """Get the point of intersection between two Weighted Point Bisectors."""
         all_intersections = self.conic_section.get_intersections(bisector.conic_section)
         valid_intersections = []

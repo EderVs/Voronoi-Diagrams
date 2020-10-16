@@ -176,7 +176,7 @@ def plot_intersections(
     bisector2: WeightedPointBisector,
 ) -> None:
     """Plot intersections between 2 bisectors."""
-    intersections = bisector1.get_intersection_points(bisector2)
+    intersections = bisector1.get_intersections(bisector2)
     for intersection in intersections:
         trace = plot_point(intersection[0], intersection[1][0])
         figure.add_trace(trace)
