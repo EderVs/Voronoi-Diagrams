@@ -252,7 +252,7 @@ class WeightedPointBoundary(Boundary):
         p = self.get_site()
         return p.get_weighted_distance(point.x, point.y)
 
-    def is_boundary_concave_to_y(self) -> bool:
+    def is_boundary_not_monotone_in_y(self) -> bool:
         """Check if the boundary is concave to y."""
         sites = self.bisector.sites
         if sites[0] == self.get_site():
@@ -272,14 +272,14 @@ class WeightedPointBoundary(Boundary):
     def formula_y(self, x: Decimal) -> List[Decimal]:
         """Return the y coordinate given the x coordinate.
 
-        This is the the formula of the bisector mapped with the star map.
+        This is the formula of the bisector mapped with the star map.
         """
         # It has at most 2 values.
         ys_in_all_boundary = super(WeightedPointBoundary, self).formula_y(x)
         if len(ys_in_all_boundary) == 0:
             return []
         to_return = []
-        if self.is_boundary_concave_to_y():
+        if self.is_boundary_not_monotone_in_y():
             to_return.append(max(ys_in_all_boundary))
         if (not self.sign and x <= self.get_site().point.x) or (
             self.sign and self.get_site().point.x <= x
@@ -305,7 +305,7 @@ class WeightedPointBoundary(Boundary):
         ys_in_boundary = self.formula_y(point.x)
         for y_in_boundary in ys_in_boundary:
             if are_close(y_in_boundary, point.y, Decimal("0.00001")):
-                if self.is_boundary_concave_to_y() and y_in_boundary == max(
+                if self.is_boundary_not_monotone_in_y() and y_in_boundary == max(
                     ys_in_boundary
                 ):
                     return True
@@ -327,7 +327,7 @@ class WeightedPointBoundary(Boundary):
         point.
         """
         site = self.get_site()
-        if self._is_point_in_all_region(point):
+        if self._is_point_in_both_boundaries(point):
             # The point is in the boundary or inside.
             if self.is_point_in_boundary(point):
                 # In the boundary.
@@ -345,7 +345,7 @@ class WeightedPointBoundary(Boundary):
         if len(ys_in_all_boundary) > 1 and max(ys_in_all_boundary) < point.y:
             # The projection to the boundary is below. This is only possible when one of the
             # boundaries concave to y.
-            if self.is_boundary_concave_to_y():
+            if self.is_boundary_not_monotone_in_y():
                 if self.sign:
                     return 1
                 else:
@@ -366,7 +366,7 @@ class WeightedPointBoundary(Boundary):
             # It's right to the site that defines the region.
             return 1
 
-    def _is_point_in_all_region(self, point: Point) -> bool:
+    def _is_point_in_both_boundaries(self, point: Point) -> bool:
         """Return True if the given point is in the region where the boundary is described."""
         p, q = self.bisector.sites
         if p.point.y == q.point.y and p.weight == q.weight:
@@ -404,7 +404,7 @@ class WeightedPointBoundary(Boundary):
                 y_in_boundary = ys_in_boundary[0]
                 return y_in_boundary <= point.y
         elif len(ys_in_boundary) == 2:
-            # there are two projection in the boundary then we one must be in above and the other
+            # there are two projection in the boundary where one must be in above and the other
             # below.
             y_in_boundary_max = max(ys_in_boundary)
             y_in_boundary_min = min(ys_in_boundary)
@@ -428,7 +428,7 @@ class WeightedPointBoundary(Boundary):
 
     def get_side_where_point_belongs(self, point: Point) -> int:
         """Get where point belongs."""
-        if self.is_boundary_concave_to_y():
+        if self.is_boundary_not_monotone_in_y():
             ys = self.formula_y(point.x)
             if are_close(point.y, max(ys), Decimal("0.0001"),):
                 return 1

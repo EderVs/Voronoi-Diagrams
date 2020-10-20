@@ -69,7 +69,7 @@ def get_plot_scatter_boundary(
         x_list = []
         y_list = []
 
-        if boundary.is_boundary_concave_to_y():
+        if boundary.is_boundary_not_monotone_in_y():
             change_of_x = boundary.bisector.conic_section.get_vertical_tangents()[0]
             x_lists = [[], []]
             if boundary.sign:
