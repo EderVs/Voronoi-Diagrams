@@ -310,7 +310,7 @@ class WeightedPointBisector(Bisector):
             self.e = Decimal((-2 * py * s) - (2 * ((2 * py) - (2 * qy)) * r))
             self.f = Decimal((s * (px ** 2)) + (s * (py ** 2)) - (r ** 2))
 
-    def _is_point_part_of_bisector(self, x: Decimal, y: Decimal) -> bool:
+    def _is_point_in_bisector(self, x: Decimal, y: Decimal) -> bool:
         """Get if the point is part of bisector.
 
         The bisector is the open branch towards p where p is the weighted site with more weight.
@@ -335,7 +335,7 @@ class WeightedPointBisector(Bisector):
         return_values = []
         xs = self.conic_section.x_formula(y)
         for x in xs:
-            if self._is_point_part_of_bisector(x, y) and x not in return_values:
+            if self._is_point_in_bisector(x, y) and x not in return_values:
                 return_values.append(x)
 
         return return_values
@@ -351,7 +351,7 @@ class WeightedPointBisector(Bisector):
         return_values = []
         ys = self.conic_section.y_formula(x)
         for y in ys:
-            if self._is_point_part_of_bisector(x, y) and y not in return_values:
+            if self._is_point_in_bisector(x, y) and y not in return_values:
                 return_values.append(y)
 
         return return_values
@@ -362,9 +362,9 @@ class WeightedPointBisector(Bisector):
         valid_intersections = []
         epsilon = Decimal("0.0001")
         for x, y in all_intersections:
-            if self._is_point_part_of_bisector(
+            if self._is_point_in_bisector(x, y) and bisector._is_point_in_bisector(
                 x, y
-            ) and bisector._is_point_part_of_bisector(x, y):
+            ):
                 for valid_intersection in valid_intersections:
                     if are_close(valid_intersection.x, x, epsilon) and are_close(
                         valid_intersection.y, y, epsilon

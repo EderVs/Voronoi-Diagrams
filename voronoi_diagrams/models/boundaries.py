@@ -67,17 +67,27 @@ class Boundary:
         """
         raise NotImplementedError
 
-    def formula_y(self, x: Decimal) -> List[Decimal]:
-        """Return the y coordinate given the x coordinate.
+    def formula_y_without_sign(self, x: Decimal) -> List[Decimal]:
+        """Return the y coordinates in all the boundary given the x coordinate.
 
         This is the the formula of the bisector mapped with the star map.
-        This can also be viewed as the projection of x in the boundary.
+        This can also be viewed as the projection of x in all the boundary without
+        taking care of the sign.
         """
         ys = [
             self.star(Point(x, y_bisector)).y
             for y_bisector in self.bisector.formula_y(x)
         ]
         return ys
+
+    def formula_y(self, x: Decimal) -> List[Decimal]:
+        """Return the y coordinate given the x coordinate taking care of the sign.
+
+        This is the the formula of the bisector mapped with the star map.
+        This can also be viewed as the projection of x in the boundary taking care of
+        the sign.
+        """
+        raise NotImplementedError
 
     def __str__(self):
         """Get boundary string representation."""
@@ -184,6 +194,19 @@ class PointBoundary(Boundary):
         x = self._quadratic_solution(f, g, e)
         return [x]
 
+    def formula_y(self, x: Decimal) -> List[Decimal]:
+        """Return the y coordinate given the x coordinate, taking care of the sign.
+
+        This is the the formula of the bisector mapped with the star map.
+        This can also be viewed as the projection of x in the boundary taking care of
+        the sign.
+        """
+        if (not self.sign and x <= self.get_site().point.x) or (
+            self.sign and x > self.get_site().point.x
+        ):
+            return self.formula_y_without_sign(x)
+        return []
+
     def is_boundary_below(self, point: Point) -> bool:
         """Get if the given point is up the boundary."""
         is_up_minus_sign = not self.sign and self.get_site().point.x >= point.x
@@ -270,21 +293,21 @@ class WeightedPointBoundary(Boundary):
             return False
 
     def formula_y(self, x: Decimal) -> List[Decimal]:
-        """Return the y coordinate given the x coordinate.
+        """Return the y coordinate given the x coordinate taking care of the sign.
 
         This is the formula of the bisector mapped with the star map.
         """
         # It has at most 2 values.
-        ys_in_all_boundary = super(WeightedPointBoundary, self).formula_y(x)
-        if len(ys_in_all_boundary) == 0:
+        ys_without_sign = self.formula_y_without_sign(x)
+        if len(ys_without_sign) == 0:
             return []
         to_return = []
         if self.is_boundary_not_monotone_in_y():
-            to_return.append(max(ys_in_all_boundary))
+            to_return.append(max(ys_without_sign))
         if (not self.sign and x <= self.get_site().point.x) or (
             self.sign and self.get_site().point.x <= x
         ):
-            to_return.append(min(ys_in_all_boundary))
+            to_return.append(min(ys_without_sign))
 
         return to_return
 
@@ -341,8 +364,8 @@ class WeightedPointBoundary(Boundary):
                 return 1
 
         # The point is outside of all the region.
-        ys_in_all_boundary = super(WeightedPointBoundary, self).formula_y(point.x)
-        if len(ys_in_all_boundary) > 1 and max(ys_in_all_boundary) < point.y:
+        ys_without_sign = self.formula_y_without_sign(point.x)
+        if len(ys_without_sign) > 1 and max(ys_without_sign) < point.y:
             # The projection to the boundary is below. This is only possible when one of the
             # boundaries concave to y.
             if self.is_boundary_not_monotone_in_y():
@@ -374,40 +397,38 @@ class WeightedPointBoundary(Boundary):
             return point.x >= min(p.point.x, q.point.x) + (distance / 2)
 
         # Get the projection of x in the boundary.
-        ys_in_boundary = super(WeightedPointBoundary, self).formula_y(point.x)
+        ys_without_sign = self.formula_y_without_sign(point.x)
         sites = self.bisector.get_sites_tuple()
         are_sites_in_same_y = (
             sites[0].get_event_point().y == sites[1].get_event_point().y
         )
-        if are_sites_in_same_y and len(ys_in_boundary) == 1:
+        if are_sites_in_same_y and len(ys_without_sign) == 1:
             # Both site events are in the same y.
             return True
-        if len(ys_in_boundary) == 0:
+        if len(ys_without_sign) == 0:
             # There is no point in boundary to compare
             return False
-        elif len(ys_in_boundary) == 1:
+        elif len(ys_without_sign) == 1:
             # First we check that the projection in the boundary is where there is a change of sign
             # of the whole boundary function.
             vertical_tangents = self.bisector.get_vertical_tangents()
             for vertical_tangent in vertical_tangents:
                 if are_close(vertical_tangent, point.x, Decimal("0.0001")):
                     return are_close(
-                        super(WeightedPointBoundary, self).formula_y(vertical_tangent)[
-                            0
-                        ],
+                        self.formula_y_without_sign(vertical_tangent)[0],
                         point.y,
                         Decimal("0.0001"),
                     )
             else:
                 # If the the projection in the boundary is not a change of sign then we just check
                 # that the projection is below the point.
-                y_in_boundary = ys_in_boundary[0]
+                y_in_boundary = ys_without_sign[0]
                 return y_in_boundary <= point.y
-        elif len(ys_in_boundary) == 2:
+        elif len(ys_without_sign) == 2:
             # there are two projection in the boundary where one must be in above and the other
             # below.
-            y_in_boundary_max = max(ys_in_boundary)
-            y_in_boundary_min = min(ys_in_boundary)
+            y_in_boundary_max = max(ys_without_sign)
+            y_in_boundary_min = min(ys_without_sign)
             return y_in_boundary_max >= point.y and y_in_boundary_min <= point.y
 
         return False
