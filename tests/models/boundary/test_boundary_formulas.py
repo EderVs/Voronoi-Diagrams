@@ -85,9 +85,8 @@ class TestWeightedPointBoundaryFormulas:
         x = -4
 
         ys_in_boundary = boundary_plus.formula_y(x)
-        assert len(ys_in_boundary) == 2
+        assert len(ys_in_boundary) == 1
         assert are_close(max(ys_in_boundary), Decimal("92"), Decimal("0.000000001"))
-        assert are_close(min(ys_in_boundary), Decimal("17"), Decimal("0.000000001"))
 
         ys_in_boundary = boundary_minus.formula_y(x)
         assert len(ys_in_boundary) == 1
@@ -131,6 +130,23 @@ class TestWeightedPointBoundaryFormulas:
             Decimal("0.000000001"),
         )
 
+        p = WeightedSite(Decimal(-3.28), Decimal(0.823), Decimal(0.8))
+        # q is the one in the top.
+        q = WeightedSite(Decimal(-2.49), Decimal(1.24), Decimal(0.2))
+        bisector = WeightedPointBisector(sites=(p, q))
+        boundary_plus = WeightedPointBoundary(bisector=bisector, sign=True)
+        boundary_minus = WeightedPointBoundary(bisector=bisector, sign=False)
+
+        # Points in boundary
+        # Point in event point
+        x = p.point.x - Decimal(1)
+        assert len(boundary_plus.formula_y(x)) == 1
+        assert len(boundary_minus.formula_y(x)) == 1
+        # Point in Boundary-
+        x = p.point.x + Decimal(0.1)
+        assert len(boundary_plus.formula_y(x)) == 2
+        assert len(boundary_minus.formula_y(x)) == 0
+
     def test_formula_y_normal_boundary(self):
         """Test point formula with 2 positive fixed sites."""
         p = WeightedSite(Decimal(14), Decimal(26), Decimal(7))
@@ -143,8 +159,7 @@ class TestWeightedPointBoundaryFormulas:
         x = 14
 
         ys_in_boundary = boundary_plus.formula_y(x)
-        assert len(ys_in_boundary) == 1
-        assert are_close(ys_in_boundary[0], Decimal("33"), Decimal("0.000000001"))
+        assert len(ys_in_boundary) == 0
 
         ys_in_boundary = boundary_minus.formula_y(x)
         assert len(ys_in_boundary) == 1
@@ -190,8 +205,7 @@ class TestWeightedPointBoundaryFormulas:
         x = 30
 
         ys_in_boundary = boundary_plus.formula_y(x)
-        assert len(ys_in_boundary) == 1
-        assert are_close(ys_in_boundary[0], Decimal("20"), Decimal(0))
+        assert len(ys_in_boundary) == 0
 
         ys_in_boundary = boundary_minus.formula_y(x)
         assert len(ys_in_boundary) == 1

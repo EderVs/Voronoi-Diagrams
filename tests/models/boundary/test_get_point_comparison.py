@@ -139,4 +139,4 @@ class TestWeightedPointBoundaryIsPointInAllRegion:
         assert boundary_plus.get_point_comparison(point) < 0
 
 
-TestWeightedPointBoundaryIsPointInAllRegion().test_with_stopped_boundary()
+# TestWeightedPointBoundaryIsPointInAllRegion().test_with_stopped_boundary()

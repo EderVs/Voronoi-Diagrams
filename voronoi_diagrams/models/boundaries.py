@@ -305,7 +305,7 @@ class WeightedPointBoundary(Boundary):
         if self.is_boundary_not_monotone_in_y():
             to_return.append(max(ys_without_sign))
         if (not self.sign and x <= self.get_site().point.x) or (
-            self.sign and self.get_site().point.x <= x
+            self.sign and self.get_site().point.x < x
         ):
             to_return.append(min(ys_without_sign))
 
@@ -328,15 +328,7 @@ class WeightedPointBoundary(Boundary):
         ys_in_boundary = self.formula_y(point.x)
         for y_in_boundary in ys_in_boundary:
             if are_close(y_in_boundary, point.y, Decimal("0.00001")):
-                if self.is_boundary_not_monotone_in_y() and y_in_boundary == max(
-                    ys_in_boundary
-                ):
-                    return True
-                if not self.sign:
-                    return point.x <= self.get_site().point.x
-                else:
-                    return self.get_site().point.x < point.x
-
+                return True
         return False
 
     def get_point_comparison(self, point) -> Optional[Decimal]:
