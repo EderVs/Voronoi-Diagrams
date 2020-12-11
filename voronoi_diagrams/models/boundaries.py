@@ -315,15 +315,9 @@ class WeightedPointBoundary(Boundary):
         """Check if the point is in this boundary."""
         p, q = self.bisector.sites
         if p.point.y == q.point.y and p.weight == q.weight:
-            distance = p.get_distance_to_site_point_from_point(q.point.x, q.point.y)
-            return (
-                are_close(
-                    point.x,
-                    min(p.point.x, q.point.x) + (distance / Decimal(2)),
-                    Decimal("0.0001"),
-                )
-                and not self.sign
-            )
+            distance = abs(p.point.x - q.point.x)
+            mid_x = min(p.point.x, q.point.x) + (distance / Decimal(2))
+            return are_close(point.x, mid_x, Decimal("0.0001"),) and not self.sign
 
         ys_in_boundary = self.formula_y(point.x)
         for y_in_boundary in ys_in_boundary:
