@@ -275,7 +275,7 @@ class WeightedPointBoundary(Boundary):
         p = self.get_site()
         return p.get_weighted_distance(point.x, point.y)
 
-    def is_boundary_not_monotone_in_y(self) -> bool:
+    def is_boundary_not_x_monotone(self) -> bool:
         """Check if the boundary is concave to y."""
         sites = self.bisector.sites
         if sites[0] == self.get_site():
@@ -302,7 +302,7 @@ class WeightedPointBoundary(Boundary):
         if len(ys_without_sign) == 0:
             return []
         to_return = []
-        if self.is_boundary_not_monotone_in_y():
+        if self.is_boundary_not_x_monotone():
             to_return.append(max(ys_without_sign))
         if (not self.sign and x <= self.get_site().point.x) or (
             self.sign and self.get_site().point.x < x
@@ -354,7 +354,7 @@ class WeightedPointBoundary(Boundary):
         if len(ys_without_sign) > 1 and max(ys_without_sign) < point.y:
             # The projection to the boundary is below. This is only possible when one of the
             # boundaries concave to y.
-            if self.is_boundary_not_monotone_in_y():
+            if self.is_boundary_not_x_monotone():
                 if self.sign:
                     return 1
                 else:
@@ -435,7 +435,7 @@ class WeightedPointBoundary(Boundary):
 
     def get_side_where_point_belongs(self, point: Point) -> int:
         """Get where point belongs."""
-        if self.is_boundary_not_monotone_in_y():
+        if self.is_boundary_not_x_monotone():
             ys = self.formula_y(point.x)
             if are_close(point.y, max(ys), Decimal("0.0001"),):
                 return 1

@@ -292,7 +292,7 @@ class VoronoiDiagramWeightedPointBisector(VoronoiDiagramBisector):
             if (
                 x0 is None
                 and side == 0
-                and self.boundary_minus.is_boundary_not_monotone_in_y()
+                and self.boundary_minus.is_boundary_not_x_monotone()
             ):
                 self.add_end_range(None, False, 1)
                 return
@@ -301,7 +301,7 @@ class VoronoiDiagramWeightedPointBisector(VoronoiDiagramBisector):
             if (
                 x1 is None
                 and side == 0
-                and self.boundary_plus.is_boundary_not_monotone_in_y()
+                and self.boundary_plus.is_boundary_not_x_monotone()
             ):
                 self.add_end_range(None, True, 1)
 

@@ -1,4 +1,4 @@
-"""Test is_boundary_not_monotone_in_y method in WeightedPointBoundary."""
+"""Test is_boundary_not_x_monotone method in WeightedPointBoundary."""
 # Standard
 from typing import List, Any
 from random import randint
@@ -25,8 +25,8 @@ class TestWeightedPointBoundaryIsBoundaryConcaveToY:
         bisector = WeightedPointBisector(sites=(p, q))
         boundary_plus = WeightedPointBoundary(bisector=bisector, sign=True)
         boundary_minus = WeightedPointBoundary(bisector=bisector, sign=False)
-        assert not boundary_plus.is_boundary_not_monotone_in_y()
-        assert boundary_minus.is_boundary_not_monotone_in_y()
+        assert not boundary_plus.is_boundary_not_x_monotone()
+        assert boundary_minus.is_boundary_not_x_monotone()
 
     def test_with_normal_boundary(self):
         """Test with a boundary that is not concave to y."""
@@ -36,8 +36,8 @@ class TestWeightedPointBoundaryIsBoundaryConcaveToY:
         bisector = WeightedPointBisector(sites=(p, q))
         boundary_plus = WeightedPointBoundary(bisector=bisector, sign=True)
         boundary_minus = WeightedPointBoundary(bisector=bisector, sign=False)
-        assert not boundary_plus.is_boundary_not_monotone_in_y()
-        assert not boundary_minus.is_boundary_not_monotone_in_y()
+        assert not boundary_plus.is_boundary_not_x_monotone()
+        assert not boundary_minus.is_boundary_not_x_monotone()
 
     def test_with_stopped_boundary(self):
         """Test with a boundary that is not concave to y."""
@@ -47,5 +47,5 @@ class TestWeightedPointBoundaryIsBoundaryConcaveToY:
         bisector = WeightedPointBisector(sites=(p, q))
         boundary_plus = WeightedPointBoundary(bisector=bisector, sign=True)
         boundary_minus = WeightedPointBoundary(bisector=bisector, sign=False)
-        assert not boundary_plus.is_boundary_not_monotone_in_y()
-        assert not boundary_minus.is_boundary_not_monotone_in_y()
+        assert not boundary_plus.is_boundary_not_x_monotone()
+        assert not boundary_minus.is_boundary_not_x_monotone()
