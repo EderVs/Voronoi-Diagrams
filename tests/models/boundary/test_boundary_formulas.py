@@ -65,9 +65,11 @@ class TestPointBoundaryFormulas:
             max_site = q
         y = max_site.point.y + delta
         x = boundary_plus.formula_x(y)[0]
-        assert (y - boundary_plus.formula_y(x)[0]) < 0.00000000001
+        if (boundary_plus.formula_y(x)) == 1:
+            assert (y - boundary_plus.formula_y(x)[0]) < 0.00000000001
         x = boundary_minus.formula_x(y)[0]
-        assert (y - boundary_minus.formula_y(x)[0]) < 0.00000000001
+        if (boundary_minus.formula_y(x)) == 1:
+            assert (y - boundary_minus.formula_y(x)[0]) < 0.00000000001
 
 
 class TestWeightedPointBoundaryFormulas:

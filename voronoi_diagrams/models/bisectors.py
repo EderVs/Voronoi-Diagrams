@@ -137,15 +137,17 @@ class PointBisector(Bisector):
         q_site = self.sites[1]
         q = q_site.point
 
-        if q.x == p.x:
+        if q.y == p.y:
             distance = p_site.get_distance_to_site_point_from_point(q.x, q.y)
-            return [min(p.y, q.y) + (distance / 2)]
+            return [min(p.x, q.x) + (distance / 2)]
+        if q.x == p.x:
+            return []
 
         a = (2 * q.y - 2 * p.y) * y + (p.y ** 2 - q.y ** 2) - (q.x ** 2 - p.x ** 2)
         b = 2 * p.x - 2 * q.x
         return [a / b]
 
-    def formula_y(self, x: Decimal) -> Decimal:
+    def formula_y(self, x: Decimal) -> List[Decimal]:
         """Get y coordinate given the x coordinate.
 
         In this case is a line.
@@ -155,9 +157,11 @@ class PointBisector(Bisector):
         q_site = self.sites[1]
         q = q_site.point
 
-        if q.y == p.y:
+        if q.x == p.x:
             distance = p_site.get_distance_to_site_point_from_point(q.x, q.y)
-            return [min(p.x, q.x) + (distance / 2)]
+            return [min(p.y, q.y) + (distance / 2)]
+        if q.y == p.y:
+            return []
 
         a = Decimal(-((q.x - p.x) / (q.y - p.y)))
         b = Decimal((q.x ** 2 - p.x ** 2 + q.y ** 2 - p.y ** 2) / (2 * (q.y - p.y)))

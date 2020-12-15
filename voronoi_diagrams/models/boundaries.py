@@ -302,6 +302,21 @@ class WeightedPointBoundary(Boundary):
         if len(ys_without_sign) == 0:
             return []
         to_return = []
+
+        # Check when events are in the same y.
+        p, q = self.bisector.sites
+        p_event, q_event = p.get_event_point(), q.get_event_point()
+        if p_event.y == q_event.y:
+            if p.weight > q.weight:
+                bigger, smaller = p, q
+            else:
+                bigger, smaller = q, p
+            if (bigger.point.x > smaller.point.x and not self.sign) or (
+                bigger.point.x < smaller.point.x and self.sign
+            ):
+                return ys_without_sign
+            return []
+
         if self.is_boundary_not_x_monotone():
             to_return.append(max(ys_without_sign))
         if (not self.sign and x <= self.get_site().point.x) or (
@@ -335,89 +350,45 @@ class WeightedPointBoundary(Boundary):
         Return < 0 if the point is to the left of the boundary based on the y coordinate of the
         point.
         """
-        site = self.get_site()
-        if self._is_point_in_both_boundaries(point):
-            # The point is in the boundary or inside.
-            if self.is_point_in_boundary(point):
-                # In the boundary.
-                return 0
-            # The point is inside.
-            if self.sign:
-                # It's left to Boundary+.
-                return -1
-            else:
-                # It's right to Boundary-.
-                return 1
-
-        # The point is outside of all the region.
-        ys_without_sign = self.formula_y_without_sign(point.x)
-        if len(ys_without_sign) > 1 and max(ys_without_sign) < point.y:
-            # The projection to the boundary is below. This is only possible when one of the
-            # boundaries concave to y.
-            if self.is_boundary_not_x_monotone():
-                if self.sign:
-                    return 1
-                else:
-                    return -1
-            else:
-                # The sibling Boundary is the one that is concave to y.
-                if self.sign:
-                    return -1
-                else:
-                    return 1
-
-        # The point doesn't have a x projection in the boundary or the projection is above the
-        # point.
-        if point.x < site.point.x:
-            # It's left to the site that defines the region.
-            return -1
-        else:
-            # It's right to the site that defines the region.
-            return 1
-
-    def _is_point_in_both_boundaries(self, point: Point) -> bool:
-        """Return True if the given point is in the region where the boundary is described."""
         p, q = self.bisector.sites
-        if p.point.y == q.point.y and p.weight == q.weight:
-            distance = p.get_distance_to_site_point_from_point(q.point.x, q.point.y)
-            return point.x >= min(p.point.x, q.point.x) + (distance / 2)
-
-        # Get the projection of x in the boundary.
-        ys_without_sign = self.formula_y_without_sign(point.x)
-        sites = self.bisector.get_sites_tuple()
-        are_sites_in_same_y = (
-            sites[0].get_event_point().y == sites[1].get_event_point().y
-        )
-        if are_sites_in_same_y and len(ys_without_sign) == 1:
-            # Both site events are in the same y.
-            return True
-        if len(ys_without_sign) == 0:
-            # There is no point in boundary to compare
-            return False
-        elif len(ys_without_sign) == 1:
-            # First we check that the projection in the boundary is where there is a change of sign
-            # of the whole boundary function.
-            vertical_tangents = self.bisector.get_vertical_tangents()
-            for vertical_tangent in vertical_tangents:
-                if are_close(vertical_tangent, point.x, Decimal("0.0001")):
-                    return are_close(
-                        self.formula_y_without_sign(vertical_tangent)[0],
-                        point.y,
-                        Decimal("0.0001"),
-                    )
+        same_y = p.point.y == q.point.y
+        same_weight = p.weight == q.weight
+        if same_y and same_weight:
+            if self.sign:
+                return Decimal(-1)
             else:
-                # If the the projection in the boundary is not a change of sign then we just check
-                # that the projection is below the point.
-                y_in_boundary = ys_without_sign[0]
-                return y_in_boundary <= point.y
-        elif len(ys_without_sign) == 2:
-            # there are two projection in the boundary where one must be in above and the other
-            # below.
-            y_in_boundary_max = max(ys_without_sign)
-            y_in_boundary_min = min(ys_without_sign)
-            return y_in_boundary_max >= point.y and y_in_boundary_min <= point.y
+                distance = abs(p.point.x - q.point.x)
+                return point.x - (min(p.point.x, q.point.x) + (distance / Decimal(2)))
 
-        return False
+        if self.is_left_to_boundary(point):
+            return Decimal(-1)
+        if self.is_point_in_boundary(point):
+            return Decimal(0)
+        return Decimal(1)
+
+    def is_left_to_boundary(self, point: Point) -> bool:
+        """Return True if the given point is to the left of the boundary."""
+        ys = self.formula_y(point.x)
+        if self.is_boundary_not_x_monotone():
+            if len(ys) == 0:
+                return not self.sign
+            if len(ys) == 1:
+                if self.sign:
+                    return ys[0] > point.y
+                else:
+                    return ys[0] < point.y
+            if len(ys) == 2:
+                if self.sign:
+                    return max(ys) > point.y and min(ys) < point.y
+                else:
+                    return max(ys) < point.y or min(ys) > point.y
+        else:
+            if len(ys) == 0:
+                return self.sign
+            if self.sign:
+                return ys[0] < point.y
+            else:
+                return ys[0] > point.y
 
     def get_intersections(self, boundary: Any) -> List[Tuple[Point, Point]]:
         """Get intersections between two WeightePointBoundaries."""

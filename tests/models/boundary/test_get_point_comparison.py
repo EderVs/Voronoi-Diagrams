@@ -66,6 +66,18 @@ class TestWeightedPointBoundaryIsPointInAllRegion:
         assert boundary_minus.get_point_comparison(point) < 0
         assert boundary_plus.get_point_comparison(point) < 0
 
+        # No Weight
+        p = WeightedSite(Decimal(40), Decimal(0), Decimal(0))
+        # q is the one in the top.
+        q = WeightedSite(Decimal(20), Decimal(0), Decimal(0))
+        bisector = WeightedPointBisector(sites=(p, q))
+        boundary_plus = WeightedPointBoundary(bisector=bisector, sign=True)
+        boundary_minus = WeightedPointBoundary(bisector=bisector, sign=False)
+
+        point = Point(Decimal("38"), Decimal("2"))
+        assert boundary_minus.get_point_comparison(point) > 0
+        assert boundary_plus.get_point_comparison(point) < 0
+
     def test_with_normal_boundary(self):
         """Test with a boundary that is not concave to y."""
         p = WeightedSite(Decimal(16), Decimal(10), Decimal(2))

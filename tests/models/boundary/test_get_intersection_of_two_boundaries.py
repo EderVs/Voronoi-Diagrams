@@ -711,3 +711,6 @@ class TestGetIntersectionInWeightedPointBoundary:
 
         intersections = boundary_qr_minus.get_intersections(boundary_pq_plus)
         assert len(intersections) == 0
+
+
+TestGetIntersectionInWeightedPointBoundary().test_vertical_bisector()
