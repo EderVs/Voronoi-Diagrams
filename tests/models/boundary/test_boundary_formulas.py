@@ -87,12 +87,12 @@ class TestWeightedPointBoundaryFormulas:
         x = -4
 
         ys_in_boundary = boundary_plus.formula_y(x)
-        assert len(ys_in_boundary) == 1
+        assert len(ys_in_boundary) == 2
         assert are_close(max(ys_in_boundary), Decimal("92"), Decimal("0.000000001"))
+        assert are_close(min(ys_in_boundary), Decimal("17"), Decimal("0.000000001"))
 
         ys_in_boundary = boundary_minus.formula_y(x)
-        assert len(ys_in_boundary) == 1
-        assert are_close(ys_in_boundary[0], Decimal("17"), Decimal("0.000000001"))
+        assert len(ys_in_boundary) == 0
 
         # To the right.
         x = 3
@@ -161,11 +161,11 @@ class TestWeightedPointBoundaryFormulas:
         x = 14
 
         ys_in_boundary = boundary_plus.formula_y(x)
-        assert len(ys_in_boundary) == 0
-
-        ys_in_boundary = boundary_minus.formula_y(x)
         assert len(ys_in_boundary) == 1
         assert are_close(ys_in_boundary[0], Decimal("33"), Decimal("0.000000001"))
+
+        ys_in_boundary = boundary_minus.formula_y(x)
+        assert len(ys_in_boundary) == 0
 
         # To the right.
         x = 20
@@ -207,11 +207,11 @@ class TestWeightedPointBoundaryFormulas:
         x = 30
 
         ys_in_boundary = boundary_plus.formula_y(x)
-        assert len(ys_in_boundary) == 0
-
-        ys_in_boundary = boundary_minus.formula_y(x)
         assert len(ys_in_boundary) == 1
         assert are_close(ys_in_boundary[0], Decimal("20"), Decimal(0))
+
+        ys_in_boundary = boundary_minus.formula_y(x)
+        assert len(ys_in_boundary) == 0
 
         # To the right.
         x = 55

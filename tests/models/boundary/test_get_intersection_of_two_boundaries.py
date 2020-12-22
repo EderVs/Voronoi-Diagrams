@@ -31,9 +31,9 @@ class TestGetIntersectionInPointBoundary:
         r = Site(Decimal(2), Decimal(-2))
         bisector_pq = PointBisector(sites=(p, q))
         bisector_pr = PointBisector(sites=(p, r))
-        boundary_pq_plus = PointBoundary(bisector_pq, False)
-        boundary_pr_minus = PointBoundary(bisector_pr, True)
-        intersections = boundary_pr_minus.get_intersections(boundary_pq_plus)
+        boundary_pq_plus = PointBoundary(bisector_pq, True)
+        boundary_pr_plus = PointBoundary(bisector_pr, True)
+        intersections = boundary_pr_plus.get_intersections(boundary_pq_plus)
         assert intersections
         assert len(intersections) == 1
         intersection = intersections[0]
@@ -42,7 +42,7 @@ class TestGetIntersectionInPointBoundary:
         assert intersection.y == Decimal(0)
         assert intersection_star.x == Decimal(2)
         assert intersection_star.y == Decimal(2)
-        intersections2 = boundary_pq_plus.get_intersections(boundary_pr_minus)
+        intersections2 = boundary_pq_plus.get_intersections(boundary_pr_plus)
         assert intersections2
         assert len(intersections2) == 1
         intersection2 = intersections2[0]
@@ -685,25 +685,16 @@ class TestGetIntersectionInWeightedPointBoundary:
         boundary_pq_minus = WeightedPointBoundary(bisector_pq, False)
         boundary_qr_plus = WeightedPointBoundary(bisector_qr, True)
         boundary_qr_minus = WeightedPointBoundary(bisector_qr, False)
-        intersections = boundary_qr_plus.get_intersections(boundary_pq_minus)
-        assert len(intersections) == 1
-        intersection = intersections[0]
-        intersection, intersection_star = intersection
-        assert intersection.x == Decimal("29")
-        assert intersection.y == Decimal("1")
-        assert intersection_star.x == Decimal("29")
-        assert intersection_star.y == Decimal("10.05538513813741662657380817")
-
-        intersections = boundary_qr_plus.get_intersections(boundary_pq_minus)
-        assert len(intersections) == 1
-        intersection = intersections[0]
-        intersection, intersection_star = intersection
-        assert intersection.x == Decimal("29")
-        assert intersection.y == Decimal("1")
-        assert intersection_star.x == Decimal("29")
-        assert intersection_star.y == Decimal("10.05538513813741662657380817")
-
         intersections = boundary_qr_plus.get_intersections(boundary_pq_plus)
+        assert len(intersections) == 1
+        intersection = intersections[0]
+        intersection, intersection_star = intersection
+        assert intersection.x == Decimal("29")
+        assert intersection.y == Decimal("1")
+        assert intersection_star.x == Decimal("29")
+        assert intersection_star.y == Decimal("10.05538513813741662657380817")
+
+        intersections = boundary_qr_plus.get_intersections(boundary_pq_minus)
         assert len(intersections) == 0
 
         intersections = boundary_qr_minus.get_intersections(boundary_pq_minus)
@@ -713,4 +704,4 @@ class TestGetIntersectionInWeightedPointBoundary:
         assert len(intersections) == 0
 
 
-TestGetIntersectionInWeightedPointBoundary().test_vertical_bisector()
+# TestGetIntersectionInWeightedPointBoundary().test_vertical_bisector()

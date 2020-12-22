@@ -405,12 +405,16 @@ class AVLTree:
     def search(self, value: Any) -> Optional[AVLNode]:
         """Search value in the Tree and return the AVLNode."""
         actual = self.root
+        print("ACTUAL:", actual)
         while actual is not None:
             if actual.is_contained(value):
+                print("is contained")
                 return actual
             if actual.is_left(value):
+                print("is left")
                 actual = actual.left
             else:
+                print("is right")
                 actual = actual.right
         return None
 

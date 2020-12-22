@@ -30,8 +30,8 @@ class TestWeightedPointBoundaryIsPointInAllRegion:
         # Points in boundary
         # Point in event point.
         point = Point(Decimal("40"), Decimal("16"))
-        assert boundary_plus.get_point_comparison(point) < 0
-        assert boundary_minus.get_point_comparison(point) == 0
+        assert boundary_plus.get_point_comparison(point) == 0
+        assert boundary_minus.get_point_comparison(point) > 0
         # Point in Boundary-
         point = Point(Decimal("36"), Decimal("16.17424305044159994757531098"))
         assert boundary_minus.get_point_comparison(point) == 0
@@ -74,9 +74,20 @@ class TestWeightedPointBoundaryIsPointInAllRegion:
         boundary_plus = WeightedPointBoundary(bisector=bisector, sign=True)
         boundary_minus = WeightedPointBoundary(bisector=bisector, sign=False)
 
+        # Right.
         point = Point(Decimal("38"), Decimal("2"))
         assert boundary_minus.get_point_comparison(point) > 0
+        assert boundary_plus.get_point_comparison(point) > 0
+
+        # Left.
+        point = Point(Decimal("25"), Decimal("5"))
+        assert boundary_minus.get_point_comparison(point) > 0
         assert boundary_plus.get_point_comparison(point) < 0
+
+        # In middle
+        point = Point(Decimal("30"), Decimal("5"))
+        assert boundary_minus.get_point_comparison(point) > 0
+        assert boundary_plus.get_point_comparison(point) == 0
 
     def test_with_normal_boundary(self):
         """Test with a boundary that is not concave to y."""
@@ -90,8 +101,8 @@ class TestWeightedPointBoundaryIsPointInAllRegion:
         # Points in boundary
         # Point in event point.
         point = Point(Decimal("40"), Decimal("36"))
-        assert boundary_minus.get_point_comparison(point) == 0
-        assert boundary_plus.get_point_comparison(point) < 0
+        assert boundary_minus.get_point_comparison(point) > 0
+        assert boundary_plus.get_point_comparison(point) == 0
         # Point in Boundary+
         point = Point(Decimal("70"), Decimal("44.51646544245032821756886326"))
         assert boundary_minus.get_point_comparison(point) > 0
@@ -126,8 +137,8 @@ class TestWeightedPointBoundaryIsPointInAllRegion:
         # Points in boundary
         # Point in event point.
         point = Point(Decimal("30"), Decimal("20"))
-        assert boundary_minus.get_point_comparison(point) == 0
-        assert boundary_plus.get_point_comparison(point) < 0
+        assert boundary_minus.get_point_comparison(point) > 0
+        assert boundary_plus.get_point_comparison(point) == 0
         # Point in Boundary+
         point = Point(Decimal("60"), Decimal("26.94980694980695009479400205"))
         assert boundary_minus.get_point_comparison(point) > 0

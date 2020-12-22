@@ -72,7 +72,7 @@ class Event:
         event_point = self.get_event_point()
         other_event_point = event.get_event_point()
         if other_event_point.y == event_point.y:
-            return event_point.x - other_event_point.x
+            return other_event_point.x - event_point.x
         return event_point.y - other_event_point.y
 
 
@@ -342,7 +342,7 @@ class WeightedSite(Site):
         other_event_point = event.get_event_point()
         if other_event_point.y == event_point.y:
             if self.weight == event.weight:
-                return event_point.x - other_event_point.x
+                return other_event_point.x - event_point.x
             # The smallest site will be first.
             return self.weight - event.weight
         return event_point.y - other_event_point.y

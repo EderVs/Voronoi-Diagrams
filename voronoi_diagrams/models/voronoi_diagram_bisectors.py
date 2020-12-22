@@ -165,7 +165,10 @@ class VoronoiDiagramBisector:
                     x_ranges.append([])
                     y_ranges.append([])
 
-        ranges = (np.concatenate(x_ranges), np.concatenate(y_ranges))
+        if len(x_ranges) == 0 or len(y_ranges) == 0:
+            ranges = ([], [])
+        else:
+            ranges = (np.concatenate(x_ranges), np.concatenate(y_ranges))
         return ranges
 
     def get_y_by_side(self, w: Decimal, side: BisectorSide) -> Optional[Decimal]:

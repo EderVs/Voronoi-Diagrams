@@ -106,8 +106,11 @@ class ConicSection:
         """Get intersections of a vertical line."""
         intersections = []
         for x in roots(ps):
+            print("X of vertical", x)
+            print("Xi of vertical", x.imag)
             if are_close(Decimal(x.imag), Decimal("0"), Decimal("0.001")):
                 other_ys = conic_section.y_formula(Decimal(x))
+                print("other_ys", other_ys)
                 for other_y in other_ys:
                     intersections.append((Decimal(x), Decimal(other_y)))
         return intersections
@@ -143,6 +146,7 @@ class ConicSection:
                 cs_d = conic_section.d
                 cs_f = conic_section.f
                 conic_section = self
+            print("VERTICAL")
             intersections = self.__get_intersections_of_vertical(
                 [cs_a, cs_d, cs_f], conic_section
             )

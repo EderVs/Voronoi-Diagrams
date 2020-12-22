@@ -1,5 +1,6 @@
 """Test Algorithm using Point Sites."""
 # Standard
+from general_utils.numbers.numbers import are_close
 from typing import List, Any
 
 # Models
@@ -31,7 +32,13 @@ class TestPointSites:
         # Vertex.
         assert len(voronoi_diagram.vertices_list) == len(expected_vertices)
         for vertex in voronoi_diagram.vertices_list:
-            assert vertex in expected_vertices
+            for expected_vertex in expected_vertices:
+                if are_close(
+                    vertex.x, expected_vertex.x, Decimal("0.00001")
+                ) and are_close(vertex.y, expected_vertex.y, Decimal("0.00001")):
+                    break
+            else:
+                assert False
 
     def test_2_point_sites(self):
         """Test 2 point sites.
@@ -442,14 +449,14 @@ class TestPointSites:
         points = (p1, p2, p3, p4)
         bisector_p1_p2 = PointBisector(sites=(site_p1, site_p2))
         bisector_p1_p3 = PointBisector(sites=(site_p1, site_p3))
-        bisector_p1_p4 = PointBisector(sites=(site_p1, site_p4))
+        bisector_p2_p3 = PointBisector(sites=(site_p2, site_p3))
         bisector_p2_p4 = PointBisector(sites=(site_p2, site_p4))
         bisector_p3_p4 = PointBisector(sites=(site_p3, site_p4))
 
         expected_bisectors = [
             bisector_p1_p2,
             bisector_p1_p3,
-            bisector_p1_p4,
+            bisector_p2_p3,
             bisector_p2_p4,
             bisector_p3_p4,
         ]
@@ -508,7 +515,7 @@ class TestPointSites:
         points = (p1, p2, p3, p4, p5)
         bisector_p1_p2 = PointBisector(sites=(site_p1, site_p2))
         bisector_p1_p3 = PointBisector(sites=(site_p1, site_p3))
-        bisector_p1_p4 = PointBisector(sites=(site_p1, site_p4))
+        bisector_p2_p3 = PointBisector(sites=(site_p2, site_p3))
         bisector_p2_p4 = PointBisector(sites=(site_p2, site_p4))
         bisector_p2_p5 = PointBisector(sites=(site_p2, site_p5))
         bisector_p3_p4 = PointBisector(sites=(site_p3, site_p4))
@@ -518,9 +525,9 @@ class TestPointSites:
         expected_bisectors = [
             bisector_p1_p2,
             bisector_p1_p3,
-            bisector_p1_p4,
-            bisector_p2_p5,
+            bisector_p2_p3,
             bisector_p2_p4,
+            bisector_p2_p5,
             bisector_p3_p4,
             bisector_p3_p5,
             bisector_p4_p5,

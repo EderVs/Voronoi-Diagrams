@@ -169,9 +169,13 @@ class PointBisector(Bisector):
 
     def is_vertical(self) -> bool:
         """Get if the bisector is vertical."""
-        p_site = self.sites[0]
-        q_site = self.sites[1]
-        return q_site.point.y == p_site.point.y
+        p, q = self.sites
+        return q.point.y == p.point.y
+
+    def is_horizontal(self) -> bool:
+        """Get if the bisector is horizontal."""
+        p, q = self.sites
+        return q.point.x == p.point.x
 
     def get_intersections(self, bisector: Bisector) -> List[Point]:
         """Get the point of intersection between two bisectors."""
@@ -208,15 +212,40 @@ class PointBisector(Bisector):
         y3 = bisector.sites[0].point.y
         y4 = bisector.sites[1].point.y
 
-        if y1 == y2:
-            # Case where self is a vertical line.
-            x = self.get_middle_between_sites().x
-            return [Point(x, bisector.formula_y(x)[0])]
-        if y3 == y4:
-            # Case where bisector is a vertical line.
-            x = bisector.get_middle_between_sites().x
-        else:
-            x = get_x(x1, x2, x3, x4, y1, y2, y3, y4)
+        if self.is_vertical() and bisector.is_vertical():
+            return []
+        elif self.is_vertical() or bisector.is_vertical():
+            vertical = self
+            other = bisector
+            if bisector.is_vertical():
+                vertical = bisector
+                other = self
+            x = vertical.get_middle_between_sites().x
+            ys = other.formula_y(x)
+            if len(ys) == 0:
+                return []
+            return [Point(x, ys[0])]
+
+        if self.is_horizontal() and bisector.is_horizontal():
+            return []
+        elif self.is_horizontal() or bisector.is_horizontal():
+            horizontal = self
+            other = bisector
+            if bisector.is_horizontal():
+                horizontal = bisector
+                other = self
+            y = horizontal.get_middle_between_sites().y
+            print("Y", y)
+            xs = other.formula_x(y)
+            print("XS", xs)
+            if len(xs) == 0:
+                return []
+            return [Point(xs[0], y)]
+
+        if self.is_same_slope(bisector):
+            return []
+
+        x = get_x(x1, x2, x3, x4, y1, y2, y3, y4)
         return [Point(x, self.formula_y(x)[0])]
 
     def is_same_slope(self, bisector: Any) -> bool:

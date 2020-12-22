@@ -58,10 +58,10 @@ class TestIsContainedPointSite:
         region = Region(q, boundary_minus, boundary_plus)
 
         # Points in boundaries
-        point_right = Point(Decimal(5.449489742783178), Decimal(3))
+        point_right = Point(Decimal("5.449489742783178"), Decimal(3))
         assert region.is_contained(point_right)
-        point_left = Point(Decimal(0.5505102572168221), Decimal(3))
-        assert region.is_contained(point_left)
+        point_left = Point(Decimal("0.5505102572168221"), Decimal(3))
+        assert not region.is_contained(point_left)
 
     def test_point_in_site(self):
         """Test point in site."""
@@ -170,7 +170,7 @@ class TestIsLeftPointSite:
         point_right = Point(Decimal(5.449489742783178), Decimal(3))
         assert not region.is_left(point_right)
         point_left = Point(Decimal(0.5505102572168221), Decimal(3))
-        assert not region.is_left(point_left)
+        assert region.is_left(point_left)
 
     def test_point_in_site(self):
         """Test point in site."""
@@ -409,7 +409,7 @@ class TestIsRightWeightedPointSite:
         boundary_qr_minus = WeightedPointBoundary(bisector=bisector_qr, sign=False)
 
         # Normal Regions
-        region = Region(q, boundary_qr_minus, boundary_qr_plus)
+        region = Region(r, boundary_qr_minus, boundary_qr_plus)
         # Highest point in in site.
         point = r.get_highest_site_point()
         assert not region.is_right(point)
@@ -428,7 +428,7 @@ class TestIsRightWeightedPointSite:
         region = Region(q, boundary_qr_plus, boundary_pq_minus)
         # Highest point in site.
         point = p.get_highest_site_point()
-        assert not region.is_right(point)
+        assert region.is_right(point)
         point = r.get_highest_site_point()
         assert not region.is_right(point)
         # Point in right boundary.
@@ -445,7 +445,7 @@ class TestIsRightWeightedPointSite:
         x = Decimal(30)
         y = boundary_qr_plus.formula_y(x)[0]
         point = Point(x, y)
-        assert region.is_right(point)
+        assert not region.is_right(point)
         # Point in pq minus boundary.
         x = Decimal(-30)
         y = boundary_qr_minus.formula_y(x)[0]
@@ -519,7 +519,7 @@ class TestIsLeftWeightedPointSite:
         boundary_qr_minus = WeightedPointBoundary(bisector=bisector_qr, sign=False)
 
         # Normal Regions
-        region = Region(q, boundary_qr_minus, boundary_qr_plus)
+        region = Region(r, boundary_qr_minus, boundary_qr_plus)
         # Highest point in in site.
         point = r.get_highest_site_point()
         assert not region.is_left(point)
@@ -532,7 +532,7 @@ class TestIsLeftWeightedPointSite:
         x = Decimal(-30)
         y = region.left.formula_y(x)[0]
         point = Point(x, y)
-        assert not region.is_left(point)
+        assert region.is_left(point)
 
         # Mixed Region
         region = Region(q, boundary_qr_plus, boundary_pq_minus)
@@ -550,7 +550,7 @@ class TestIsLeftWeightedPointSite:
         x = Decimal(-10)
         y = region.left.formula_y(x)[0]
         point = Point(x, y)
-        assert not region.is_left(point)
+        assert region.is_left(point)
         # Point in pq plus boundary.
         x = Decimal(30)
         y = boundary_qr_plus.formula_y(x)[0]
