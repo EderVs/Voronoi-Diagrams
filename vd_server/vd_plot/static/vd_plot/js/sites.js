@@ -4,7 +4,7 @@ var site_y_index = 2;
 var site_w_index = 3;
 var session = Date.now().toString();
 var csrftoken = "";
-var max_sites = 20;
+var max_sites = 100;
 
 window.addEventListener("load", function () {
     csrftoken = $('[name=csrfmiddlewaretoken]').attr("value");

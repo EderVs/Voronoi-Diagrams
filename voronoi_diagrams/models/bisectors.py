@@ -350,7 +350,7 @@ class WeightedPointBisector(Bisector):
         The open branch towards p has the equality distance_to_p + w_p = distance_to_q + w_q
         where w_p is the weight of p, q is the smallest site and w_q the weight of q.
         """
-        epsilon = Decimal(0.00001)
+        epsilon = Decimal("0.001")
         return are_close(
             self.sites[0].get_weighted_distance(x, y),
             self.sites[1].get_weighted_distance(x, y),
@@ -392,12 +392,14 @@ class WeightedPointBisector(Bisector):
     def get_intersections(self, bisector: Any) -> List[Point]:
         """Get the point of intersection between two Weighted Point Bisectors."""
         all_intersections = self.conic_section.get_intersections(bisector.conic_section)
+        print("ALL INTERSECTIONS", all_intersections)
         valid_intersections = []
-        epsilon = Decimal("0.0001")
+        epsilon = Decimal("0.001")
         for x, y in all_intersections:
             if self._is_point_in_bisector(x, y) and bisector._is_point_in_bisector(
                 x, y
             ):
+                print("point in bisector", x, y)
                 for valid_intersection in valid_intersections:
                     if are_close(valid_intersection.x, x, epsilon) and are_close(
                         valid_intersection.y, y, epsilon

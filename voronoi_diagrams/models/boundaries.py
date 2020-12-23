@@ -331,6 +331,23 @@ class WeightedPointBoundary(Boundary):
         else:
             return False
 
+    def is_boundary_vertical_infinity(self) -> bool:
+        """Check if the boundary is concave to y."""
+        p, q = self.bisector.sites
+        if p.weight > q.weight:
+            biggest_site = p
+            smallest_site = q
+        else:
+            biggest_site = q
+            smallest_site = p
+        if p.get_lowest_site_point().y == q.get_lowest_site_point().y:
+            if biggest_site.point.x < smallest_site.point.x:
+                return self.sign
+            else:
+                return not self.sign
+        else:
+            return False
+
     def formula_y(self, x: Decimal) -> List[Decimal]:
         """Return the y coordinate given the x coordinate taking care of the sign.
 
@@ -376,12 +393,12 @@ class WeightedPointBoundary(Boundary):
             distance = abs(p.point.x - q.point.x)
             mid_x = min(p.point.x, q.point.x) + (distance / Decimal(2))
             print("COMPARISON", mid_x, point.x)
-            return are_close(point.x, mid_x, Decimal("0.0001"),) and self.sign
+            return are_close(point.x, mid_x, Decimal("0.001"),) and self.sign
 
         ys_in_boundary = self.formula_y(point.x)
         for y_in_boundary in ys_in_boundary:
             print("COMPARISON", y_in_boundary, point.y)
-            if are_close(y_in_boundary, point.y, Decimal("0.00001")):
+            if are_close(y_in_boundary, point.y, Decimal("0.001")):
                 return True
         return False
 
@@ -429,7 +446,9 @@ class WeightedPointBoundary(Boundary):
                 # Checking if the point is in the vertical tangent.
                 vertical_tangents = self.bisector.get_vertical_tangents()
                 # There is just one posible vertical tangent.
-                if are_close(vertical_tangents[0], point.x, Decimal("0.000001")):
+                if len(vertical_tangents) > 0 and are_close(
+                    vertical_tangents[0], point.x, Decimal("0.000001")
+                ):
                     return not self.sign
 
                 if self.sign:
@@ -441,7 +460,16 @@ class WeightedPointBoundary(Boundary):
                     return max(ys) > point.y and min(ys) < point.y
                 else:
                     return max(ys) < point.y or min(ys) > point.y
+        elif self.is_boundary_vertical_infinity():
+            print("whattttttt")
+            if len(ys) == 0:
+                return self.get_site().point.x > point.x
+            if self.sign:
+                return ys[0] < point.y
+            else:
+                return ys[0] > point.y
         else:
+            print("nooooooo whattttttt")
             if len(ys) == 0:
                 return self.sign
             if self.sign:

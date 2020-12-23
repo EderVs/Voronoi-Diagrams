@@ -703,5 +703,19 @@ class TestGetIntersectionInWeightedPointBoundary:
         intersections = boundary_qr_minus.get_intersections(boundary_pq_plus)
         assert len(intersections) == 0
 
+    def test_special_case(self):
+        """Test get intersection with 3 positive fixed sites."""
+        p = WeightedSite(Decimal(88), Decimal(80), Decimal(0))
+        q = WeightedSite(Decimal(95), Decimal(15), Decimal(3))
+        r = WeightedSite(Decimal(78), Decimal(13), Decimal(1))
+        bisector_pq = WeightedPointBisector(sites=(p, q))
+        bisector_qr = WeightedPointBisector(sites=(q, r))
+        boundary_pq_plus = WeightedPointBoundary(bisector_pq, True)
+        boundary_pq_minus = WeightedPointBoundary(bisector_pq, False)
+        boundary_qr_plus = WeightedPointBoundary(bisector_qr, True)
+        boundary_qr_minus = WeightedPointBoundary(bisector_qr, False)
+        intersections = boundary_qr_minus.get_intersections(boundary_pq_minus)
+        assert len(intersections) == 1
+
 
 # TestGetIntersectionInWeightedPointBoundary().test_vertical_bisector()
