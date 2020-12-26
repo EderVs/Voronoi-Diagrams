@@ -99,7 +99,7 @@ class Bisector:
         return Point(point_x, point_y)
 
     def get_site(self):
-        """Get the site that is highest or more to the right."""
+        """Get the site that is highest or more to the left."""
         return self.get_sites_tuple()[0]
 
     @abstractmethod
@@ -260,13 +260,14 @@ class PointBisector(Bisector):
         return delta_y_is_zero or delta_x_is_zero or both_deltas_are_the_same
 
     def get_sites_tuple(self) -> Tuple[Site, Site]:
-        """Get the site tuple sorted."""
-        site1 = self.sites[0]
-        site2 = self.sites[1]
-        if (site1.get_highest_site_point().y > site2.get_highest_site_point().y) or (
-            site1.get_highest_site_point().y == site2.get_highest_site_point().y
-            and site1.get_rightest_site_point().x >= site2.get_rightest_site_point().x
-        ):
+        """Get the site tuple sorted.
+
+        First checks that the y coordinates of each event point and returns first the highest.
+        If both event points are cohorizontal then returns first the one more to the left.
+        """
+        site1, site2 = self.sites
+        event1, event2 = site1.get_event_point(), site2.get_event_point()
+        if (event1.y > event2.y) or (event1.y == event2.y and event1.x <= event2.x):
             return (site1, site2)
         else:
             return (site2, site1)
@@ -437,19 +438,21 @@ class WeightedPointBisector(Bisector):
         return valid_xs
 
     def get_sites_tuple(self) -> Tuple[WeightedSite, WeightedSite]:
-        """Get site tuple sorted."""
-        site1 = self.sites[0]
-        site2 = self.sites[1]
+        """Get site tuple sorted.
+
+        First checks that the y coordinates of each event point and returns first the highest.
+        If both event points are cohorizontal then returns first the one with more weight.
+        If both sites have the same weight then returns first the one more the left.
+        """
+        site1, site2 = self.sites
+        event1, event2 = site1.get_event_point(), site2.get_event_point()
         if (
-            (site1.get_highest_site_point().y > site2.get_highest_site_point().y)
+            (event1.y > event2.y)
+            or (event1.y == event2.y and site1.weight > site2.weight)
             or (
-                site1.get_highest_site_point().y == site2.get_highest_site_point().y
-                and site1.compare_weights(site2) > 0
-            )
-            or (
-                site1.get_highest_site_point().y == site2.get_highest_site_point().y
-                and site1.compare_weights(site2) == 0
-                and site1.get_highest_site_point().x >= site2.get_highest_site_point().x
+                event1.y == event2.y
+                and site1.weight == site2.weight
+                and event1.x <= event2.x
             )
         ):
             return (site1, site2)
