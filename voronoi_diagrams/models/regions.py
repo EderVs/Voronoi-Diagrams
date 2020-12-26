@@ -31,7 +31,7 @@ class Region:
         right: Optional[Boundary] = None,
         active: bool = False,
     ):
-        """Construct Boundary."""
+        """Construct region."""
         self.left = left
         self.right = right
         self.site = site
