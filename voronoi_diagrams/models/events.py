@@ -38,6 +38,7 @@ class Event:
         """Get event point to evaluate."""
         raise NotImplementedError
 
+    @abstractmethod
     def get_str(self):
         """Get letter in str representation of event."""
         raise NotImplementedError
@@ -55,6 +56,7 @@ class Event:
         """Get string representation in plot."""
         return f"{self.name} S({self.get_point_str()})"
 
+    @abstractmethod
     def get_event_str(self):
         """Get event str."""
         raise NotImplementedError

@@ -109,6 +109,7 @@ class Bisector:
             sites_tuple[1].get_object_to_hash(),
         )
 
+    @abstractmethod
     def is_vertical(self) -> bool:
         """Get if the bisector is vertical."""
         raise NotImplementedError
