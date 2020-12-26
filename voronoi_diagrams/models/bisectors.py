@@ -80,22 +80,9 @@ class Bisector:
     def get_middle_between_sites(self) -> Point:
         """Get Middle point between sites."""
         site1, site2 = self.sites
-        point_x = (
-            site1.get_x_frontier_pointing_to_point(site2.point)
-            - (
-                site1.get_x_frontier_pointing_to_point(site2.point)
-                - site2.get_x_frontier_pointing_to_point(site1.point)
-            )
-            / 2
-        )
-        point_y = (
-            site1.get_y_frontier_pointing_to_point(site2.point)
-            - (
-                site1.get_y_frontier_pointing_to_point(site2.point)
-                - site2.get_y_frontier_pointing_to_point(site1.point)
-            )
-            / 2
-        )
+        point1, point2 = site1.point, site2.point
+        point_x = min(point1.x, point2.x) + (abs(point1.x - point2.x) / Decimal(2))
+        point_y = min(point1.y, point2.y) + (abs(point1.y - point2.y) / Decimal(2))
         return Point(point_x, point_y)
 
     def get_site(self):
@@ -119,6 +106,17 @@ class Bisector:
         """Get if the bisector is vertical."""
         raise NotImplementedError
 
+    def is_point_in_bisector(self, x: Decimal, y: Decimal) -> bool:
+        """Get if the point is part of bisector.
+
+        A point is in the bisector if the point is to the same distance to both sites.
+        """
+        site1, site2 = self.sites
+        epsilon = Decimal("0.001")
+        return are_close(
+            site1.get_site_distance(x, y), site2.get_site_distance(x, y), epsilon,
+        )
+
 
 class PointBisector(Bisector):
     """Bisector defined by point sites."""
@@ -138,7 +136,7 @@ class PointBisector(Bisector):
         q = q_site.point
 
         if q.y == p.y:
-            distance = p_site.get_distance_to_site_point_from_point(q.x, q.y)
+            distance = p_site.get_site_distance(q.x, q.y)
             return [min(p.x, q.x) + (distance / 2)]
         if q.x == p.x:
             return []
@@ -342,20 +340,6 @@ class WeightedPointBisector(Bisector):
             self.e = Decimal((-2 * py * s) - (2 * ((2 * py) - (2 * qy)) * r))
             self.f = Decimal((s * (px ** 2)) + (s * (py ** 2)) - (r ** 2))
 
-    def _is_point_in_bisector(self, x: Decimal, y: Decimal) -> bool:
-        """Get if the point is part of bisector.
-
-        The bisector is the open branch towards p where p is the weighted site with more weight.
-        The open branch towards p has the equality distance_to_p + w_p = distance_to_q + w_q
-        where w_p is the weight of p, q is the smallest site and w_q the weight of q.
-        """
-        epsilon = Decimal("0.001")
-        return are_close(
-            self.sites[0].get_weighted_distance(x, y),
-            self.sites[1].get_weighted_distance(x, y),
-            epsilon,
-        )
-
     def formula_x(self, y: Decimal) -> List[Decimal]:
         """Get x coordinate given the y coordinate.
 
@@ -367,7 +351,7 @@ class WeightedPointBisector(Bisector):
         return_values = []
         xs = self.conic_section.x_formula(y)
         for x in xs:
-            if self._is_point_in_bisector(x, y) and x not in return_values:
+            if self.is_point_in_bisector(x, y) and x not in return_values:
                 return_values.append(x)
 
         return return_values
@@ -383,7 +367,7 @@ class WeightedPointBisector(Bisector):
         return_values = []
         ys = self.conic_section.y_formula(x)
         for y in ys:
-            if self._is_point_in_bisector(x, y) and y not in return_values:
+            if self.is_point_in_bisector(x, y) and y not in return_values:
                 return_values.append(y)
 
         return return_values
@@ -394,9 +378,7 @@ class WeightedPointBisector(Bisector):
         valid_intersections = []
         epsilon = Decimal("0.001")
         for x, y in all_intersections:
-            if self._is_point_in_bisector(x, y) and bisector._is_point_in_bisector(
-                x, y
-            ):
+            if self.is_point_in_bisector(x, y) and bisector.is_point_in_bisector(x, y):
                 for valid_intersection in valid_intersections:
                     if are_close(valid_intersection.x, x, epsilon) and are_close(
                         valid_intersection.y, y, epsilon

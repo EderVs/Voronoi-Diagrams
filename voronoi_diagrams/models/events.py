@@ -63,10 +63,6 @@ class Event:
         """Get object representation."""
         return self.__str__()
 
-    def is_dominated(self, event: Any) -> bool:
-        """Check if this event is dominated to other event."""
-        raise NotImplementedError
-
     def get_comparison(self, event: Any) -> Decimal:
         """Get comparison between 2 events."""
         event_point = self.get_event_point()
@@ -118,6 +114,15 @@ class Site(Event):
         """Get the frontier's x coordinates given y coordinate."""
         return (self.point.x, self.point.x)
 
+    def get_site_distance(self, x: Decimal, y: Decimal) -> Decimal:
+        """Get distance to site from another point.
+
+        In this case the site distance is the distance to the site point.
+        """
+        return (
+            ((self.point.x - x) ** Decimal(2)) + ((self.point.y - y) ** Decimal(2))
+        ).sqrt()
+
     def get_distance_to_site_point_from_point(self, x: Decimal, y: Decimal) -> Decimal:
         """Get distance to site point from another point."""
         return (
@@ -139,10 +144,6 @@ class Site(Event):
 
     def get_highest_site_point(self) -> Point:
         """Get lowest point in the site."""
-        return self.point
-
-    def get_rightest_site_point(self) -> Point:
-        """Get rightest point in the site."""
         return self.point
 
     def get_lowest_site_point(self) -> Point:
@@ -186,10 +187,6 @@ class Intersection(Event):
         """Get event point to evaluate."""
         return self.point
 
-    def is_dominated(self, site: Any) -> bool:
-        """Check if this event is dominated to other event."""
-        return False
-
 
 class WeightedSite(Site):
     """Weighted Site to handle in Fortune's Algorithm.
@@ -211,6 +208,15 @@ class WeightedSite(Site):
             and self.point.y == wsite.point.y
             and self.weight == wsite.weight
         )
+
+    def get_site_distance(self, x: Decimal, y: Decimal) -> Decimal:
+        """Get distance to site from another point.
+
+        In this case the site distance is the distance to the site point plus the weight.
+        """
+        return (
+            ((self.point.x - x) ** Decimal(2)) + ((self.point.y - y) ** Decimal(2))
+        ).sqrt() + abs(self.weight)
 
     def compare_weights(self, site: Any) -> int:
         """Compare weight between sites."""
@@ -306,10 +312,6 @@ class WeightedSite(Site):
     def get_highest_site_point(self) -> Point:
         """Get highest point in the site."""
         return Point(self.point.x, self.point.y + abs(self.weight))
-
-    def get_rightest_site_point(self) -> Point:
-        """Get rightest point in the site."""
-        return Point(self.point.x + abs(self.weight), self.point.y)
 
     def get_lowest_site_point(self) -> Point:
         """Get lowest point in the site."""
