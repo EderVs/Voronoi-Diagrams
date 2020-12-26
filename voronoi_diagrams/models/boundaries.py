@@ -396,7 +396,7 @@ class WeightedPointBoundary(Boundary):
         else:
             return self.is_left_when_boundary_is_not_concave(point)
 
-    def is_left_when_boundary_is_concave(self, point):
+    def is_left_when_boundary_is_concave(self, point) -> bool:
         """Return True if the given point is to the left when boundary is concave."""
         ys = self.formula_y(point.x)
         if len(ys) == 0:
@@ -420,7 +420,7 @@ class WeightedPointBoundary(Boundary):
             else:
                 return max(ys) < point.y or min(ys) > point.y
 
-    def is_left_when_boundary_is_stopped_to_infinity(self, point):
+    def is_left_when_boundary_is_stopped_to_infinity(self, point) -> bool:
         """Return True if the given point is to the left when boundary is stopped to infinity."""
         ys = self.formula_y(point.x)
         if len(ys) == 0:
@@ -430,7 +430,7 @@ class WeightedPointBoundary(Boundary):
         else:
             return ys[0] > point.y
 
-    def is_left_when_boundary_is_not_concave(self, point):
+    def is_left_when_boundary_is_not_concave(self, point) -> bool:
         """Return True if the given point is to the left when boundary is not concave."""
         ys = self.formula_y(point.x)
         if len(ys) == 0:

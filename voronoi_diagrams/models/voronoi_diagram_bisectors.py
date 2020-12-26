@@ -1,6 +1,7 @@
 """Bisectors Representations in the Voronoi Diagram."""
 
-from typing import Tuple, Any, Optional, List
+from abc import abstractmethod
+from typing import Tuple, Any, Optional, List, Iterable
 from decimal import Decimal
 import numpy as np
 
@@ -91,7 +92,7 @@ class VoronoiDiagramBisector:
 
     def get_x(self, y: Decimal) -> Optional[Decimal]:
         """Get x given y of the bisector.
-        
+
         Used in vertical bisectors.
         """
         xs = self.bisector.formula_x(y)
@@ -109,61 +110,13 @@ class VoronoiDiagramBisector:
 
         self.complete_ranges()
         if self.bisector.is_vertical():
-            for y0, y1 in self.ranges_vertical:
-                if y0 is None:
-                    y0 = ylim[0]
-                if y1 is None:
-                    y1 = ylim[1]
-                step = abs(y0 - y1) / num_steps
-                if step > 0:
-                    y_range = np.arange(y0, y1, step)
-                    x_range = [self.get_x(y) for y in y_range]
-                    x_ranges.append(x_range)
-                    y_ranges.append(y_range)
-                else:
-                    x_ranges.append([])
-                    y_ranges.append([])
+            x_ranges, y_ranges = self.get_ranges_when_bisector_is_vertical(
+                num_steps, xlim, ylim
+            )
         else:
-            for x1, x0, side in self.ranges_b_minus[::-1]:
-                if x0 is None:
-                    if side == 0:
-                        x0 = xlim[0]
-                    else:
-                        x0 = xlim[1]
-                step = abs(x0 - x1) / num_steps
-                if step > 0:
-                    if side == 1:
-                        x_range = np.arange(x0, x1, -step)
-                    else:
-                        x_range = np.arange(x0, x1, step)
-                    y_range = []
-                    for x in x_range:
-                        y_range.append(self.get_y_by_side(x, side))
-                    x_ranges.append(x_range)
-                    y_ranges.append(y_range)
-                else:
-                    x_ranges.append([])
-                    y_ranges.append([])
-            for x0, x1, side in self.ranges_b_plus:
-                if x1 is None:
-                    if side == 0:
-                        x1 = xlim[1]
-                    else:
-                        x1 = xlim[0]
-                step = abs(x0 - x1) / num_steps
-                if step > 0:
-                    if side == 1:
-                        x_range = np.arange(x0, x1, -step)
-                    else:
-                        x_range = np.arange(x0, x1, step)
-                    y_range = []
-                    for x in x_range:
-                        y_range.append(self.get_y_by_side(x, side))
-                    x_ranges.append(x_range)
-                    y_ranges.append(y_range)
-                else:
-                    x_ranges.append([])
-                    y_ranges.append([])
+            x_ranges, y_ranges = self.get_ranges_when_bisector_is_not_vertical(
+                num_steps, xlim, ylim
+            )
 
         if len(x_ranges) == 0 or len(y_ranges) == 0:
             ranges = ([], [])
@@ -171,6 +124,82 @@ class VoronoiDiagramBisector:
             ranges = (np.concatenate(x_ranges), np.concatenate(y_ranges))
         return ranges
 
+    def get_ranges_when_bisector_is_vertical(
+        self,
+        num_steps: Decimal,
+        xlim: Tuple[Decimal, Decimal],
+        ylim: Tuple[Decimal, Decimal],
+    ) -> Tuple[List[Iterable[Any]], List[Iterable[Any]]]:
+        """Get ranges when bisector is vertical."""
+        x_ranges = []
+        y_ranges = []
+        for y0, y1 in self.ranges_vertical:
+            if y0 is None:
+                y0 = ylim[0]
+            if y1 is None:
+                y1 = ylim[1]
+            step = abs(y0 - y1) / num_steps
+            if step > 0:
+                y_range = np.arange(y0, y1, step)
+                x_range = [self.get_x(y) for y in y_range]
+                x_ranges.append(x_range)
+                y_ranges.append(y_range)
+            else:
+                x_ranges.append([])
+                y_ranges.append([])
+        return (x_ranges, y_ranges)
+
+    def get_ranges_when_bisector_is_not_vertical(
+        self,
+        num_steps: Decimal,
+        xlim: Tuple[Decimal, Decimal],
+        ylim: Tuple[Decimal, Decimal],
+    ) -> Tuple[List[Iterable[Any]], List[Iterable[Any]]]:
+        """Get ranges when bisector is not vertical."""
+        x_ranges = []
+        y_ranges = []
+        for x1, x0, side in self.ranges_b_minus[::-1]:
+            if x0 is None:
+                if side == 0:
+                    x0 = xlim[0]
+                else:
+                    x0 = xlim[1]
+            self.get_ranges_in_general(x_ranges, y_ranges, x0, x1, side, num_steps)
+        for x0, x1, side in self.ranges_b_plus:
+            if x1 is None:
+                if side == 0:
+                    x1 = xlim[1]
+                else:
+                    x1 = xlim[0]
+            self.get_ranges_in_general(x_ranges, y_ranges, x0, x1, side, num_steps)
+        return (x_ranges, y_ranges)
+
+    def get_ranges_in_general(
+        self,
+        x_ranges: List[Iterable[Any]],
+        y_ranges: List[Iterable[Any]],
+        x0: Decimal,
+        x1: Decimal,
+        side: int,
+        num_steps: Decimal,
+    ) -> None:
+        """Get ranges in general."""
+        step = abs(x0 - x1) / num_steps
+        if step > 0:
+            if side == 1:
+                x_range = np.arange(x0, x1, -step)
+            else:
+                x_range = np.arange(x0, x1, step)
+            y_range = []
+            for x in x_range:
+                y_range.append(self.get_y_by_side(x, side))
+            x_ranges.append(x_range)
+            y_ranges.append(y_range)
+        else:
+            x_ranges.append([])
+            y_ranges.append([])
+
+    @abstractmethod
     def get_y_by_side(self, w: Decimal, side: BisectorSide) -> Optional[Decimal]:
         """Get y by BisectorSide."""
         raise NotImplementedError
@@ -188,6 +217,7 @@ class VoronoiDiagramBisector:
         """Add new vertical range."""
         self.ranges_vertical.append((y, None))
 
+    @abstractmethod
     def add_end_range(
         self, x: Decimal, boundary_sign: bool, side: BisectorSide
     ) -> None:
@@ -198,6 +228,7 @@ class VoronoiDiagramBisector:
         """Add end of the vertical range."""
         self.ranges_vertical[-1] = (self.ranges_vertical[-1][0], y)
 
+    @abstractmethod
     def complete_ranges(self):
         """Add a new range if neccessary."""
         raise NotImplementedError
@@ -288,7 +319,7 @@ class VoronoiDiagramWeightedPointBisector(VoronoiDiagramBisector):
                 return max(ys)
             return min(ys)
 
-    def complete_ranges(self):
+    def complete_ranges(self) -> None:
         """Add a new range if neccessary."""
         if len(self.ranges_b_minus) > 0:
             x1, x0, side = self.ranges_b_minus[-1]

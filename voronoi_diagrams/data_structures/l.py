@@ -10,6 +10,17 @@ from .avl_tree import AVLTree, AVLNode
 from voronoi_diagrams.models import Region, Event, Bisector, Site, Point, Boundary
 
 
+class RegionNotFoundException(Exception):
+    """Region not found in LList."""
+
+    def __init__(self):
+        """Constructor."""
+        self.strerror = (
+            "Cannot find a region with this point. Are your boundaries, "
+            + "regions and y coordinate right?"
+        )
+
+
 class LNode(AVLNode):
     """List L AVLNode that contains Region in their values."""
 
@@ -87,11 +98,7 @@ class LList:
         """Search the node of the region where a point is located given a y coordinate."""
         node = self.t.search(region)
         if node is None:
-            # TODO: Create exception.
-            raise Exception(
-                "Cannot find a region with this point. Are your boundaries, "
-                "regions and y coordinate right?"
-            )
+            raise RegionNotFoundException()
         return node  # type: ignore
 
     def search_region_contained(self, region: Region) -> Region:
