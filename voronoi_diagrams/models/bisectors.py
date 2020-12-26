@@ -80,9 +80,16 @@ class Bisector:
     def get_middle_between_sites(self) -> Point:
         """Get Middle point between sites."""
         site1, site2 = self.sites
-        point1, point2 = site1.point, site2.point
-        point_x = min(point1.x, point2.x) + (abs(point1.x - point2.x) / Decimal(2))
-        point_y = min(point1.y, point2.y) + (abs(point1.y - point2.y) / Decimal(2))
+        point1 = Point(
+            site1.get_x_frontier_pointing_to_point(site2.point),
+            site1.get_y_frontier_pointing_to_point(site2.point),
+        )
+        point2 = Point(
+            site2.get_x_frontier_pointing_to_point(site1.point),
+            site2.get_y_frontier_pointing_to_point(site1.point),
+        )
+        point_x = min(point1.x, point2.x) + (abs(point1.x - point2.x) / 2)
+        point_y = min(point1.y, point2.y) + (abs(point1.y - point2.y) / 2)
         return Point(point_x, point_y)
 
     def get_site(self):
