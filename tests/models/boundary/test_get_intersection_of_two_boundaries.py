@@ -710,12 +710,7 @@ class TestGetIntersectionInWeightedPointBoundary:
         r = WeightedSite(Decimal(78), Decimal(13), Decimal(1))
         bisector_pq = WeightedPointBisector(sites=(p, q))
         bisector_qr = WeightedPointBisector(sites=(q, r))
-        boundary_pq_plus = WeightedPointBoundary(bisector_pq, True)
         boundary_pq_minus = WeightedPointBoundary(bisector_pq, False)
-        boundary_qr_plus = WeightedPointBoundary(bisector_qr, True)
         boundary_qr_minus = WeightedPointBoundary(bisector_qr, False)
         intersections = boundary_qr_minus.get_intersections(boundary_pq_minus)
         assert len(intersections) == 1
-
-
-# TestGetIntersectionInWeightedPointBoundary().test_vertical_bisector()

@@ -43,34 +43,26 @@ class Region:
         if point.y < self.site.get_highest_site_point().y:
             return False
 
-        print("+++++++++++++++++++++++++")
-        print("left with", self.left, ":", self.is_left_contained(point))
-        print("right with", self.right, ":", self.is_right_contained(point))
-        print("+++++++++++++++++++++++++")
         return self.is_left_contained(point) and self.is_right_contained(point)
 
     def is_left_contained(self, point: Point) -> bool:
         """Return if a point is containted to the left."""
-        print("is_left_contained")
         if point.y < self.site.get_highest_site_point().y:
             return False
         if self.left is None:
             return True
 
         comparison = self.left.get_point_comparison(point)
-        print("COMPARISON", comparison)
         return comparison > 0
 
     def is_right_contained(self, point: Point) -> bool:
         """Return if a point is containted to the right."""
-        print("is_right_contained")
         if point.y < self.site.get_highest_site_point().y:
             return False
         if self.right is None:
             return True
 
         comparison = self.right.get_point_comparison(point)
-        print("COMPARISON", comparison)
         return comparison <= 0
 
     def is_left(self, point: Point, *args: Any, **kwargs: Any) -> bool:

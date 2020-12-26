@@ -38,9 +38,6 @@ class StepView(View):
         else:
             self.session = request.POST.get("session")
 
-        # For debuging.
-        # print(self.session)
-
     def get(self, request):
         """GET method."""
         self.set_visitors_session(request)

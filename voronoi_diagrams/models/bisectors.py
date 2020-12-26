@@ -1,7 +1,7 @@
 """Bisector representation."""
 
 # Standard Library
-from typing import Callable, Tuple, Optional, Any, List, Set
+from typing import Tuple, Optional, Any, List
 from abc import ABCMeta, abstractmethod
 
 # Models
@@ -43,12 +43,12 @@ class Bisector:
 
     @abstractmethod
     def formula_x(self, y: Decimal) -> List[Decimal]:
-        """Get x coordinate given the y coordinate."""
+        """Get x coordinate given a y coordinate."""
         raise NotImplementedError
 
     @abstractmethod
     def formula_y(self, x: Decimal) -> List[Decimal]:
-        """Get y coordinate given the x coordinate."""
+        """Get y coordinate given a x coordinate."""
         raise NotImplementedError
 
     def __str__(self):
@@ -235,9 +235,7 @@ class PointBisector(Bisector):
                 horizontal = bisector
                 other = self
             y = horizontal.get_middle_between_sites().y
-            print("Y", y)
             xs = other.formula_x(y)
-            print("XS", xs)
             if len(xs) == 0:
                 return []
             return [Point(xs[0], y)]
@@ -392,14 +390,12 @@ class WeightedPointBisector(Bisector):
     def get_intersections(self, bisector: Any) -> List[Point]:
         """Get the point of intersection between two Weighted Point Bisectors."""
         all_intersections = self.conic_section.get_intersections(bisector.conic_section)
-        print("ALL INTERSECTIONS", all_intersections)
         valid_intersections = []
         epsilon = Decimal("0.001")
         for x, y in all_intersections:
             if self._is_point_in_bisector(x, y) and bisector._is_point_in_bisector(
                 x, y
             ):
-                print("point in bisector", x, y)
                 for valid_intersection in valid_intersections:
                     if are_close(valid_intersection.x, x, epsilon) and are_close(
                         valid_intersection.y, y, epsilon

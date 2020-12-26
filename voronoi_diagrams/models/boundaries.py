@@ -191,9 +191,7 @@ class PointBoundary(Boundary):
 
     def is_left_to_boundary(self, point: Point) -> bool:
         """Return True if the given point is to the left of the boundary."""
-        print("POINT:", point.x, point.y)
         ys = self.formula_y(point.x)
-        print(ys)
         if len(ys) == 0:
             return self.sign
         if self.sign:
@@ -240,19 +238,14 @@ class PointBoundary(Boundary):
 
     def is_point_in_boundary(self, point) -> bool:
         """Check if the point is in this boundary."""
-        print(self)
-        print("in is_point_in_boundary")
         p, q = self.bisector.sites
         if p.point.y == q.point.y:
             distance = abs(p.point.x - q.point.x)
             mid_x = min(p.point.x, q.point.x) + (distance / Decimal(2))
-            print("COMPARISON", mid_x, point.x)
             return are_close(point.x, mid_x, Decimal("0.0001"),) and self.sign
 
         ys_in_boundary = self.formula_y(point.x)
-        print("ys_in_boundary", ys_in_boundary)
         for y_in_boundary in ys_in_boundary:
-            print("COMPARISON", y_in_boundary, point.y)
             if are_close(y_in_boundary, point.y, Decimal("0.00001")):
                 return True
         return False
@@ -267,7 +260,6 @@ class PointBoundary(Boundary):
         all_intersections = []
         # bisector.get_intersections gives us the intersections in the bisectors.
         intersection_points = self.bisector.get_intersections(boundary.bisector)
-        print("INTERSECTIONS", intersection_points)
         # Now we need to look that each mapped intersection point is in the boundary.
         for intersection_point in intersection_points:
             intersection_point_star = self.star(intersection_point)
@@ -354,9 +346,7 @@ class WeightedPointBoundary(Boundary):
         This is the formula of the bisector mapped with the star map.
         """
         # It has at most 2 values.
-        # print("in formula_y")
         ys_without_sign = self.formula_y_without_sign(x)
-        # print("without_sign", ys_without_sign)
         if len(ys_without_sign) == 0:
             return []
         to_return = []
@@ -386,18 +376,14 @@ class WeightedPointBoundary(Boundary):
 
     def is_point_in_boundary(self, point) -> bool:
         """Check if the point is in this boundary."""
-        print(self)
-        print("in is_point_in_boundary")
         p, q = self.bisector.sites
         if p.point.y == q.point.y and p.weight == q.weight:
             distance = abs(p.point.x - q.point.x)
             mid_x = min(p.point.x, q.point.x) + (distance / Decimal(2))
-            print("COMPARISON", mid_x, point.x)
             return are_close(point.x, mid_x, Decimal("0.001"),) and self.sign
 
         ys_in_boundary = self.formula_y(point.x)
         for y_in_boundary in ys_in_boundary:
-            print("COMPARISON", y_in_boundary, point.y)
             if are_close(y_in_boundary, point.y, Decimal("0.001")):
                 return True
         return False
@@ -426,8 +412,6 @@ class WeightedPointBoundary(Boundary):
                 # Negative Boundary of a vertical bisector is always to the left of any point.
                 return Decimal(1)
 
-        print("not same weight")
-
         if self.is_left_to_boundary(point):
             return Decimal(-1)
         if self.is_point_in_boundary(point):
@@ -436,9 +420,7 @@ class WeightedPointBoundary(Boundary):
 
     def is_left_to_boundary(self, point: Point) -> bool:
         """Return True if the given point is to the left of the boundary."""
-        print("POINT:", point.x, point.y)
         ys = self.formula_y(point.x)
-        print(ys)
         if self.is_boundary_not_x_monotone():
             if len(ys) == 0:
                 return not self.sign
@@ -461,7 +443,6 @@ class WeightedPointBoundary(Boundary):
                 else:
                     return max(ys) < point.y or min(ys) > point.y
         elif self.is_boundary_vertical_infinity():
-            print("whattttttt")
             if len(ys) == 0:
                 return self.get_site().point.x > point.x
             if self.sign:
@@ -469,7 +450,6 @@ class WeightedPointBoundary(Boundary):
             else:
                 return ys[0] > point.y
         else:
-            print("nooooooo whattttttt")
             if len(ys) == 0:
                 return self.sign
             if self.sign:
@@ -482,7 +462,6 @@ class WeightedPointBoundary(Boundary):
         all_intersections = []
         # bisector.get_intersections gives us the intersections in the bisectors.
         intersection_points = self.bisector.get_intersections(boundary.bisector)
-        print("INTERSECTIONS", intersection_points)
         # Now we need to look that each mapped intersection point is in the boundary.
         for intersection_point in intersection_points:
             intersection_point_star = self.star(intersection_point)

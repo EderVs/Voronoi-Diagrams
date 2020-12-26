@@ -258,7 +258,6 @@ class VoronoiDiagram:
             return
 
         intersection_point_tuples = boundary_1.get_intersections(boundary_2)
-        print(intersection_point_tuples)
         if intersection_point_tuples:
             # Adding all intersections.
             for vertex, event in intersection_point_tuples:
@@ -281,23 +280,15 @@ class VoronoiDiagram:
         """Insert posible intersections in Q."""
         # Left.
         if left_left_boundary is not None:
-            print("--------------------------")
-            print("left")
-            print(left_left_boundary, left_right_boundary)
             self._insert_intersection(
                 left_left_boundary, left_right_boundary, left_region_node
             )
-            print("--------------------------")
 
         # Right.
         if right_right_boundary is not None:
-            print("--------------------------")
-            print("left")
-            print(right_left_boundary, right_right_boundary)
             self._insert_intersection(
                 right_left_boundary, right_right_boundary, right_region_node
             )
-            print("--------------------------")
 
     def _add_boundary_to_plot(self, boundary: Boundary):
         """Add boundary to plot."""
@@ -336,13 +327,6 @@ class VoronoiDiagram:
                     (str(bisector.get_object_to_hash()), sign)
                 ] = traces_numbers
             self._figure_traces += len(traces)
-            # For debuging.
-            # print("//////////////////////////////////////////////////////")
-            # print(traces_numbers)
-            # print("-------------------------------------------------------")
-            # print(traces)
-            # print("-------------------------------------------------------")
-            # print(self._traces[traces_numbers[0] : traces_numbers[-1] + 1])
 
     def _add_boundaries_to_plot(self, boundaries: List[Boundary]):
         """Add boundaries to plot."""
@@ -354,11 +338,9 @@ class VoronoiDiagram:
         """Handle when event is a site."""
         # Step 8.
         # Find an occurrence of a region R*q on L containing p.
-        print("SITE")
         r_p, r_q, r_q_node = self._find_region_containing_p(p)
         left_region_node = r_q_node.left_neighbor
         right_region_node = r_q_node.right_neighbor
-        print("r_q", r_q)
 
         # Step 8.1.
         # Check if p is dominated by q.
@@ -548,9 +530,6 @@ class VoronoiDiagram:
             p.point, r_q.site, r_s.site
         )
         boundary_q_s = self.BOUNDARY_CLASS(bisector_q_s, boundary_q_s_sign)
-        print("=============")
-        print(boundary_q_s)
-        print("=============")
         self.add_bisector(bisector_q_s, sign=boundary_q_s_sign)
         if boundary_q_s.bisector.is_vertical():
             self.add_begin_vertical_bisector(
@@ -738,11 +717,6 @@ class VoronoiDiagram:
         """Plot step."""
         if self._plot_steps:
             # keep the sites and clean all other traces.
-            # For debuging.
-            # print(self.l_list)
-            # print(self.q_queue)
-            # print(self.event)
-            # print("In plot step")
             self._figure.data = []
             for trace in self._traces:
                 if trace is not None:

@@ -206,12 +206,6 @@ def plot_vertices_and_bisectors(
     vertices_passed = set()
     traces = []
     for vd_bisector in bisectors:
-        # For debuging.
-        # print("//////////////////////////////////////////////////")
-        # print(vd_bisector)  # Debugging
-        # print("-", vd_bisector.ranges_b_minus)
-        # print("+", vd_bisector.ranges_b_plus)
-        # print("|", vd_bisector.ranges_vertical)
         if not is_a_limit_bisector(
             vd_bisector, limit_sites, bisector_class=bisector_class
         ):
@@ -224,8 +218,4 @@ def plot_vertices_and_bisectors(
                 vd_bisector, xlim=xlim, ylim=ylim, bisector_class=bisector_class,
             )
 
-        # For debuging.
-        # print("-", vd_bisector.ranges_b_minus)
-        # print("+", vd_bisector.ranges_b_plus)
-        # print("|", vd_bisector.ranges_vertical)
     return traces
