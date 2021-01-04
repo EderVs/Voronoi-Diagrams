@@ -203,7 +203,7 @@ class VoronoiDiagram:
         Also returns the Region of p.
         """
         r_p = self.REGION_CLASS(p, None, None)
-        r_q_node = self.l_list.search_region_node(r_p)
+        r_q_node = self.l_list.search_region_node(p)
         r_q = r_q_node.value
         return r_p, r_q, r_q_node
 

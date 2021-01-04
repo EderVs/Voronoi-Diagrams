@@ -292,7 +292,7 @@ class WeightedPointBoundary(Boundary):
         else:
             return False
 
-    def is_boundary_stopped_to_infinity(self) -> bool:
+    def has_vertical_asymptote(self) -> bool:
         """Check if the boundary has a vertical asymptote."""
         p, q = self.bisector.sites
         if p.weight > q.weight:
@@ -390,14 +390,14 @@ class WeightedPointBoundary(Boundary):
     def is_left_to_boundary(self, point: Point) -> bool:
         """Return True if the given point is to the left of the boundary."""
         if self.is_boundary_not_x_monotone():
-            return self.is_left_when_boundary_is_concave(point)
-        elif self.is_boundary_stopped_to_infinity():
+            return self.is_left_when_boundary_is_not_x_monotone(point)
+        elif self.has_vertical_asymptote():
             return self.is_left_when_boundary_is_stopped_to_infinity(point)
         else:
             return self.is_left_when_boundary_is_not_concave(point)
 
-    def is_left_when_boundary_is_concave(self, point) -> bool:
-        """Return True if the given point is to the left when boundary is concave."""
+    def is_left_when_boundary_is_not_x_monotone(self, point) -> bool:
+        """Return True if the given point is to the left when boundary is not x monotone."""
         ys = self.formula_y(point.x)
         if len(ys) == 0:
             return not self.sign
@@ -406,7 +406,7 @@ class WeightedPointBoundary(Boundary):
             vertical_tangents = self.bisector.get_vertical_tangents()
             # There is just one posible vertical tangent.
             if len(vertical_tangents) > 0 and are_close(
-                vertical_tangents[0], point.x, Decimal("0.000001")
+                vertical_tangents[0], point.x, Decimal("0.0001")
             ):
                 return not self.sign
 

@@ -24,21 +24,24 @@ class RegionNotFoundException(Exception):
 class LNode(AVLNode):
     """List L AVLNode that contains Region in their values."""
 
+    left_neighbor: Optional["LNode"] = None
+    right_neighbor: Optional["LNode"] = None
+
     def __init__(self, value: Region, left=None, right=None) -> None:
         """List L AVL Node constructor."""
         super(LNode, self).__init__(value, left, right)
 
-    def is_contained(self, value: Region, *args: Any, **kwargs: Any) -> bool:
-        """Value is contained in the Node."""
-        return self.value.is_contained(value.site.get_event_point())
+    def is_contained(self, site: Site, *args: Any, **kwargs: Any) -> bool:
+        """Site is contained in the Node."""
+        return self.value.is_contained(site.get_event_point())
 
-    def is_left(self, value: Region, *args: Any, **kwargs: Any) -> bool:
-        """Value is to the left of Node."""
-        return self.value.is_left(value.site.get_event_point())
+    def is_left(self, site: Site, *args: Any, **kwargs: Any) -> bool:
+        """Site is to the left of Node."""
+        return self.value.is_left(site.get_event_point())
 
-    def is_right(self, value: Region, *args: Any, **kwargs: Any) -> bool:
-        """Value is to the right of Node."""
-        return self.value.is_right(value.site.get_event_point())
+    def is_right(self, site: Site, *args: Any, **kwargs: Any) -> bool:
+        """Site is to the right of Node."""
+        return self.value.is_right(site.get_event_point())
 
 
 class LList:
@@ -94,16 +97,16 @@ class LList:
         """Get representation."""
         return self.__str__()
 
-    def search_region_node(self, region: Region) -> LNode:
-        """Search the node of the region where a point is located given a y coordinate."""
-        node = self.t.search(region)
+    def search_region_node(self, site: Site) -> LNode:
+        """Search the node of the region where the site is located."""
+        node = self.t.search(site)
         if node is None:
             raise RegionNotFoundException()
         return node  # type: ignore
 
-    def search_region_contained(self, region: Region) -> Region:
-        """Search the region where a point is located given a y coordinate."""
-        return self.search_region_node(region).value
+    def search_region_contained(self, site: Site) -> Region:
+        """Search the region where the site is located."""
+        return self.search_region_node(site).value
 
     def update_neighbors(
         self, left_node: Optional[LNode], right_node: Optional[LNode]
@@ -127,7 +130,7 @@ class LList:
         boundary: Optional[Boundary],
         right_node: Optional[LNode],
     ) -> None:
-        """Update boundary in between 2 nodes."""
+        """Update boundary between 2 nodes."""
         if left_node is not None:
             left_node.value.right = boundary
 
@@ -144,7 +147,7 @@ class LList:
           site.
         - right_region is the Region that will be in the right. This region must have q as its site.
         """
-        node = self.search_region_node(center_region)
+        node = self.search_region_node(center_region.site)
 
         node.value = center_region
 

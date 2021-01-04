@@ -19,8 +19,6 @@ class AVLNode:
     left: Optional["AVLNode"] = None
     right: Optional["AVLNode"] = None
     parent: Optional["AVLNode"] = None
-    left_neighbor: Optional["AVLNode"] = None
-    right_neighbor: Optional["AVLNode"] = None
 
     def __init__(self, value: Any, left=None, right=None, parent=None) -> None:
         """AVL Node constructor."""
