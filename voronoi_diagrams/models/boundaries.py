@@ -1,7 +1,7 @@
 """Boundary representation."""
 
 # Standard Library
-from typing import Optional, Any, Tuple, List
+from typing import Optional, Tuple, List
 from abc import ABC, abstractmethod
 
 # Models
