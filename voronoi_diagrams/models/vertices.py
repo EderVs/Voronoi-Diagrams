@@ -15,15 +15,15 @@ class VoronoiDiagramVertex:
     bisectors: List[VoronoiDiagramBisector]
 
     def __init__(
-        self, vertex: Point, bisectors: Optional[List[VoronoiDiagramBisector]] = None
+        self, point: Point, bisectors: Optional[List[VoronoiDiagramBisector]] = None
     ) -> None:
         """Constructor."""
-        self.point = vertex
+        self.point = point
         if bisectors is None:
             bisectors = []
         self.bisectors = bisectors
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: "VoronoiDiagramVertex") -> bool:
         """Equallity between VoronoiDiagramBisectors."""
         return self.point == other.vertex
 

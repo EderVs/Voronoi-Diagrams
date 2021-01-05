@@ -16,11 +16,14 @@ BisectorSide = int
 Range = Tuple[Optional[Decimal], Optional[Decimal], BisectorSide]
 
 
+VoronoiDiagramVertex = "vertices.VoronoiDiagramVertex"
+
+
 class VoronoiDiagramBisector:
     """Bisector representation in the Voronoi diagram."""
 
     bisector: Bisector
-    vertices: List[Any]
+    vertices: List[VoronoiDiagramVertex]
     ranges_b_plus: List[Range]
     ranges_b_minus: List[Range]
     boundary_plus: Boundary
@@ -32,8 +35,8 @@ class VoronoiDiagramBisector:
         bisector: Any,
         boundary_plus: Boundary,
         boundary_minus: Boundary,
-        vertex1: Any = None,
-        vertex2: Any = None,
+        vertex1: VoronoiDiagramVertex = None,
+        vertex2: VoronoiDiagramVertex = None,
     ) -> None:
         """Constructor."""
         self.bisector = bisector
@@ -48,7 +51,7 @@ class VoronoiDiagramBisector:
         self.boundary_plus = boundary_plus
         self.boundary_minus = boundary_minus
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: "VoronoiDiagramBisector") -> bool:
         """Equallity between VoronoiDiagramBisectors."""
         return self.bisector == other.bisector and (
             (self.vertex1 == other.vertex1 and self.vertex2 == other.vertex2)
@@ -63,7 +66,7 @@ class VoronoiDiagramBisector:
         """Check if the bisector doesn't have one vertex."""
         return len(self.vertices) != 2
 
-    def get_vertices(self) -> Tuple[Any, Any]:
+    def get_vertices(self) -> Tuple[VoronoiDiagramVertex, VoronoiDiagramVertex]:
         """Get vertices linked to this bisector."""
         if len(self.vertices) == 0:
             vertex1 = None
@@ -84,7 +87,7 @@ class VoronoiDiagramBisector:
 
         return (vertex1, vertex2)
 
-    def add_vertex(self, vertex: Any):
+    def add_vertex(self, vertex: VoronoiDiagramVertex):
         """Add vertex."""
         if len(self.vertices) >= 2:
             return
@@ -244,7 +247,7 @@ class VoronoiDiagramPointBisector(VoronoiDiagramBisector):
         boundary_minus: PointBoundary,
         vertex1: Any = None,
         vertex2: Any = None,
-    ):
+    ) -> None:
         """Create Voronoi Diagram Weighted Bisector."""
         super().__init__(bisector, boundary_plus, boundary_minus, vertex1, vertex2)
 
@@ -281,7 +284,7 @@ class VoronoiDiagramWeightedPointBisector(VoronoiDiagramBisector):
         boundary_minus: WeightedPointBoundary,
         vertex1: Any = None,
         vertex2: Any = None,
-    ):
+    ) -> None:
         """Create Voronoi Diagram Weighted Bisector."""
         super().__init__(bisector, boundary_plus, boundary_minus, vertex1, vertex2)
 
@@ -321,34 +324,32 @@ class VoronoiDiagramWeightedPointBisector(VoronoiDiagramBisector):
 
     def complete_ranges(self) -> None:
         """Add a new range if neccessary."""
+        # No blank lines
+        def complete_range_in_boundary_if_neccessary(x, side, boundary, sign):
+            if x is None and side == 0 and boundary.is_boundary_not_x_monotone():
+                self.add_end_range(None, sign, 1)
+
+        def delete_first_with_side_0(b_range):
+            for i, (_, _, side) in enumerate(b_range):
+                if side == 0:
+                    del b_range[i]
+                    break
+
         if len(self.ranges_b_minus) > 0:
             x1, x0, side = self.ranges_b_minus[-1]
-            if (
-                x0 is None
-                and side == 0
-                and self.boundary_minus.is_boundary_not_x_monotone()
-            ):
-                self.add_end_range(None, False, 1)
-                return
+            return complete_range_in_boundary_if_neccessary(
+                x0, side, self.boundary_minus, False
+            )
         if len(self.ranges_b_plus) > 0:
             x0, x1, side = self.ranges_b_plus[-1]
-            if (
-                x1 is None
-                and side == 0
-                and self.boundary_plus.is_boundary_not_x_monotone()
-            ):
-                self.add_end_range(None, True, 1)
+            return complete_range_in_boundary_if_neccessary(
+                x1, side, self.boundary_plus, True
+            )
 
         sites = self.bisector.get_sites_tuple()
         are_sites_in_same_y = (
             sites[0].get_event_point().y == sites[1].get_event_point().y
         )
         if not self.bisector.is_vertical() and are_sites_in_same_y:
-            for i, (_, _, side) in enumerate(self.ranges_b_plus):
-                if side == 0:
-                    del self.ranges_b_plus[i]
-                    break
-            for i, (_, _, side) in enumerate(self.ranges_b_minus):
-                if side == 0:
-                    del self.ranges_b_minus[i]
-                    break
+            delete_first_with_side_0(self.ranges_b_plus)
+            delete_first_with_side_0(self.ranges_b_minus)
