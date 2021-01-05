@@ -12,14 +12,14 @@ class Vertex:
     """Vertex representation in the Voronoi diagram."""
 
     point: Point
-    bisectors: List[Edge]
+    edges: List[Edge]
 
-    def __init__(self, point: Point, bisectors: Optional[List[Edge]] = None) -> None:
+    def __init__(self, point: Point, edges: Optional[List[Edge]] = None) -> None:
         """Constructor."""
         self.point = point
-        if bisectors is None:
-            bisectors = []
-        self.bisectors = bisectors
+        if edges is None:
+            edges = []
+        self.edges = edges
 
     def __eq__(self, other: "Vertex") -> bool:
         """Equallity between Vertices."""
@@ -33,7 +33,7 @@ class Vertex:
         """Return string representation."""
         return self.__str__()
 
-    def add_bisector(self, bisector: Edge) -> List[Edge]:
+    def add_edge(self, edge: Edge) -> List[Edge]:
         """Add bisector adjacent to this vertex."""
-        self.bisectors.append(bisector)
-        return self.bisectors
+        self.edges.append(edge)
+        return self.edges

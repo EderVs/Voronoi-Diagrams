@@ -1,7 +1,7 @@
 """Plot voronoi diagram."""
 
 # Standard Library
-from typing import List, Any, Tuple, Optional
+from typing import List, Tuple, Optional
 from decimal import Decimal
 import time
 from random import random

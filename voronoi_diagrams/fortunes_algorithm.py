@@ -90,12 +90,7 @@ class FortunesAlgorithm:
             Site(points[i].x, points[i].y, name=names[i]) for i in range(len(points))
         ]
         voronoi_diagram = FortunesAlgorithm(
-            sites,
-            site_class=Site,
-            plot_steps=plot_steps,
-            xlim=xlim,
-            ylim=ylim,
-            mode=mode,
+            sites, plot_steps=plot_steps, xlim=xlim, ylim=ylim, mode=mode,
         )
 
         return voronoi_diagram
@@ -119,12 +114,7 @@ class FortunesAlgorithm:
             sites.append(site)
 
         voronoi_diagram = FortunesAlgorithm(
-            sites,
-            site_class=WeightedSite,
-            plot_steps=plot_steps,
-            xlim=xlim,
-            ylim=ylim,
-            mode=mode,
+            sites, plot_steps=plot_steps, xlim=xlim, ylim=ylim, mode=mode,
         )
 
         return voronoi_diagram
@@ -132,12 +122,11 @@ class FortunesAlgorithm:
     def __init__(
         self,
         sites: Iterable[Site],
-        site_class: Type[Site] = Site,
         plot_steps: bool = False,
         xlim: Optional[Limit] = (-100, 100),
         ylim: Optional[Limit] = (-100, 100),
         mode: Optional[int] = STATIC_MODE,
-    ):
+    ) -> None:
         """Construct and calculate Voronoi Diagram."""
         self.vertices = []
         self.vertices_list = []
@@ -150,14 +139,17 @@ class FortunesAlgorithm:
 
         # Type of Voronoi diagram.
         self.sites = list(sites)
-        self.SITE_CLASS = site_class
-        if site_class == Site:
+        if len(self.sites) == 0:
+            return
+
+        self.SITE_CLASS = type(self.sites[0])
+        if self.SITE_CLASS == Site:
             self.BISECTOR_CLASS = PointBisector
             self.REGION_CLASS = Region
             self.BOUNDARY_CLASS = PointBoundary
             self.VD_BISECTOR_CLASS = PointBisectorEdge
             self._site_traces = 1
-        elif site_class == WeightedSite:
+        elif self.SITE_CLASS == WeightedSite:
             self.BISECTOR_CLASS = WeightedPointBisector
             self.REGION_CLASS = Region
             self.BOUNDARY_CLASS = WeightedPointBoundary
@@ -494,7 +486,7 @@ class FortunesAlgorithm:
 
         if vd_bisectors is not None:
             for vd_bisector in vd_bisectors:
-                vd_vertex.add_bisector(vd_bisector)
+                vd_vertex.add_edge(vd_bisector)
                 vd_bisector.add_vertex(vd_vertex)
 
         if self._plot_steps:
