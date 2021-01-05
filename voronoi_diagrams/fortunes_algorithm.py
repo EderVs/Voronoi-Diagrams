@@ -147,198 +147,106 @@ class VoronoiDiagram:
         if self.mode == STATIC_MODE:
             self._calculate_diagram()
 
-    def add_vertex(
-        self, point: Point, vd_bisectors: Optional[List[VoronoiDiagramBisector]] = None
-    ) -> None:
-        """Add point in the vertex list."""
-        point_tuple = point.get_tuple()
-        if point_tuple not in self._vertices:
-            vd_vertex = VoronoiDiagramVertex(point)
-            self._vertices[point_tuple] = vd_vertex
-            self.vertices.append(vd_vertex)
-            self.vertices_list.append(point)
-        else:
-            vd_vertex = self._vertices[point_tuple]
+    def _init_structures(self):
+        """Init data structures used."""
+        # Step 1.
+        self.q_queue = QQueue()
+        for site in self.sites:
+            self.q_queue.enqueue(site)
+            if self._plot_steps:
+                self._set_site_trace(site)
 
-        if vd_bisectors is not None:
-            for vd_bisector in vd_bisectors:
-                vd_vertex.add_bisector(vd_bisector)
-                vd_bisector.add_vertex(vd_vertex)
+        # Step 2.
+        self.event = self.q_queue.dequeue()
 
+        # Step 3.
+        r_p = self.REGION_CLASS(self.event, None, None)
+        self._updated_regions = [r_p]
+        r_p.active = True
+        self.l_list = LList(r_p)
+        self._plot_step()
+
+    def _set_site_trace(self, site):
+        """Set site trace in traces."""
         if self._plot_steps:
-            self._add_vertex_trace(vd_vertex)
+            site_traces = get_site_traces(site, self.SITE_CLASS)
+            self._traces += site_traces
+            self._figure_traces += len(site_traces)
 
-    def add_bisector(self, bisector: Bisector, sign: Optional[bool] = True) -> None:
-        """Add point in the vertex list."""
-        hasheable_of_bisector = bisector.get_object_to_hash()
-        if hasheable_of_bisector not in self._bisectors:
-            self._bisectors[hasheable_of_bisector] = bisector
-            self.bisectors_list.append(bisector)
-        vd_bisector = self.VD_BISECTOR_CLASS(
-            bisector,
-            self.BOUNDARY_CLASS(bisector, True),
-            self.BOUNDARY_CLASS(bisector, False),
-        )
-        self.bisectors.append(vd_bisector)
-        if sign is None:
-            self._active_bisectors[(hasheable_of_bisector, False)] = vd_bisector
-            self._active_bisectors[(hasheable_of_bisector, True)] = vd_bisector
-        else:
-            self._active_bisectors[(hasheable_of_bisector, sign)] = vd_bisector
+    def _calculate_diagram(self):
+        """Calculate point diagram."""
+        # Step 4.
+        while not self.q_queue.is_empty():
+            self.calculate_next_event()
 
-    def get_voronoi_diagram_bisectors(
-        self, bisectors: List[Tuple[Bisector, bool]]
-    ) -> List[VoronoiDiagramBisector]:
-        """Get voronoi diagram bisectors based on the current state."""
-        vd_bisectors = []
-        for bisector, sign in bisectors:
-            hasheable_of_bisector = bisector.get_object_to_hash()
-            vd_bisector = self._active_bisectors[(hasheable_of_bisector, sign)]
-            vd_bisectors.append(vd_bisector)
-        return vd_bisectors
+    def calculate_next_event(self):
+        """Calculate next event in the Queue."""
+        self.move_to_next_event()
+        self.calculate_event()
 
-    def _find_region_containing_p(self, p: Site) -> Tuple[Region, Region, LNode]:
-        """Find an occurrence of a region R*q on L containing p.
-
-        Also returns the Region of p.
-        """
-        r_p = self.REGION_CLASS(p, None, None)
-        r_q_node = self.l_list.search_region_node(p)
-        r_q = r_q_node.value
-        return r_p, r_q, r_q_node
-
-    def _update_list_l(
-        self, r_p: Region, r_q: Region, bisector_p_q: Bisector,
-    ) -> Tuple[Boundary, Boundary, LNode, LNode]:
-        """Update list L so that it contains ...,R*q,C-pq,R*p,C+pq,R*q,... in place of R*q."""
-        boundary_p_q_plus = self.BOUNDARY_CLASS(bisector_p_q, True)  # type: ignore
-        boundary_p_q_minus = self.BOUNDARY_CLASS(bisector_p_q, False)  # type: ignore
-        r_q_left = self.REGION_CLASS(r_q.site, r_q.left, boundary_p_q_minus)
-        r_q_right = self.REGION_CLASS(r_q.site, boundary_p_q_plus, r_q.right)
-        r_p.left = boundary_p_q_minus
-        r_p.right = boundary_p_q_plus
-
-        self._updated_boundaries = [boundary_p_q_minus, boundary_p_q_plus]
-        self._updated_regions = [r_q_left, r_p, r_q_right]
+    def move_to_next_event(self):
+        """Move to next event in Queue."""
+        # Reset active boundaries and regions.
         for region in self._updated_regions:
-            region.active = True
+            region.active = False
         for boundary in self._updated_boundaries:
-            boundary.active = True
+            boundary.active = False
+        self._updated_regions = []
+        self._updated_boundaries = []
 
-        # Update L list.
-        r_q_left_node, r_p_node, r_q_right_node = self.l_list.update_regions(
-            r_q_left, r_p, r_q_right
-        )
-        return (
-            boundary_p_q_plus,
-            boundary_p_q_minus,
-            r_q_left_node,
-            r_q_right_node,
-        )
-
-    def _delete_intersection_from_boundary(
-        self, boundary: Optional[Boundary], is_left_intersection: bool
-    ) -> None:
-        if boundary is None:
+        # Step 4.
+        if self.q_queue.is_empty():
             return
 
-        if is_left_intersection and boundary.left_intersection is not None:
-            self.q_queue.delete(boundary.left_intersection)
-            boundary.left_intersection = None
-        elif not is_left_intersection and boundary.right_intersection is not None:
-            self.q_queue.delete(boundary.right_intersection)
-            boundary.right_intersection = None
+        # Step 5.
+        self.event = self.q_queue.dequeue()
+        self._plot_step()
+        self._begin_event = False
+        if not self.event.is_site:
+            self.event.region_node.value.is_to_be_deleted = True
+            self.event.region_node.value.left.is_to_be_deleted = True
+            self.event.region_node.value.right.is_to_be_deleted = True
 
-    def _insert_intersection(
-        self, boundary_1: Boundary, boundary_2: Boundary, region_node: LNode
-    ) -> None:
-        """Look for intersections between the the boundaries."""
-        # There could be a possibility that the two boundaries are from the same bisector.
-        if boundary_1.bisector == boundary_2.bisector:
-            return
+    def calculate_event(self):
+        """Calculate actual event."""
+        self._plot_step()
+        # Step 6 and 7.
+        if self.event.is_site:
+            self._handle_site(self.event)
+        # Step 13: p is an intersection.
+        else:
+            self._handle_intersection(self.event)
+        self._plot_step()
+        self._begin_event = True
 
-        intersection_point_tuples = boundary_1.get_intersections(boundary_2)
-        if intersection_point_tuples:
-            # Adding all intersections.
-            for vertex, event in intersection_point_tuples:
-                intersection = Intersection(event, vertex, region_node)
-                # Insert intersection to Q.
-                self.q_queue.enqueue(intersection)
-                # Save intersection in both boundaries.
-                boundary_1.right_intersection = intersection
-                boundary_2.left_intersection = intersection
-
-    def _insert_posible_intersections(
-        self,
-        left_left_boundary: Optional[Boundary],
-        left_right_boundary: Boundary,
-        left_region_node: LNode,
-        right_left_boundary: Boundary,
-        right_right_boundary: Optional[Boundary],
-        right_region_node: LNode,
-    ) -> None:
-        """Insert posible intersections in Q."""
-        # Left.
-        if left_left_boundary is not None:
-            self._insert_intersection(
-                left_left_boundary, left_right_boundary, left_region_node
-            )
-
-        # Right.
-        if right_right_boundary is not None:
-            self._insert_intersection(
-                right_left_boundary, right_right_boundary, right_region_node
-            )
-
-    def _add_boundary_to_plot(self, boundary: Boundary):
-        """Add boundary to plot."""
+    def _plot_step(self):
+        """Plot step."""
         if self._plot_steps:
-            trace = get_plot_scatter_boundary(
-                boundary, self._xlim, self._ylim, self.BISECTOR_CLASS,
-            )
-            self._traces.append(trace)
-            self._figure_traces += 1
-            # TODO: Change to use complete_string()
-            self._boundary_plot_dict[str(boundary)] = self._figure_traces - 1
+            # keep the sites and clean all other traces.
+            self._figure.data = []
+            for trace in self._traces:
+                if trace is not None:
+                    self._figure.add_trace(trace)
+            plot_sweep_line(self._figure, self._xlim, self._ylim, self.event)
+            plot_events_traces(self._figure, self.q_queue)
+            # self._figure.show()
 
-    def _add_bisector_to_plot(self, bisector: Bisector, sign: Optional[bool]):
-        """Add boundary to plot."""
-        if self._plot_steps:
-            if sign is None:
-                vd_bisector = self.get_voronoi_diagram_bisectors([(bisector, True)])[0]
-            else:
-                vd_bisector = self.get_voronoi_diagram_bisectors([(bisector, sign)])[0]
-            traces = plot_voronoi_diagram_bisector(
-                vd_bisector, self._xlim, self._ylim, self.BISECTOR_CLASS
-            )
-            self._traces += traces
-            traces_numbers = list(
-                range(self._figure_traces, self._figure_traces + len(traces))
-            )
-            if sign is None:
-                self._bisector_plot_dict[
-                    (str(bisector.get_object_to_hash()), True)
-                ] = traces_numbers
-                self._bisector_plot_dict[
-                    (str(bisector.get_object_to_hash()), False)
-                ] = traces_numbers
-            else:
-                self._bisector_plot_dict[
-                    (str(bisector.get_object_to_hash()), sign)
-                ] = traces_numbers
-            self._figure_traces += len(traces)
+    def next_step(self):
+        """Calculate next step."""
+        if self._begin_event:
+            self.move_to_next_event()
+        else:
+            self.calculate_event()
 
-    def _add_boundaries_to_plot(self, boundaries: List[Boundary]):
-        """Add boundaries to plot."""
-        if self._plot_steps:
-            for boundary in boundaries:
-                self._add_boundary_to_plot(boundary)
+    def is_next_step(self):
+        """Get if there is a next step to calculate."""
+        return not self.q_queue.is_empty() or not self._begin_event
 
     def _handle_site(self, p: Site):
         """Handle when event is a site."""
         # Step 8.
         # Find an occurrence of a region R*q on L containing p.
-        r_p, r_q, r_q_node = self._find_region_containing_p(p)
+        r_q, r_q_node = self._find_region_containing_p(p)
         left_region_node = r_q_node.left_neighbor
         right_region_node = r_q_node.right_neighbor
 
@@ -356,12 +264,13 @@ class VoronoiDiagram:
 
         # Step 10.
         # Update list L so that it contains ...,R*q,C-pq,R*p,C+pq,R*q,... in place of R*q.
+        r_p = self.REGION_CLASS(p, None, None)
         (
             boundary_p_q_plus,
             boundary_p_q_minus,
             r_q_left_node,
             r_q_right_node,
-        ) = self._update_list_l(r_p, r_q, bisector_p_q)
+        ) = self._update_l_list(r_p, r_q, bisector_p_q)
 
         if bisector_p_q.is_vertical():
             self.add_begin_vertical_bisector(bisector_p_q, None)
@@ -402,107 +311,6 @@ class VoronoiDiagram:
             boundary_p_q_plus,
             right_boundary,
             r_q_right_node,
-        )
-
-    def _get_regions_and_nodes_of_intersection(self, p: Intersection):
-        """Get regions and their nodes of the intersection p."""
-        intersection_region_node = p.region_node
-        # Left and right neighbor cannot be None because p is an intersection.
-        r_q_node = intersection_region_node.left_neighbor
-        r_q = r_q_node.value  # type: ignore
-        r_s_node = intersection_region_node.right_neighbor
-        r_s = r_s_node.value  # type: ignore
-        return r_q, r_s, r_q_node, r_s_node
-
-    def _remove_boundary_from_figure_traces(self, boundary: Optional[Boundary]):
-        """Remove boundary from figure traces."""
-        if boundary is None:
-            return
-        self._traces[self._boundary_plot_dict[str(boundary)]] = None
-
-    def _update_boundaries_bisectors_figure_traces(
-        self, boundaries: List[Optional[Boundary]]
-    ):
-        """Update boundaries bisectors' figure traces."""
-        for boundary in boundaries:
-            if boundary is None:
-                continue
-            self._update_bisector_figure_traces(boundary.bisector, boundary.sign)
-
-    def _update_bisector_figure_traces(self, bisector: Bisector, sign: bool):
-        """Update bisector's figure traces."""
-        bisector_traces = self._bisector_plot_dict[
-            (str(bisector.get_object_to_hash()), sign)
-        ]
-        bisector_other_sign_traces = self._bisector_plot_dict.get(
-            (str(bisector.get_object_to_hash()), not sign), []
-        )
-        if bisector_traces == bisector_other_sign_traces:
-            sign = None
-        for bisector_trace_i in bisector_traces:
-            self._traces[bisector_trace_i] = None
-        self._add_bisector_to_plot(bisector, sign)
-
-    def _add_vertex_trace(self, vertex: VoronoiDiagramVertex):
-        """Add vertex to vd trace."""
-        trace = plot_vertex(vertex)
-        self._traces.append(trace)
-        self._figure_traces += 1
-
-    def _remove_boundaries_from_figure_traces(
-        self, boundary1: Optional[Boundary], boundary2: Optional[Boundary]
-    ):
-        """Remove boundary from figure traces."""
-        if boundary1 is None and boundary2 is None:
-            return
-        if boundary1 is None:
-            self._remove_boundary_from_figure_traces(boundary2)
-        elif boundary2 is None:
-            self._remove_boundary_from_figure_traces(boundary1)
-        else:
-            position1 = self._boundary_plot_dict[str(boundary1)]
-            position2 = self._boundary_plot_dict[str(boundary2)]
-            if position1 > position2:
-                self._remove_boundary_from_figure_traces(boundary1)
-                self._remove_boundary_from_figure_traces(boundary2)
-            else:
-                self._remove_boundary_from_figure_traces(boundary2)
-                self._remove_boundary_from_figure_traces(boundary1)
-
-    def add_begin_vertical_bisector(
-        self, bisector: Bisector, y: Optional[Decimal], sign: bool = True
-    ):
-        """Add vertical bisector range."""
-        voronoi_diagram_bisector = self.get_voronoi_diagram_bisectors(
-            [(bisector, sign)]
-        )[0]
-        voronoi_diagram_bisector.add_begin_range_vertical(y)
-
-    def add_begin_bisector(self, boundary: Boundary, event: Event) -> None:
-        """Get range of the bisector based on the boundary and the intersection."""
-        voronoi_diagram_bisector = self.get_voronoi_diagram_bisectors(
-            [(boundary.bisector, boundary.sign)]
-        )[0]
-        side = boundary.get_side_where_point_belongs(event.point)
-        voronoi_diagram_bisector.add_begin_range(event.point.x, boundary.sign, side)
-
-    def add_end_vertical_bisector(
-        self, bisector: Bisector, y: Decimal, sign: bool = True
-    ):
-        """Add end of vertical bisector range."""
-        voronoi_diagram_bisector = self.get_voronoi_diagram_bisectors(
-            [(bisector, sign)]
-        )[0]
-        voronoi_diagram_bisector.add_end_range_vertical(y)
-
-    def add_end_bisector(self, boundary: Boundary, intersection: Intersection) -> None:
-        """Get range of the bisector based on the boundary and the intersection."""
-        voronoi_diagram_bisector = self.get_voronoi_diagram_bisectors(
-            [(boundary.bisector, boundary.sign)]
-        )[0]
-        side = boundary.get_side_where_point_belongs(intersection.point)
-        voronoi_diagram_bisector.add_end_range(
-            intersection.point.x, boundary.sign, side
         )
 
     def _handle_intersection(self, p: Intersection):
@@ -621,109 +429,292 @@ class VoronoiDiagram:
         )
         self.add_vertex(p.vertex, vd_bisectors)
 
-    def _set_site_trace(self, site):
-        """Set site trace in traces."""
+    def add_vertex(
+        self, point: Point, vd_bisectors: Optional[List[VoronoiDiagramBisector]] = None
+    ) -> None:
+        """Add point in the vertex list."""
+        point_tuple = point.get_tuple()
+        if point_tuple not in self._vertices:
+            vd_vertex = VoronoiDiagramVertex(point)
+            self._vertices[point_tuple] = vd_vertex
+            self.vertices.append(vd_vertex)
+            self.vertices_list.append(point)
+        else:
+            vd_vertex = self._vertices[point_tuple]
+
+        if vd_bisectors is not None:
+            for vd_bisector in vd_bisectors:
+                vd_vertex.add_bisector(vd_bisector)
+                vd_bisector.add_vertex(vd_vertex)
+
         if self._plot_steps:
-            site_traces = get_site_traces(site, self.SITE_CLASS)
-            self._traces += site_traces
-            self._figure_traces += len(site_traces)
+            self._add_vertex_trace(vd_vertex)
 
-    def _init_structures(self):
-        """Init data structures used."""
-        # Step 1.
-        self.q_queue = QQueue()
-        for site in self.sites:
-            self.q_queue.enqueue(site)
-            if self._plot_steps:
-                self._set_site_trace(site)
+    def add_bisector(self, bisector: Bisector, sign: Optional[bool] = True) -> None:
+        """Add point in the vertex list."""
+        hasheable_of_bisector = bisector.get_object_to_hash()
+        if hasheable_of_bisector not in self._bisectors:
+            self._bisectors[hasheable_of_bisector] = bisector
+            self.bisectors_list.append(bisector)
+        vd_bisector = self.VD_BISECTOR_CLASS(
+            bisector,
+            self.BOUNDARY_CLASS(bisector, True),
+            self.BOUNDARY_CLASS(bisector, False),
+        )
+        self.bisectors.append(vd_bisector)
+        if sign is None:
+            self._active_bisectors[(hasheable_of_bisector, False)] = vd_bisector
+            self._active_bisectors[(hasheable_of_bisector, True)] = vd_bisector
+        else:
+            self._active_bisectors[(hasheable_of_bisector, sign)] = vd_bisector
 
-        # Step 2.
-        self.event = self.q_queue.dequeue()
+    def _find_region_containing_p(self, p: Site) -> Tuple[Region, Region, LNode]:
+        """Find an occurrence of a region R*q on L containing p.
 
-        # Step 3.
-        r_p = self.REGION_CLASS(self.event, None, None)
-        self._updated_regions = [r_p]
-        r_p.active = True
-        self.l_list = LList(r_p)
-        self._plot_step()
+        Also returns the Region of p.
+        """
+        r_q_node = self.l_list.search_region_node(p)
+        r_q = r_q_node.value
+        return r_q, r_q_node
 
-    def move_to_next_event(self):
-        """Move to next event in Queue."""
-        # Reset active boundaries and regions.
+    def _update_l_list(
+        self, r_p: Region, r_q: Region, bisector_p_q: Bisector,
+    ) -> Tuple[Boundary, Boundary, LNode, LNode]:
+        """Update list L so that it contains ...,R*q,C-pq,R*p,C+pq,R*q,... in the place of R*q."""
+        boundary_p_q_plus = self.BOUNDARY_CLASS(bisector_p_q, True)  # type: ignore
+        boundary_p_q_minus = self.BOUNDARY_CLASS(bisector_p_q, False)  # type: ignore
+        r_q_left = self.REGION_CLASS(r_q.site, r_q.left, boundary_p_q_minus)
+        r_q_right = self.REGION_CLASS(r_q.site, boundary_p_q_plus, r_q.right)
+        r_p.left = boundary_p_q_minus
+        r_p.right = boundary_p_q_plus
+
+        self._updated_boundaries = [boundary_p_q_minus, boundary_p_q_plus]
+        self._updated_regions = [r_q_left, r_p, r_q_right]
         for region in self._updated_regions:
-            region.active = False
+            region.active = True
         for boundary in self._updated_boundaries:
-            boundary.active = False
-        self._updated_regions = []
-        self._updated_boundaries = []
+            boundary.active = True
 
-        # Step 4.
-        if self.q_queue.is_empty():
+        # Update L list.
+        r_q_left_node, r_p_node, r_q_right_node = self.l_list.update_regions(
+            r_q_left, r_p, r_q_right
+        )
+        return (
+            boundary_p_q_plus,
+            boundary_p_q_minus,
+            r_q_left_node,
+            r_q_right_node,
+        )
+
+    def _add_boundaries_to_plot(self, boundaries: List[Boundary]):
+        """Add boundaries to plot."""
+        if self._plot_steps:
+            for boundary in boundaries:
+                self._add_boundary_to_plot(boundary)
+
+    def _add_boundary_to_plot(self, boundary: Boundary):
+        """Add boundary to plot."""
+        if self._plot_steps:
+            trace = get_plot_scatter_boundary(
+                boundary, self._xlim, self._ylim, self.BISECTOR_CLASS,
+            )
+            self._traces.append(trace)
+            self._figure_traces += 1
+            # TODO: Change to use complete_string()
+            self._boundary_plot_dict[str(boundary)] = self._figure_traces - 1
+
+    def _add_bisector_to_plot(self, bisector: Bisector, sign: Optional[bool]):
+        """Add boundary to plot."""
+        if self._plot_steps:
+            if sign is None:
+                vd_bisector = self.get_voronoi_diagram_bisectors([(bisector, True)])[0]
+            else:
+                vd_bisector = self.get_voronoi_diagram_bisectors([(bisector, sign)])[0]
+            traces = plot_voronoi_diagram_bisector(
+                vd_bisector, self._xlim, self._ylim, self.BISECTOR_CLASS
+            )
+            self._traces += traces
+            traces_numbers = list(
+                range(self._figure_traces, self._figure_traces + len(traces))
+            )
+            if sign is None:
+                self._bisector_plot_dict[
+                    (str(bisector.get_object_to_hash()), True)
+                ] = traces_numbers
+                self._bisector_plot_dict[
+                    (str(bisector.get_object_to_hash()), False)
+                ] = traces_numbers
+            else:
+                self._bisector_plot_dict[
+                    (str(bisector.get_object_to_hash()), sign)
+                ] = traces_numbers
+            self._figure_traces += len(traces)
+
+    def get_voronoi_diagram_bisectors(
+        self, bisectors: List[Tuple[Bisector, bool]]
+    ) -> List[VoronoiDiagramBisector]:
+        """Get voronoi diagram bisectors based on the current state."""
+        vd_bisectors = []
+        for bisector, sign in bisectors:
+            hasheable_of_bisector = bisector.get_object_to_hash()
+            vd_bisector = self._active_bisectors[(hasheable_of_bisector, sign)]
+            vd_bisectors.append(vd_bisector)
+        return vd_bisectors
+
+    def _delete_intersection_from_boundary(
+        self, boundary: Optional[Boundary], is_left_intersection: bool
+    ) -> None:
+        if boundary is None:
             return
 
-        # Step 5.
-        self.event = self.q_queue.dequeue()
-        self._plot_step()
-        self._begin_event = False
-        if not self.event.is_site:
-            self.event.region_node.value.is_to_be_deleted = True
-            self.event.region_node.value.left.is_to_be_deleted = True
-            self.event.region_node.value.right.is_to_be_deleted = True
+        if is_left_intersection and boundary.left_intersection is not None:
+            self.q_queue.delete(boundary.left_intersection)
+            boundary.left_intersection = None
+        elif not is_left_intersection and boundary.right_intersection is not None:
+            self.q_queue.delete(boundary.right_intersection)
+            boundary.right_intersection = None
 
-    def calculate_event(self):
-        """Calculate actual event."""
-        self._plot_step()
-        # Step 6 and 7.
-        if self.event.is_site:
-            self._handle_site(self.event)
-        # Step 13: p is an intersection.
+    def _insert_posible_intersections(
+        self,
+        left_left_boundary: Optional[Boundary],
+        left_right_boundary: Boundary,
+        left_region_node: LNode,
+        right_left_boundary: Boundary,
+        right_right_boundary: Optional[Boundary],
+        right_region_node: LNode,
+    ) -> None:
+        """Insert posible intersections in Q."""
+        # Left.
+        if left_left_boundary is not None:
+            self._insert_intersection(
+                left_left_boundary, left_right_boundary, left_region_node
+            )
+
+        # Right.
+        if right_right_boundary is not None:
+            self._insert_intersection(
+                right_left_boundary, right_right_boundary, right_region_node
+            )
+
+    def _insert_intersection(
+        self, boundary_1: Boundary, boundary_2: Boundary, region_node: LNode
+    ) -> None:
+        """Look for intersections between the the boundaries."""
+        # There could be a possibility that the two boundaries are from the same bisector.
+        if boundary_1.bisector == boundary_2.bisector:
+            return
+
+        intersection_point_tuples = boundary_1.get_intersections(boundary_2)
+        if intersection_point_tuples:
+            # Adding all intersections.
+            for vertex, event in intersection_point_tuples:
+                intersection = Intersection(event, vertex, region_node)
+                # Insert intersection to Q.
+                self.q_queue.enqueue(intersection)
+                # Save intersection in both boundaries.
+                boundary_1.right_intersection = intersection
+                boundary_2.left_intersection = intersection
+
+    def _get_regions_and_nodes_of_intersection(self, p: Intersection):
+        """Get regions and their nodes of the intersection p."""
+        intersection_region_node = p.region_node
+        # Left and right neighbor cannot be None because p is an intersection.
+        r_q_node = intersection_region_node.left_neighbor
+        r_q = r_q_node.value  # type: ignore
+        r_s_node = intersection_region_node.right_neighbor
+        r_s = r_s_node.value  # type: ignore
+        return r_q, r_s, r_q_node, r_s_node
+
+    def _update_boundaries_bisectors_figure_traces(
+        self, boundaries: List[Optional[Boundary]]
+    ):
+        """Update boundaries bisectors' figure traces."""
+        for boundary in boundaries:
+            if boundary is None:
+                continue
+            self._update_bisector_figure_traces(boundary.bisector, boundary.sign)
+
+    def _update_bisector_figure_traces(self, bisector: Bisector, sign: bool):
+        """Update bisector's figure traces."""
+        bisector_traces = self._bisector_plot_dict[
+            (str(bisector.get_object_to_hash()), sign)
+        ]
+        bisector_other_sign_traces = self._bisector_plot_dict.get(
+            (str(bisector.get_object_to_hash()), not sign), []
+        )
+        if bisector_traces == bisector_other_sign_traces:
+            sign = None
+        for bisector_trace_i in bisector_traces:
+            self._traces[bisector_trace_i] = None
+        self._add_bisector_to_plot(bisector, sign)
+
+    def _add_vertex_trace(self, vertex: VoronoiDiagramVertex):
+        """Add vertex to vd trace."""
+        trace = plot_vertex(vertex)
+        self._traces.append(trace)
+        self._figure_traces += 1
+
+    def _remove_boundaries_from_figure_traces(
+        self, boundary1: Optional[Boundary], boundary2: Optional[Boundary]
+    ):
+        """Remove boundary from figure traces."""
+        if boundary1 is None and boundary2 is None:
+            return
+        if boundary1 is None:
+            self._remove_boundary_from_figure_traces(boundary2)
+        elif boundary2 is None:
+            self._remove_boundary_from_figure_traces(boundary1)
         else:
-            self._handle_intersection(self.event)
-        self._plot_step()
-        self._begin_event = True
-
-    def calculate_next_event(self):
-        """Calculate next event in the Queue."""
-        self.move_to_next_event()
-        self.calculate_event()
-
-    def next_step(self):
-        """Calculate next step."""
-        if self._begin_event:
-            self.move_to_next_event()
-        else:
-            self.calculate_event()
-
-    def is_next_step(self):
-        """Get if there is a next step to calculate."""
-        return not self.q_queue.is_empty() or not self._begin_event
-
-    def _calculate_diagram(self):
-        """Calculate point diagram."""
-        # Step 4.
-        while not self.q_queue.is_empty():
-            # Step 5.
-            self.event = self.q_queue.dequeue()
-            self._plot_step()
-            # Step 6 and 7.
-            if self.event.is_site:
-                self._handle_site(self.event)
-            # Step 13: p is an intersection.
+            position1 = self._boundary_plot_dict[str(boundary1)]
+            position2 = self._boundary_plot_dict[str(boundary2)]
+            if position1 > position2:
+                self._remove_boundary_from_figure_traces(boundary1)
+                self._remove_boundary_from_figure_traces(boundary2)
             else:
-                self._handle_intersection(self.event)
-            self._plot_step()
+                self._remove_boundary_from_figure_traces(boundary2)
+                self._remove_boundary_from_figure_traces(boundary1)
 
-    def _plot_step(self):
-        """Plot step."""
-        if self._plot_steps:
-            # keep the sites and clean all other traces.
-            self._figure.data = []
-            for trace in self._traces:
-                if trace is not None:
-                    self._figure.add_trace(trace)
-            plot_sweep_line(self._figure, self._xlim, self._ylim, self.event)
-            plot_events_traces(self._figure, self.q_queue)
-            # self._figure.show()
+    def _remove_boundary_from_figure_traces(self, boundary: Optional[Boundary]):
+        """Remove boundary from figure traces."""
+        if boundary is None:
+            return
+        self._traces[self._boundary_plot_dict[str(boundary)]] = None
+
+    def add_begin_vertical_bisector(
+        self, bisector: Bisector, y: Optional[Decimal], sign: bool = True
+    ):
+        """Add vertical bisector range."""
+        voronoi_diagram_bisector = self.get_voronoi_diagram_bisectors(
+            [(bisector, sign)]
+        )[0]
+        voronoi_diagram_bisector.add_begin_range_vertical(y)
+
+    def add_begin_bisector(self, boundary: Boundary, event: Event) -> None:
+        """Get range of the bisector based on the boundary and the intersection."""
+        voronoi_diagram_bisector = self.get_voronoi_diagram_bisectors(
+            [(boundary.bisector, boundary.sign)]
+        )[0]
+        side = boundary.get_side_where_point_belongs(event.point)
+        voronoi_diagram_bisector.add_begin_range(event.point.x, boundary.sign, side)
+
+    def add_end_vertical_bisector(
+        self, bisector: Bisector, y: Decimal, sign: bool = True
+    ):
+        """Add end of vertical bisector range."""
+        voronoi_diagram_bisector = self.get_voronoi_diagram_bisectors(
+            [(bisector, sign)]
+        )[0]
+        voronoi_diagram_bisector.add_end_range_vertical(y)
+
+    def add_end_bisector(self, boundary: Boundary, intersection: Intersection) -> None:
+        """Get range of the bisector based on the boundary and the intersection."""
+        voronoi_diagram_bisector = self.get_voronoi_diagram_bisectors(
+            [(boundary.bisector, boundary.sign)]
+        )[0]
+        side = boundary.get_side_where_point_belongs(intersection.point)
+        voronoi_diagram_bisector.add_end_range(
+            intersection.point.x, boundary.sign, side
+        )
 
 
 class FortunesAlgorithm:
