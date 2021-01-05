@@ -1,30 +1,24 @@
 """Voronoi Diagram representation in plot"""
 
 # Standard Library.
-from typing import Any, Tuple, List, Type, Union
+from typing import Tuple, List, Type, Union
 from decimal import Decimal
 
 # Voronoi diagrams.
-from voronoi_diagrams.fortunes_algorithm import VoronoiDiagram
+from voronoi_diagrams.fortunes_algorithm import FortunesAlgorithm
 from voronoi_diagrams.models import (
     Site,
     WeightedSite,
-    Bisector,
     PointBisector,
     WeightedPointBisector,
-    VoronoiDiagramBisector,
-    VoronoiDiagramVertex,
     Point,
 )
 
 # Plot.
 # from matplotlib import pyplot as plt
 from plotly import graph_objects as go
-import plotly.offline as py
-import numpy as np
-from plots.plot_utils.models.bisectors import plot_bisector, plot_vertices_and_bisectors
+from plots.plot_utils.models.bisectors import plot_vertices_and_bisectors
 from plots.plot_utils.models.events import plot_site, is_equal_limit_site
-from plots.plot_utils.models.vertices import plot_vertex
 
 
 SiteToUse = Union[Point, Tuple[Point, Decimal]]
@@ -32,7 +26,7 @@ Limit = Tuple[Decimal, Decimal]
 
 
 def get_vd_figure(
-    voronoi_diagram: VoronoiDiagram,
+    voronoi_diagram: FortunesAlgorithm,
     limit_sites: List[SiteToUse],
     xlim: Limit,
     ylim: Limit,
@@ -50,12 +44,9 @@ def get_vd_figure(
     figure.update_layout(title="VD", template=template)
     figure.update_xaxes(range=list(xlim))
     figure.update_yaxes(range=list(ylim), scaleanchor="x", scaleratio=1)
-    # plt.figure(figsize=(12, 10))
-    # plt.gca().set_aspect("equal", adjustable="box")
 
-    if site_class == Site:
-        bisector_class = PointBisector
-    elif site_class == WeightedSite:
+    bisector_class = PointBisector
+    if site_class == WeightedSite:
         bisector_class = WeightedPointBisector
 
     # Sites.
@@ -77,9 +68,6 @@ def get_vd_figure(
     for trace in traces:
         figure.add_trace(trace)
 
-    # plt.xlim(*xlim)
-    # plt.ylim(*ylim)
-    # plt.show()
     return figure
 
 
@@ -93,7 +81,7 @@ def get_html(figure: go.Figure):
 
 
 def get_vd_html(
-    voronoi_diagram: VoronoiDiagram,
+    voronoi_diagram: FortunesAlgorithm,
     limit_sites: List[SiteToUse],
     xlim: Limit,
     ylim: Limit,
@@ -107,7 +95,7 @@ def get_vd_html(
 
 
 def plot_voronoi_diagram(
-    voronoi_diagram: VoronoiDiagram,
+    voronoi_diagram: FortunesAlgorithm,
     limit_sites: List[SiteToUse],
     xlim: Limit,
     ylim: Limit,

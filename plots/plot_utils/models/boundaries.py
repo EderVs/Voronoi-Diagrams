@@ -1,6 +1,6 @@
 """Boundaries representations in plots."""
 # Standard Library.
-from typing import Iterable, Tuple, Optional, Any, Type
+from typing import Tuple, Type
 
 # Models.
 from voronoi_diagrams.models import (
@@ -8,7 +8,6 @@ from voronoi_diagrams.models import (
     Bisector,
     PointBisector,
     WeightedPointBisector,
-    WeightedPointBoundary,
 )
 
 # Plot.

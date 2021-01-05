@@ -71,47 +71,6 @@ class ConicSection:
                 to_return.append(Decimal(x.real))
         return to_return
 
-    def __get_ys_of_intersections(
-        self, x: Decimal, conic_section
-    ) -> List[Tuple[Decimal, Decimal]]:
-        """Get ys of intersections."""
-        ys = self.y_formula(x)
-        other_ys = conic_section.y_formula(x)
-        intersections: List[Tuple[Decimal, Decimal]] = []
-        if len(ys) == 0 or len(other_ys) == 0:
-            return []
-
-        epsilon = Decimal("0.0001")
-        for y in ys:
-            for other_y in other_ys:
-                if are_close(y, other_y, epsilon):
-                    intersections.append((x, y))
-        return intersections
-
-    def __get_intersections(
-        self, ps: List[Decimal], conic_section: Any,
-    ) -> List[Tuple[Decimal, Decimal]]:
-        """Get intersections using polinomial roots."""
-        intersections: List[Tuple[Decimal, Decimal]] = []
-        for x in roots(ps):
-            if are_close(Decimal(x.imag), Decimal("0"), Decimal("0.001")):
-                intersections += self.__get_ys_of_intersections(
-                    Decimal(x.real), conic_section
-                )
-        return intersections
-
-    def __get_intersections_of_vertical(
-        self, ps: List[Decimal], conic_section: Any
-    ) -> List[Tuple[Decimal, Decimal]]:
-        """Get intersections of a vertical line."""
-        intersections = []
-        for x in roots(ps):
-            if are_close(Decimal(x.imag), Decimal("0"), Decimal("0.001")):
-                other_ys = conic_section.y_formula(Decimal(x))
-                for other_y in other_ys:
-                    intersections.append((Decimal(x), Decimal(other_y)))
-        return intersections
-
     def get_intersections(self, conic_section: Any) -> List[Tuple[Decimal, Decimal]]:
         """Get the intersections of 2 conic sections.
 
@@ -143,7 +102,7 @@ class ConicSection:
                 cs_d = conic_section.d
                 cs_f = conic_section.f
                 conic_section = self
-            intersections = self.__get_intersections_of_vertical(
+            intersections = self._get_intersections_of_vertical(
                 [cs_a, cs_d, cs_f], conic_section
             )
         elif cs_c == 0 and cs_i == 0:
@@ -159,7 +118,7 @@ class ConicSection:
             c2 = a2 - b2
             c3 = a3 - b3
             c4 = a4 - b4
-            intersections = self.__get_intersections([c1, c2, c3, c4], conic_section)
+            intersections = self._get_intersections([c1, c2, c3, c4], conic_section)
         elif cs_c == 0 or cs_i == 0:
             if cs_i == 0:
                 # Changing variables.
@@ -209,9 +168,7 @@ class ConicSection:
             k3 = (f ** 2) + (2 * e * g) - j3
             k4 = (2 * f * g) - j4
             k5 = (g ** 2) - j5
-            intersections = self.__get_intersections(
-                [k1, k2, k3, k4, k5], conic_section
-            )
+            intersections = self._get_intersections([k1, k2, k3, k4, k5], conic_section)
         else:
             a = cs_i / cs_c
             b = cs_h - a * cs_b
@@ -271,9 +228,48 @@ class ConicSection:
             p4 = n4 - o4
             p5 = n5 - o5
 
-            intersections = self.__get_intersections(
-                [p1, p2, p3, p4, p5], conic_section
-            )
+            intersections = self._get_intersections([p1, p2, p3, p4, p5], conic_section)
+        return intersections
+
+    def _get_intersections_of_vertical(
+        self, ps: List[Decimal], conic_section: Any
+    ) -> List[Tuple[Decimal, Decimal]]:
+        """Get intersections of a vertical line."""
+        intersections = []
+        for x in roots(ps):
+            if are_close(Decimal(x.imag), Decimal("0"), Decimal("0.001")):
+                other_ys = conic_section.y_formula(Decimal(x))
+                for other_y in other_ys:
+                    intersections.append((Decimal(x), Decimal(other_y)))
+        return intersections
+
+    def _get_intersections(
+        self, ps: List[Decimal], conic_section: Any,
+    ) -> List[Tuple[Decimal, Decimal]]:
+        """Get intersections using polinomial roots."""
+        intersections: List[Tuple[Decimal, Decimal]] = []
+        for x in roots(ps):
+            if are_close(Decimal(x.imag), Decimal("0"), Decimal("0.001")):
+                intersections += self._get_ys_of_intersections(
+                    Decimal(x.real), conic_section
+                )
+        return intersections
+
+    def _get_ys_of_intersections(
+        self, x: Decimal, conic_section
+    ) -> List[Tuple[Decimal, Decimal]]:
+        """Get ys of intersections."""
+        ys = self.y_formula(x)
+        other_ys = conic_section.y_formula(x)
+        intersections: List[Tuple[Decimal, Decimal]] = []
+        if len(ys) == 0 or len(other_ys) == 0:
+            return []
+
+        epsilon = Decimal("0.0001")
+        for y in ys:
+            for other_y in other_ys:
+                if are_close(y, other_y, epsilon):
+                    intersections.append((x, y))
         return intersections
 
     def get_vertical_tangents(self) -> List[Decimal]:

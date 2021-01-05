@@ -253,7 +253,6 @@ if __name__ == "__main__":
     if sites is None:
         print("Bye bye")
     else:
-        # limit_sites = get_limit_sites(xlim, ylim, sites, type_vd)
         limit_sites = []
         get_diagram_and_plot(
             sites,

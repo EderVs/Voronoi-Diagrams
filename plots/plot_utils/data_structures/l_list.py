@@ -1,6 +1,6 @@
 """L List plots."""
 
-from typing import Iterable, Tuple, Optional, Any, Type
+from typing import Tuple, Type
 
 # Data structures
 from voronoi_diagrams.data_structures import LList
@@ -12,7 +12,6 @@ from plots.plot_utils.models.boundaries import plot_boundary
 # Plot.
 # from matplotlib import pyplot as plt
 from plotly import graph_objects as go
-import numpy as np
 
 # Math
 from decimal import Decimal

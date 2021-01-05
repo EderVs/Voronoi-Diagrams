@@ -7,7 +7,7 @@ from typing import List, Any
 from voronoi_diagrams.models import Site, PointBisector, Point
 
 # Algorithm
-from voronoi_diagrams.fortunes_algorithm import FortunesAlgorithm, VoronoiDiagram
+from voronoi_diagrams.fortunes_algorithm import FortunesAlgorithm
 
 # Math
 from decimal import Decimal
@@ -18,7 +18,7 @@ class TestPointSites:
 
     def _check_bisectors_and_vertex(
         self,
-        voronoi_diagram: VoronoiDiagram,
+        voronoi_diagram: FortunesAlgorithm,
         expected_bisectors: List[PointBisector],
         expected_vertices: List[Point],
     ):

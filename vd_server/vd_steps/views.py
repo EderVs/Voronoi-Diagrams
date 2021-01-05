@@ -12,12 +12,6 @@ from django import http
 
 # VD
 from . import db
-from .utils import get_event_dict
-from voronoi_diagrams.fortunes_algorithm import (
-    VoronoiDiagram,
-    FortunesAlgorithm,
-    DYNAMIC_MODE,
-)
 from voronoi_diagrams.models import Point
 
 

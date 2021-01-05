@@ -1,6 +1,6 @@
 """Regions representations in plots."""
 # Standard Library.
-from typing import Iterable, Tuple, Optional, Any, Type
+from typing import Tuple, Type
 
 # Models.
 from voronoi_diagrams.models import (
@@ -11,7 +11,6 @@ from voronoi_diagrams.models import (
 from plots.plot_utils.models.boundaries import plot_boundary
 
 # Plot.
-# from matplotlib import pyplot as plt
 from plotly import graph_objects as go
 import numpy as np
 

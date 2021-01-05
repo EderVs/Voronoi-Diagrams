@@ -3,9 +3,6 @@
 # Models.
 from voronoi_diagrams.models import VoronoiDiagramVertex
 
-# Plot.
-from plotly import graph_objects as go
-
 # Plot Models.
 from .points import plot_point
 

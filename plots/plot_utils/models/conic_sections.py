@@ -4,7 +4,6 @@
 from typing import List, Any, Tuple, Iterable
 
 # Plot
-# from matplotlib import pyplot as plt
 
 # Conic sections
 from conic_sections.utils.circle import get_circle_formula_y
@@ -34,5 +33,3 @@ def get_circle_ranges(
         np.concatenate((x_range, x_range[::-1])),
         np.concatenate((y_lists[0], y_lists[1][::-1])),
     )
-    # plt.plot(x_range, y_lists[0], f"{color}-")
-    # plt.plot(x_range, y_lists[1], f"{color}-")

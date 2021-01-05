@@ -4,11 +4,7 @@
 from typing import List, Optional, Dict, Any
 
 # Plot
-# from matplotlib import pyplot as plt
 from plotly import graph_objects as go
-
-# Conic sections
-from conic_sections.utils.circle import get_circle_formula_y
 
 # Math
 from decimal import Decimal

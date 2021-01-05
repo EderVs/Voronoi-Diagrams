@@ -3,7 +3,7 @@
 General Solution.
 """
 # Standard Library
-from typing import Iterable, List, Any, Optional, Tuple, Set, Dict, Type
+from typing import Iterable, List, Any, Optional, Tuple, Dict, Type
 
 # Data structures
 from .data_structures import LList, QQueue
@@ -56,8 +56,8 @@ STATIC_MODE = 0
 DYNAMIC_MODE = 1
 
 
-class VoronoiDiagram:
-    """Voronoi Diagram representation."""
+class FortunesAlgorithm:
+    """Fortune's Algorithm implementation."""
 
     vertices: List[VoronoiDiagramVertex]
     vertices_list: List[Point]
@@ -78,6 +78,61 @@ class VoronoiDiagram:
     _begin_event: bool
     _updated_regions: List[Region]
     _updated_boundaries: List[Boundary]
+
+    @staticmethod
+    def calculate_voronoi_diagram(
+        points: List[Point],
+        plot_steps: bool = False,
+        xlim: Limit = (-100, 100),
+        ylim: Limit = (-100, 100),
+        mode: int = STATIC_MODE,
+        names: Optional[List[str]] = None,
+    ) -> "FortunesAlgorithm":
+        """Calculate Voronoi Diagram."""
+        if names is None or len(points) != len(names):
+            names = [str(i + 1) for i in range(len(points))]
+        sites = [
+            Site(points[i].x, points[i].y, name=names[i]) for i in range(len(points))
+        ]
+        voronoi_diagram = FortunesAlgorithm(
+            sites,
+            site_class=Site,
+            plot_steps=plot_steps,
+            xlim=xlim,
+            ylim=ylim,
+            mode=mode,
+        )
+
+        return voronoi_diagram
+
+    @staticmethod
+    def calculate_aw_voronoi_diagram(
+        points_and_weights: List[Tuple[Point, Decimal]],
+        plot_steps: bool = False,
+        xlim: Limit = (-100, 100),
+        ylim: Limit = (-100, 100),
+        mode: int = STATIC_MODE,
+        names: Optional[List[str]] = None,
+    ) -> "FortunesAlgorithm":
+        """Calculate AW Voronoi Diagram."""
+        sites = []
+        if names is None or len(points_and_weights) != len(names):
+            names = [str(i + 1) for i in range(len(points_and_weights))]
+        for i in range(len(points_and_weights)):
+            point, weight = points_and_weights[i]
+            site = WeightedSite(point.x, point.y, weight, name=names[i])
+            sites.append(site)
+
+        voronoi_diagram = FortunesAlgorithm(
+            sites,
+            site_class=WeightedSite,
+            plot_steps=plot_steps,
+            xlim=xlim,
+            ylim=ylim,
+            mode=mode,
+        )
+
+        return voronoi_diagram
 
     def __init__(
         self,
@@ -715,62 +770,3 @@ class VoronoiDiagram:
         voronoi_diagram_bisector.add_end_range(
             intersection.point.x, boundary.sign, side
         )
-
-
-class FortunesAlgorithm:
-    """Fortune's Algorithm implementation."""
-
-    @staticmethod
-    def calculate_voronoi_diagram(
-        points: List[Point],
-        plot_steps: bool = False,
-        xlim: Limit = (-100, 100),
-        ylim: Limit = (-100, 100),
-        mode: int = STATIC_MODE,
-        names: Optional[List[str]] = None,
-    ) -> VoronoiDiagram:
-        """Calculate Voronoi Diagram."""
-        if names is None or len(points) != len(names):
-            names = [str(i + 1) for i in range(len(points))]
-        sites = [
-            Site(points[i].x, points[i].y, name=names[i]) for i in range(len(points))
-        ]
-        voronoi_diagram = VoronoiDiagram(
-            sites,
-            site_class=Site,
-            plot_steps=plot_steps,
-            xlim=xlim,
-            ylim=ylim,
-            mode=mode,
-        )
-
-        return voronoi_diagram
-
-    @staticmethod
-    def calculate_aw_voronoi_diagram(
-        points_and_weights: List[Tuple[Point, Decimal]],
-        plot_steps: bool = False,
-        xlim: Limit = (-100, 100),
-        ylim: Limit = (-100, 100),
-        mode: int = STATIC_MODE,
-        names: Optional[List[str]] = None,
-    ) -> VoronoiDiagram:
-        """Calculate AW Voronoi Diagram."""
-        sites = []
-        if names is None or len(points_and_weights) != len(names):
-            names = [str(i + 1) for i in range(len(points_and_weights))]
-        for i in range(len(points_and_weights)):
-            point, weight = points_and_weights[i]
-            site = WeightedSite(point.x, point.y, weight, name=names[i])
-            sites.append(site)
-
-        voronoi_diagram = VoronoiDiagram(
-            sites,
-            site_class=WeightedSite,
-            plot_steps=plot_steps,
-            xlim=xlim,
-            ylim=ylim,
-            mode=mode,
-        )
-
-        return voronoi_diagram

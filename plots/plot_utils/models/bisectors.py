@@ -16,9 +16,7 @@ from .vertices import plot_vertex
 from .points import plot_point
 
 # Plot.
-# from matplotlib import pyplot as plt
 from plotly import graph_objects as go
-import numpy as np
 
 # Math
 from decimal import Decimal
@@ -86,14 +84,14 @@ def plot_bisector(
     traces = []
     if x_range is None and y_range is None:
         # error
-        return
+        return []
 
     if bisector_class == PointBisector:
         num_lists = 1
     elif bisector_class == WeightedPointBisector:
         num_lists = 2
     else:
-        return
+        return []
 
     if y_range is None:
         y_lists = [[] for _ in range(num_lists)]
@@ -124,7 +122,6 @@ def plot_bisector(
                     hoverinfo="name",
                 )
             )
-            # plt.plot(x_range, y_lists[i], "k")
     elif x_range is None:
         x_lists = [[] for _ in range(num_lists)]
         for y in y_range:
@@ -154,7 +151,6 @@ def plot_bisector(
                     hoverinfo="name",
                 )
             )
-            # plt.plot(x_lists[i], y_range, "k")
     else:
         traces.append(
             go.Scatter(
@@ -186,7 +182,7 @@ def is_a_limit_bisector(
     vd_bisector: VoronoiDiagramBisector,
     limit_sites: List[SiteToUse],
     bisector_class: Type[Bisector],
-) -> None:
+) -> bool:
     """Check if current bisector is a bisector with a limit site."""
     for site in vd_bisector.bisector.get_sites_tuple():
         for limit_site in limit_sites:

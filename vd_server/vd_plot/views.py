@@ -8,13 +8,13 @@ from django.views import View
 
 from django import http
 
-from voronoi_diagrams.fortunes_algorithm import FortunesAlgorithm, VoronoiDiagram
+from voronoi_diagrams.fortunes_algorithm import FortunesAlgorithm
 from voronoi_diagrams.models import Point
 from plots.plot_utils.voronoi_diagram import get_vd_html
 
 from decimal import Decimal
 
-voronoi_diagrams: Dict[int, VoronoiDiagram] = {}
+voronoi_diagrams: Dict[int, FortunesAlgorithm] = {}
 
 
 class MainView(View):

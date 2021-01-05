@@ -1,14 +1,13 @@
 """ Voronoi Diagrams mini DB. """
 
 # Standard Library
-from typing import Optional, Dict, List, Any
+from typing import Optional, Dict, List, Any, Tuple
 from datetime import datetime
 import threading
 
 # Voronoi Diagrams
 from plots.plot_utils.voronoi_diagram import get_vd_html, get_html
 from voronoi_diagrams.fortunes_algorithm import (
-    VoronoiDiagram,
     FortunesAlgorithm,
     DYNAMIC_MODE,
 )
@@ -53,14 +52,14 @@ class VDEntry:
 
     session: Session
     created_at: datetime
-    vd: VoronoiDiagram
+    vd: FortunesAlgorithm
     steps: List[Step]
     step_infos: List[VDStepInfo]
     finished: bool
     is_diagram: bool
     current_step: int
 
-    def __init__(self, vd: VoronoiDiagram):
+    def __init__(self, vd: FortunesAlgorithm):
         """Create entry."""
         self.vd = vd
         self.created_at = datetime.now()
@@ -107,7 +106,7 @@ class VDEntry:
 db: Dict[Session, VDEntry] = {}
 
 
-def get_vd(session: Session) -> Optional[VoronoiDiagram]:
+def get_vd(session: Session) -> Optional[FortunesAlgorithm]:
     """Get VD with a given session."""
     entry = db.get(session, None)
     if entry is None:
@@ -147,7 +146,7 @@ def add_step(session: Session) -> bool:
     return True
 
 
-def get_last_step(session: Session) -> (Step, bool):
+def get_last_step(session: Session) -> Tuple[Step, bool]:
     """Get last step."""
     entry = db.get(session, None)
     if entry is None or entry.steps == []:
@@ -155,7 +154,7 @@ def get_last_step(session: Session) -> (Step, bool):
     return (entry.steps[-1], True)
 
 
-def get_next_step(session: Session) -> (Step, bool):
+def get_next_step(session: Session) -> Tuple[Step, bool]:
     """Get next step."""
     entry = db.get(session, None)
     if entry is None:
@@ -169,7 +168,7 @@ def get_next_step(session: Session) -> (Step, bool):
     return (entry.steps[entry.current_step], True)
 
 
-def get_prev_step(session: Session) -> (Step, bool):
+def get_prev_step(session: Session) -> Tuple[Step, bool]:
     """Get prev step."""
     entry = db.get(session, None)
     if entry is None:
@@ -181,7 +180,7 @@ def get_prev_step(session: Session) -> (Step, bool):
     return (entry.steps[entry.current_step], True)
 
 
-def get_current_step(session: Session) -> (Step, bool):
+def get_current_step(session: Session) -> Tuple[Step, bool]:
     """Get current step."""
     entry = db.get(session, None)
     if entry is None:
@@ -190,7 +189,7 @@ def get_current_step(session: Session) -> (Step, bool):
     return (entry.steps[entry.current_step], True)
 
 
-def get_current_step_info(session: Session) -> (Dict[str, Any], bool):
+def get_current_step_info(session: Session) -> Tuple[Dict[str, Any], bool]:
     """Get current step info."""
     entry = db.get(session, None)
     if entry is None:
