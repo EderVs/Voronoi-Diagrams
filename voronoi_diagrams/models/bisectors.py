@@ -2,10 +2,10 @@
 
 # Standard Library
 from typing import Tuple, Optional, Any, List
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 
 # Models
-from .events import Site, WeightedSite
+from .events import Site, WeightedSite, Coordinates
 from .points import Point
 
 # Conic Sections
@@ -18,17 +18,12 @@ from decimal import Decimal
 from general_utils.numbers import are_close
 
 
-class Bisector:
-    """Bisector representation.
-
-    It has its formula(function) associated.
-    """
-
-    __metaclass__ = ABCMeta
+class Bisector(ABC):
+    """Bisector representation."""
 
     sites: Tuple[Site, Site]
 
-    def __init__(self, sites: Tuple[Site, Site]):
+    def __init__(self, sites: Tuple[Site, Site]) -> None:
         """Construct bisector."""
         if sites[0].point.y < sites[1].point.y or (
             sites[0].point.y == sites[1].point.y
@@ -37,7 +32,7 @@ class Bisector:
             sites = (sites[1], sites[0])
         self.sites = sites
 
-    def __eq__(self, bisector: Any) -> bool:
+    def __eq__(self, bisector: "Bisector") -> bool:
         """Equality between bisectors."""
         return self.sites == bisector.sites
 
@@ -51,29 +46,29 @@ class Bisector:
         """Get y coordinate given a x coordinate."""
         raise NotImplementedError
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get bisector string representation."""
         return f"B({self.sites[0]}, {self.sites[1]})"
 
-    def small_str(self):
+    def small_str(self) -> str:
         """Get bisector small string representation."""
         return f"B{self.get_sites_names()}"
 
-    def get_sites_names(self):
+    def get_sites_names(self) -> str:
         """Get bisector small string representation."""
         return f"({self.sites[0].name}, {self.sites[1].name})"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Get Bisector representation."""
         return self.__str__()
 
     @abstractmethod
-    def get_intersections(self, bisector: Any) -> List[Point]:
+    def get_intersections(self, bisector: "Bisector") -> List[Point]:
         """Get the points of intersection between two bisectors."""
         raise NotImplementedError
 
     @abstractmethod
-    def is_same_slope(self, bisector: Any) -> bool:
+    def are_same_slope(self, bisector: "Bisector") -> bool:
         """Compare if the given bisector slope is the same as the slope of this bisector."""
         raise NotImplementedError
 
@@ -92,7 +87,7 @@ class Bisector:
         point_y = min(point1.y, point2.y) + (abs(point1.y - point2.y) / 2)
         return Point(point_x, point_y)
 
-    def get_site(self):
+    def get_site(self) -> Site:
         """Get the site that is highest or more to the left."""
         return self.get_sites_tuple()[0]
 
@@ -101,7 +96,7 @@ class Bisector:
         """Get sites tuple sorted."""
         raise NotImplementedError
 
-    def get_object_to_hash(self) -> Any:
+    def get_object_to_hash(self) -> Tuple[Coordinates, Coordinates]:
         """Get object to hash this site."""
         sites_tuple = self.get_sites_tuple()
         return (
@@ -183,7 +178,7 @@ class PointBisector(Bisector):
         p, q = self.sites
         return q.point.x == p.point.x
 
-    def get_intersections(self, bisector: Bisector) -> List[Point]:
+    def get_intersections(self, bisector: "PointBisector") -> List[Point]:
         """Get the point of intersection between two bisectors."""
         # No blank spaces after docstring.
         def f_aux_1(xi: Decimal, xj: Decimal, yi: Decimal, yj: Decimal) -> Decimal:
@@ -208,6 +203,16 @@ class PointBisector(Bisector):
                 f_aux_2(xk, xl, yk, yl) - f_aux_2(xi, xj, yi, yj)
             )
 
+        if self.is_vertical() and bisector.is_vertical():
+            return []
+        elif self.is_vertical() or bisector.is_vertical():
+            return self._get_intersections_when_one_is_vertical(bisector)
+
+        if self.is_horizontal() and bisector.is_horizontal():
+            return []
+        elif self.is_horizontal() or bisector.is_horizontal():
+            return self._get_intersections_when_one_is_horizontal(bisector)
+
         x1 = self.sites[0].point.x
         x2 = self.sites[1].point.x
         y1 = self.sites[0].point.y
@@ -218,41 +223,41 @@ class PointBisector(Bisector):
         y3 = bisector.sites[0].point.y
         y4 = bisector.sites[1].point.y
 
-        if self.is_vertical() and bisector.is_vertical():
-            return []
-        elif self.is_vertical() or bisector.is_vertical():
-            vertical = self
-            other = bisector
-            if bisector.is_vertical():
-                vertical = bisector
-                other = self
-            x = vertical.get_middle_between_sites().x
-            ys = other.formula_y(x)
-            if len(ys) == 0:
-                return []
-            return [Point(x, ys[0])]
-
-        if self.is_horizontal() and bisector.is_horizontal():
-            return []
-        elif self.is_horizontal() or bisector.is_horizontal():
-            horizontal = self
-            other = bisector
-            if bisector.is_horizontal():
-                horizontal = bisector
-                other = self
-            y = horizontal.get_middle_between_sites().y
-            xs = other.formula_x(y)
-            if len(xs) == 0:
-                return []
-            return [Point(xs[0], y)]
-
-        if self.is_same_slope(bisector):
+        if self.are_same_slope(bisector):
             return []
 
         x = get_x(x1, x2, x3, x4, y1, y2, y3, y4)
         return [Point(x, self.formula_y(x)[0])]
 
-    def is_same_slope(self, bisector: Any) -> bool:
+    def _get_intersections_when_one_is_vertical(
+        self, bisector: "PointBisector"
+    ) -> List[Point]:
+        vertical = self
+        other = bisector
+        if bisector.is_vertical():
+            vertical = bisector
+            other = self
+        x = vertical.get_middle_between_sites().x
+        ys = other.formula_y(x)
+        if len(ys) == 0:
+            return []
+        return [Point(x, ys[0])]
+
+    def _get_intersections_when_one_is_horizontal(
+        self, bisector: "PointBisector"
+    ) -> List[Point]:
+        horizontal = self
+        other = bisector
+        if bisector.is_horizontal():
+            horizontal = bisector
+            other = self
+        y = horizontal.get_middle_between_sites().y
+        xs = other.formula_x(y)
+        if len(xs) == 0:
+            return []
+        return [Point(xs[0], y)]
+
+    def are_same_slope(self, bisector: "PointBisector") -> bool:
         """Compare if the given bisector slope is the same as the slope of this bisector."""
         p_1 = self.sites[0].point
         p_2 = self.sites[1].point
@@ -293,7 +298,7 @@ class WeightedPointBisector(Bisector):
     point_bisector: Optional[PointBisector]
 
     def __init__(self, sites: Tuple[WeightedSite, WeightedSite]):
-        """Construct bisector of weighted sites Bisector.
+        """Construct bisector of weighted sites.
 
         In this case the Sites are WeightedSites.
         """
@@ -313,8 +318,7 @@ class WeightedPointBisector(Bisector):
 
     def is_vertical(self) -> bool:
         """Get if the bisector is vertical."""
-        p_site = self.sites[0]
-        q_site = self.sites[1]
+        p_site, q_site = self.sites
         return q_site.point.y == p_site.point.y and q_site.weight == p_site.weight
 
     def _set_polynomial_parameters(self) -> None:
@@ -380,7 +384,7 @@ class WeightedPointBisector(Bisector):
 
         return return_values
 
-    def get_intersections(self, bisector: Any) -> List[Point]:
+    def get_intersections(self, bisector: "WeightedPointBisector") -> List[Point]:
         """Get the point of intersection between two Weighted Point Bisectors."""
         all_intersections = self.conic_section.get_intersections(bisector.conic_section)
         valid_intersections = []
@@ -396,7 +400,7 @@ class WeightedPointBisector(Bisector):
                     valid_intersections.append(Point(x, y))
         return valid_intersections
 
-    def is_same_slope(self, bisector: Any) -> bool:
+    def are_same_slope(self, bisector: "WeightedPointBisector") -> bool:
         """Compare if the given bisector slope is the same as the slope of this bisector."""
         return False
 

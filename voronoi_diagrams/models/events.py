@@ -17,6 +17,9 @@ from decimal import Decimal
 # Conic Sections
 from conic_sections.utils.circle import get_circle_formula_x, get_circle_formula_y
 
+# Types
+Coordinates = Tuple[Decimal, Decimal]
+
 
 class Event:
     """Event Representation. It can be either a Site or an Interception."""
@@ -160,7 +163,7 @@ class Site(Event):
         """Check if this site is dominated by other site."""
         return False
 
-    def get_object_to_hash(self) -> Any:
+    def get_object_to_hash(self) -> Coordinates:
         """Get object to hash this site."""
         return (self.point.x, self.point.y)
 
