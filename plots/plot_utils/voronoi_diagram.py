@@ -17,7 +17,7 @@ from voronoi_diagrams.models import (
 # Plot.
 # from matplotlib import pyplot as plt
 from plotly import graph_objects as go
-from plots.plot_utils.models.bisectors import plot_vertices_and_bisectors
+from plots.plot_utils.models.bisectors import plot_vertices_and_edges
 from plots.plot_utils.models.events import plot_site, is_equal_limit_site
 
 
@@ -58,12 +58,8 @@ def get_vd_figure(
             plot_site(figure, site, site_class)
 
     # Diagram.
-    traces = plot_vertices_and_bisectors(
-        voronoi_diagram.bisectors,
-        limit_sites,
-        xlim,
-        ylim,
-        bisector_class=bisector_class,
+    traces = plot_vertices_and_edges(
+        voronoi_diagram.edges, limit_sites, xlim, ylim, bisector_class=bisector_class,
     )
     for trace in traces:
         figure.add_trace(trace)

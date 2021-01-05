@@ -7,7 +7,7 @@ from voronoi_diagrams.models import (
     Bisector,
     PointBisector,
     WeightedPointBisector,
-    VoronoiDiagramBisector,
+    Edge,
 )
 
 # Utils.
@@ -33,9 +33,7 @@ def create_weighted_point_bisector(
     return WeightedPointBisector(sites=(p, q))
 
 
-def is_plot_in_x(
-    vd_bisector: VoronoiDiagramBisector, bisector_class: Any = PointBisector
-) -> bool:
+def is_plot_in_x(vd_bisector: Edge, bisector_class: Any = PointBisector) -> bool:
     """Get if we are going to use formula_x or formula_y to plot.
 
     Check depending on the sites of the bisector.
@@ -48,11 +46,8 @@ def is_plot_in_x(
         return sites[0].get_lowest_site_point().y >= sites[1].get_lowest_site_point().y
 
 
-def plot_voronoi_diagram_bisector(
-    vd_bisector: VoronoiDiagramBisector,
-    xlim,
-    ylim,
-    bisector_class: Any = PointBisector,
+def plot_edge(
+    vd_bisector: Edge, xlim, ylim, bisector_class: Any = PointBisector,
 ) -> List[go.Scatter]:
     """Plot Bisector in a Voronoi Diagram.
 
@@ -179,9 +174,7 @@ def plot_intersections(
 
 
 def is_a_limit_bisector(
-    vd_bisector: VoronoiDiagramBisector,
-    limit_sites: List[SiteToUse],
-    bisector_class: Type[Bisector],
+    vd_bisector: Edge, limit_sites: List[SiteToUse], bisector_class: Type[Bisector],
 ) -> bool:
     """Check if current bisector is a bisector with a limit site."""
     for site in vd_bisector.bisector.get_sites_tuple():
@@ -191,8 +184,8 @@ def is_a_limit_bisector(
     return False
 
 
-def plot_vertices_and_bisectors(
-    bisectors: List[VoronoiDiagramBisector],
+def plot_vertices_and_edges(
+    bisectors: List[Edge],
     limit_sites: List[SiteToUse],
     xlim: Limit,
     ylim: Limit,
@@ -210,7 +203,7 @@ def plot_vertices_and_bisectors(
                     continue
                 vertices_passed.add(id(bisector_vertex))
                 traces.append(plot_vertex(bisector_vertex))
-            traces += plot_voronoi_diagram_bisector(
+            traces += plot_edge(
                 vd_bisector, xlim=xlim, ylim=ylim, bisector_class=bisector_class,
             )
 

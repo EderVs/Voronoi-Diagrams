@@ -9,9 +9,9 @@ from .bisectors import (
     PointBisector,
     WeightedPointBisector,
 )
-from .voronoi_diagram_bisectors import (
-    VoronoiDiagramBisector,
-    VoronoiDiagramPointBisector,
-    VoronoiDiagramWeightedPointBisector,
+from .edges import (
+    Edge,
+    PointBisectorEdge,
+    WeightedPointBisectorEdge,
 )
-from .vertices import VoronoiDiagramVertex
+from .vertices import Vertex

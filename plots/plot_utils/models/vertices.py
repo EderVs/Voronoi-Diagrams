@@ -1,13 +1,13 @@
 """Plot Vertices utils."""
 
 # Models.
-from voronoi_diagrams.models import VoronoiDiagramVertex
+from voronoi_diagrams.models import Vertex
 
 # Plot Models.
 from .points import plot_point
 
 
-def plot_vertex(vertex: VoronoiDiagramVertex):
+def plot_vertex(vertex: Vertex):
     """Plot vertex."""
     return plot_point(
         vertex.point.x,

@@ -16,14 +16,14 @@ BisectorSide = int
 Range = Tuple[Optional[Decimal], Optional[Decimal], BisectorSide]
 
 
-VoronoiDiagramVertex = "vertices.VoronoiDiagramVertex"
+Vertex = "vertices.Vertex"
 
 
-class VoronoiDiagramBisector:
-    """Bisector representation in the Voronoi diagram."""
+class Edge:
+    """Edge representation in the Voronoi diagram."""
 
     bisector: Bisector
-    vertices: List[VoronoiDiagramVertex]
+    vertices: List[Vertex]
     ranges_b_plus: List[Range]
     ranges_b_minus: List[Range]
     boundary_plus: Boundary
@@ -35,8 +35,8 @@ class VoronoiDiagramBisector:
         bisector: Any,
         boundary_plus: Boundary,
         boundary_minus: Boundary,
-        vertex1: VoronoiDiagramVertex = None,
-        vertex2: VoronoiDiagramVertex = None,
+        vertex1: Vertex = None,
+        vertex2: Vertex = None,
     ) -> None:
         """Constructor."""
         self.bisector = bisector
@@ -51,7 +51,7 @@ class VoronoiDiagramBisector:
         self.boundary_plus = boundary_plus
         self.boundary_minus = boundary_minus
 
-    def __eq__(self, other: "VoronoiDiagramBisector") -> bool:
+    def __eq__(self, other: "Edge") -> bool:
         """Equallity between VoronoiDiagramBisectors."""
         return self.bisector == other.bisector and (
             (self.vertex1 == other.vertex1 and self.vertex2 == other.vertex2)
@@ -66,7 +66,7 @@ class VoronoiDiagramBisector:
         """Check if the bisector doesn't have one vertex."""
         return len(self.vertices) != 2
 
-    def get_vertices(self) -> Tuple[VoronoiDiagramVertex, VoronoiDiagramVertex]:
+    def get_vertices(self) -> Tuple[Vertex, Vertex]:
         """Get vertices linked to this bisector."""
         if len(self.vertices) == 0:
             vertex1 = None
@@ -87,7 +87,7 @@ class VoronoiDiagramBisector:
 
         return (vertex1, vertex2)
 
-    def add_vertex(self, vertex: VoronoiDiagramVertex):
+    def add_vertex(self, vertex: Vertex):
         """Add vertex."""
         if len(self.vertices) >= 2:
             return
@@ -237,8 +237,8 @@ class VoronoiDiagramBisector:
         raise NotImplementedError
 
 
-class VoronoiDiagramPointBisector(VoronoiDiagramBisector):
-    """Point Bisector representation in Voronoi Diagram."""
+class PointBisectorEdge(Edge):
+    """Point Bisector Edge representation in Voronoi Diagram."""
 
     def __init__(
         self,
@@ -274,7 +274,7 @@ class VoronoiDiagramPointBisector(VoronoiDiagramBisector):
         pass
 
 
-class VoronoiDiagramWeightedPointBisector(VoronoiDiagramBisector):
+class WeightedPointBisectorEdge(Edge):
     """Weighted Point Bisector representation in Voronoi Diagram."""
 
     def __init__(

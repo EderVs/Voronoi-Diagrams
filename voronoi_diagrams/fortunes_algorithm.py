@@ -23,10 +23,10 @@ from .models import (
     PointBoundary,
     WeightedPointBisector,
     WeightedPointBoundary,
-    VoronoiDiagramBisector,
-    VoronoiDiagramPointBisector,
-    VoronoiDiagramWeightedPointBisector,
-    VoronoiDiagramVertex,
+    Edge,
+    PointBisectorEdge,
+    WeightedPointBisectorEdge,
+    Vertex,
 )
 
 # Math
@@ -35,18 +35,13 @@ from decimal import Decimal
 # Plot
 from plotly import graph_objects as go
 from plots.plot_utils.models.events import (
-    plot_site,
     plot_sweep_line,
     get_site_traces,
     plot_events_traces,
 )
 from plots.plot_utils.models.boundaries import get_plot_scatter_boundary
-from plots.plot_utils.models.bisectors import (
-    plot_vertices_and_bisectors,
-    plot_voronoi_diagram_bisector,
-)
+from plots.plot_utils.models.bisectors import plot_edge
 from plots.plot_utils.models.vertices import plot_vertex
-from plots.plot_utils.data_structures.l_list import plot_l_list
 
 # Types
 Limit = Tuple[Decimal, Decimal]
@@ -59,16 +54,16 @@ DYNAMIC_MODE = 1
 class FortunesAlgorithm:
     """Fortune's Algorithm implementation."""
 
-    vertices: List[VoronoiDiagramVertex]
+    vertices: List[Vertex]
     vertices_list: List[Point]
-    bisectors: List[VoronoiDiagramBisector]
+    edges: List[Edge]
     bisectors_list: List[Bisector]
     mode: int
     event: Event  # Current Event
 
-    _vertices_dict: Dict[Tuple[Decimal, Decimal], VoronoiDiagramVertex]
+    _vertices_dict: Dict[Tuple[Decimal, Decimal], Vertex]
     _bisectors: Dict[Any, Bisector]
-    _active_bisectors: Dict[Any, VoronoiDiagramBisector]
+    _active_bisectors: Dict[Any, Edge]
     sites: List[Site]
     _plot_steps: bool
     _figure: Optional[go.Figure]
@@ -148,7 +143,7 @@ class FortunesAlgorithm:
         self.vertices_list = []
         self._vertices = dict()
 
-        self.bisectors = []
+        self.edges = []
         self.bisectors_list = []
         self._bisectors = dict()
         self._active_bisectors = dict()
@@ -160,13 +155,13 @@ class FortunesAlgorithm:
             self.BISECTOR_CLASS = PointBisector
             self.REGION_CLASS = Region
             self.BOUNDARY_CLASS = PointBoundary
-            self.VD_BISECTOR_CLASS = VoronoiDiagramPointBisector
+            self.VD_BISECTOR_CLASS = PointBisectorEdge
             self._site_traces = 1
         elif site_class == WeightedSite:
             self.BISECTOR_CLASS = WeightedPointBisector
             self.REGION_CLASS = Region
             self.BOUNDARY_CLASS = WeightedPointBoundary
-            self.VD_BISECTOR_CLASS = VoronoiDiagramWeightedPointBisector
+            self.VD_BISECTOR_CLASS = WeightedPointBisectorEdge
             self._site_traces = 2
 
         # Plot.
@@ -475,7 +470,7 @@ class FortunesAlgorithm:
         # Step 19.
         # Mark p as a vertex and as an endpoint of B*qr, B*rs and B*qs.
         # Add that this vertex is an endpoint of B*qr, B*rs and B*qs.
-        vd_bisectors = self.get_voronoi_diagram_bisectors(
+        vd_bisectors = self.get_edges(
             [
                 (intersection_left_bisector, intersection_left_bisector_sign),
                 (intersection_right_bisector, intersection_right_bisector_sign),
@@ -485,12 +480,12 @@ class FortunesAlgorithm:
         self.add_vertex(p.vertex, vd_bisectors)
 
     def add_vertex(
-        self, point: Point, vd_bisectors: Optional[List[VoronoiDiagramBisector]] = None
+        self, point: Point, vd_bisectors: Optional[List[Edge]] = None
     ) -> None:
         """Add point in the vertex list."""
         point_tuple = point.get_tuple()
         if point_tuple not in self._vertices:
-            vd_vertex = VoronoiDiagramVertex(point)
+            vd_vertex = Vertex(point)
             self._vertices[point_tuple] = vd_vertex
             self.vertices.append(vd_vertex)
             self.vertices_list.append(point)
@@ -516,7 +511,7 @@ class FortunesAlgorithm:
             self.BOUNDARY_CLASS(bisector, True),
             self.BOUNDARY_CLASS(bisector, False),
         )
-        self.bisectors.append(vd_bisector)
+        self.edges.append(vd_bisector)
         if sign is None:
             self._active_bisectors[(hasheable_of_bisector, False)] = vd_bisector
             self._active_bisectors[(hasheable_of_bisector, True)] = vd_bisector
@@ -582,12 +577,10 @@ class FortunesAlgorithm:
         """Add boundary to plot."""
         if self._plot_steps:
             if sign is None:
-                vd_bisector = self.get_voronoi_diagram_bisectors([(bisector, True)])[0]
+                vd_bisector = self.get_edges([(bisector, True)])[0]
             else:
-                vd_bisector = self.get_voronoi_diagram_bisectors([(bisector, sign)])[0]
-            traces = plot_voronoi_diagram_bisector(
-                vd_bisector, self._xlim, self._ylim, self.BISECTOR_CLASS
-            )
+                vd_bisector = self.get_edges([(bisector, sign)])[0]
+            traces = plot_edge(vd_bisector, self._xlim, self._ylim, self.BISECTOR_CLASS)
             self._traces += traces
             traces_numbers = list(
                 range(self._figure_traces, self._figure_traces + len(traces))
@@ -605,9 +598,7 @@ class FortunesAlgorithm:
                 ] = traces_numbers
             self._figure_traces += len(traces)
 
-    def get_voronoi_diagram_bisectors(
-        self, bisectors: List[Tuple[Bisector, bool]]
-    ) -> List[VoronoiDiagramBisector]:
+    def get_edges(self, bisectors: List[Tuple[Bisector, bool]]) -> List[Edge]:
         """Get voronoi diagram bisectors based on the current state."""
         vd_bisectors = []
         for bisector, sign in bisectors:
@@ -703,7 +694,7 @@ class FortunesAlgorithm:
             self._traces[bisector_trace_i] = None
         self._add_bisector_to_plot(bisector, sign)
 
-    def _add_vertex_trace(self, vertex: VoronoiDiagramVertex):
+    def _add_vertex_trace(self, vertex: Vertex):
         """Add vertex to vd trace."""
         trace = plot_vertex(vertex)
         self._traces.append(trace)
@@ -739,16 +730,14 @@ class FortunesAlgorithm:
         self, bisector: Bisector, y: Optional[Decimal], sign: bool = True
     ):
         """Add vertical bisector range."""
-        voronoi_diagram_bisector = self.get_voronoi_diagram_bisectors(
-            [(bisector, sign)]
-        )[0]
+        voronoi_diagram_bisector = self.get_edges([(bisector, sign)])[0]
         voronoi_diagram_bisector.add_begin_range_vertical(y)
 
     def add_begin_bisector(self, boundary: Boundary, event: Event) -> None:
         """Get range of the bisector based on the boundary and the intersection."""
-        voronoi_diagram_bisector = self.get_voronoi_diagram_bisectors(
-            [(boundary.bisector, boundary.sign)]
-        )[0]
+        voronoi_diagram_bisector = self.get_edges([(boundary.bisector, boundary.sign)])[
+            0
+        ]
         side = boundary.get_side_where_point_belongs(event.point)
         voronoi_diagram_bisector.add_begin_range(event.point.x, boundary.sign, side)
 
@@ -756,16 +745,14 @@ class FortunesAlgorithm:
         self, bisector: Bisector, y: Decimal, sign: bool = True
     ):
         """Add end of vertical bisector range."""
-        voronoi_diagram_bisector = self.get_voronoi_diagram_bisectors(
-            [(bisector, sign)]
-        )[0]
+        voronoi_diagram_bisector = self.get_edges([(bisector, sign)])[0]
         voronoi_diagram_bisector.add_end_range_vertical(y)
 
     def add_end_bisector(self, boundary: Boundary, intersection: Intersection) -> None:
         """Get range of the bisector based on the boundary and the intersection."""
-        voronoi_diagram_bisector = self.get_voronoi_diagram_bisectors(
-            [(boundary.bisector, boundary.sign)]
-        )[0]
+        voronoi_diagram_bisector = self.get_edges([(boundary.bisector, boundary.sign)])[
+            0
+        ]
         side = boundary.get_side_where_point_belongs(intersection.point)
         voronoi_diagram_bisector.add_end_range(
             intersection.point.x, boundary.sign, side

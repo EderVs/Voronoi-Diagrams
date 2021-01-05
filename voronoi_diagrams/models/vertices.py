@@ -5,26 +5,24 @@ from typing import List, Any, Optional
 
 # Models
 from .points import Point
-from .voronoi_diagram_bisectors import VoronoiDiagramBisector
+from .edges import Edge
 
 
-class VoronoiDiagramVertex:
+class Vertex:
     """Vertex representation in the Voronoi diagram."""
 
     point: Point
-    bisectors: List[VoronoiDiagramBisector]
+    bisectors: List[Edge]
 
-    def __init__(
-        self, point: Point, bisectors: Optional[List[VoronoiDiagramBisector]] = None
-    ) -> None:
+    def __init__(self, point: Point, bisectors: Optional[List[Edge]] = None) -> None:
         """Constructor."""
         self.point = point
         if bisectors is None:
             bisectors = []
         self.bisectors = bisectors
 
-    def __eq__(self, other: "VoronoiDiagramVertex") -> bool:
-        """Equallity between VoronoiDiagramBisectors."""
+    def __eq__(self, other: "Vertex") -> bool:
+        """Equallity between Vertices."""
         return self.point == other.vertex
 
     def __str__(self) -> str:
@@ -35,9 +33,7 @@ class VoronoiDiagramVertex:
         """Return string representation."""
         return self.__str__()
 
-    def add_bisector(
-        self, bisector: VoronoiDiagramBisector
-    ) -> List[VoronoiDiagramBisector]:
+    def add_bisector(self, bisector: Edge) -> List[Edge]:
         """Add bisector adjacent to this vertex."""
         self.bisectors.append(bisector)
         return self.bisectors
