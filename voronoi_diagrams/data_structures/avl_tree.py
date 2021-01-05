@@ -20,7 +20,13 @@ class AVLNode:
     right: Optional["AVLNode"] = None
     parent: Optional["AVLNode"] = None
 
-    def __init__(self, value: Any, left=None, right=None, parent=None) -> None:
+    def __init__(
+        self,
+        value: Any,
+        left: Optional["AVLNode"] = None,
+        right: Optional["AVLNode"] = None,
+        parent: Optional["AVLNode"] = None,
+    ) -> None:
         """AVL Node constructor."""
         self.value = value
         self.left = left
@@ -66,7 +72,12 @@ class AVLNode:
 class IntNode(AVLNode):
     """Integer AVLNode."""
 
-    def __init__(self, value: int, left=None, right=None) -> None:
+    def __init__(
+        self,
+        value: int,
+        left: Optional["IntNode"] = None,
+        right: Optional["IntNode"] = None,
+    ) -> None:
         """Integer AVL Node constructor."""
         super(IntNode, self).__init__(value, left, right)
 
@@ -460,78 +471,9 @@ class AVLTree:
         value is the only thing that is not swapped.
         """
         if node1.parent == node2 or node2.parent == node1:
-            father = node1
-            son = node2
-            if node1.parent == node2:
-                father = node2
-                son = node1
-
-            if father.parent is None:
-                self.root = son
-                father_is_left_child = None
-            else:
-                father_is_left_child = father.parent.left == father
-
-            if father_is_left_child:
-                father.parent.left = son
-            elif father_is_left_child is not None and not father_is_left_child:
-                father.parent.right = son
-
-            if father.left == son:
-                father_right = father.right
-                father.left = son.left
-                father.right = son.right
-                son.left = father
-                son.right = father_right
-            else:
-                father_left = father.left
-                father.right = son.right
-                father.left = son.left
-                son.right = father
-                son.left = father_left
-            son.parent = father.parent
-            father.parent = son
-
+            self._swap_father_and_son(node1, node2)
         else:
-            # Look for type of child.
-            if node1.parent is None:
-                node1_is_left_child = None
-            else:
-                node1_is_left_child = node1.parent.left == node1
-            if node2.parent is None:
-                node2_is_left_child = None
-            else:
-                node2_is_left_child = node2.parent.left == node2
-
-            # Update father child with node2
-            if node1_is_left_child is None:
-                self.root = node2
-            elif node1_is_left_child:
-                node1.parent.left = node2
-            else:
-                node1.parent.right = node2
-
-            # Update father child with node1
-            if node2_is_left_child is None:
-                self.root = node1
-            elif node2_is_left_child:
-                node2.parent.left = node1
-            else:
-                node2.parent.right = node1
-
-            node1_left = node1.left
-            node1_right = node1.right
-            node1_parent = node1.parent
-
-            # Update relations of node1.
-            node1.parent = node2.parent
-            node1.left = node2.left
-            node1.right = node2.right
-
-            # Update relations of node2.
-            node2.left = node1_left
-            node2.right = node1_right
-            node2.parent = node1_parent
+            self._swap_general_nodes_parented(node1, node2)
 
         if node1.left is not None:
             node1.left.parent = node1
@@ -554,6 +496,82 @@ class AVLTree:
         node2.factor = node1_factor
         node2.length = node1_length
         node2.level = node1_level
+
+    def _swap_father_and_son(self, node1: AVLNode, node2: AVLNode) -> None:
+        """Swap two nodes that are father and son."""
+        father = node1
+        son = node2
+        if node1.parent == node2:
+            father = node2
+            son = node1
+
+        if father.parent is None:
+            self.root = son
+            father_is_left_child = None
+        else:
+            father_is_left_child = father.parent.left == father
+
+        if father_is_left_child:
+            father.parent.left = son
+        elif father_is_left_child is not None and not father_is_left_child:
+            father.parent.right = son
+
+        if father.left == son:
+            father_right = father.right
+            father.left = son.left
+            father.right = son.right
+            son.left = father
+            son.right = father_right
+        else:
+            father_left = father.left
+            father.right = son.right
+            father.left = son.left
+            son.right = father
+            son.left = father_left
+        son.parent = father.parent
+        father.parent = son
+
+    def _swap_general_nodes_parented(self, node1: AVLNode, node2: AVLNode) -> None:
+        """Swap two nodes that are father and son."""
+        # Look for type of child.
+        if node1.parent is None:
+            node1_is_left_child = None
+        else:
+            node1_is_left_child = node1.parent.left == node1
+        if node2.parent is None:
+            node2_is_left_child = None
+        else:
+            node2_is_left_child = node2.parent.left == node2
+
+        # Update father child with node2
+        if node1_is_left_child is None:
+            self.root = node2
+        elif node1_is_left_child:
+            node1.parent.left = node2
+        else:
+            node1.parent.right = node2
+
+        # Update father child with node1
+        if node2_is_left_child is None:
+            self.root = node1
+        elif node2_is_left_child:
+            node2.parent.left = node1
+        else:
+            node2.parent.right = node1
+
+        node1_left = node1.left
+        node1_right = node1.right
+        node1_parent = node1.parent
+
+        # Update relations of node1.
+        node1.parent = node2.parent
+        node1.left = node2.left
+        node1.right = node2.right
+
+        # Update relations of node2.
+        node2.left = node1_left
+        node2.right = node1_right
+        node2.parent = node1_parent
 
     def remove_node(self, node: AVLNode) -> None:
         """Remove node in the Tree."""

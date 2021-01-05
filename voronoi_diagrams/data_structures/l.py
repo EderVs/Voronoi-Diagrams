@@ -24,10 +24,19 @@ class RegionNotFoundException(Exception):
 class LNode(AVLNode):
     """List L AVLNode that contains Region in their values."""
 
+    left: Optional["LNode"]
+    right: Optional["LNode"]
+    value: Region
+    parent: Optional["LNode"] = None
     left_neighbor: Optional["LNode"] = None
     right_neighbor: Optional["LNode"] = None
 
-    def __init__(self, value: Region, left=None, right=None) -> None:
+    def __init__(
+        self,
+        value: Region,
+        left: Optional["LNode"] = None,
+        right: Optional["LNode"] = None,
+    ) -> None:
         """List L AVL Node constructor."""
         super(LNode, self).__init__(value, left, right)
 
