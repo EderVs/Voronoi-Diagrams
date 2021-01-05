@@ -1,7 +1,7 @@
 """Event representation."""
 
 # Standar Library
-from typing import Union, Any, Optional, Tuple
+from typing import Any, Optional, Tuple
 from abc import ABCMeta, abstractmethod
 
 # Models
@@ -39,33 +39,33 @@ class Event:
         raise NotImplementedError
 
     @abstractmethod
-    def get_str(self):
+    def get_str(self) -> str:
         """Get letter in str representation of event."""
         raise NotImplementedError
 
-    def get_point_str(self):
+    def get_point_str(self) -> str:
         """Get point string representation."""
         return f"{'{0:.4f}'.format(self.point.x)}, {'{0:.4f}'.format(self.point.y)}"
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get String representation."""
         event_str = self.get_str()
         return f"{self.name} {event_str}"
 
-    def get_display_str(self):
+    def get_display_str(self) -> str:
         """Get string representation in plot."""
         return f"{self.name} S({self.get_point_str()})"
 
     @abstractmethod
-    def get_event_str(self):
+    def get_event_str(self) -> str:
         """Get event str."""
         raise NotImplementedError
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Get object representation."""
         return self.__str__()
 
-    def get_comparison(self, event: Any) -> Decimal:
+    def get_comparison(self, event: "Event") -> Decimal:
         """Get comparison between 2 events."""
         event_point = self.get_event_point()
         other_event_point = event.get_event_point()
@@ -80,7 +80,7 @@ class Site(Event):
     By itself it is just a point.
     """
 
-    def __init__(self, x: Decimal, y: Decimal, name: str = ""):
+    def __init__(self, x: Decimal, y: Decimal, name: str = "") -> None:
         """Construct point."""
         super(Site, self).__init__(x, y, True, name=name)
 
@@ -88,15 +88,15 @@ class Site(Event):
         """Get string representation of Site."""
         return f"S({self.get_point_str()})"
 
-    def __eq__(self, site: Any) -> bool:
+    def __eq__(self, site: "Site") -> bool:
         """Get equality between sites."""
         return self.point.x == site.point.x and self.point.y == site.point.y
 
-    def get_display_str(self):
+    def get_display_str(self) -> str:
         """Get string representation in plot."""
         return f"{self.name} S({self.get_point_str()})"
 
-    def get_event_str(self):
+    def get_event_str(self) -> str:
         """Get event str."""
         return f"S {self.name}"
 
@@ -156,8 +156,8 @@ class Site(Event):
         """Get event point to evaluate."""
         return self.get_highest_site_point()
 
-    def is_dominated(self, site: Any) -> bool:
-        """Check if this event is dominated to other event."""
+    def is_dominated(self, site: "Site") -> bool:
+        """Check if this site is dominated by other site."""
         return False
 
     def get_object_to_hash(self) -> Any:
@@ -171,17 +171,17 @@ class Intersection(Event):
     vertex: Point
     region_node: AVLNode
 
-    def __init__(self, event: Point, vertex: Point, region_node: AVLNode):
+    def __init__(self, event: Point, vertex: Point, region_node: AVLNode) -> None:
         """Construct point."""
         super(Intersection, self).__init__(event.x, event.y, False)
         self.vertex = vertex
         self.region_node = region_node
 
-    def get_str(self):
+    def get_str(self) -> str:
         """Get string representation of Site."""
         return f"I({self.get_point_str()})"
 
-    def get_event_str(self):
+    def get_event_str(self) -> str:
         """Get event str."""
         return self.get_str()
 
@@ -198,17 +198,17 @@ class WeightedSite(Site):
 
     weight: Decimal
 
-    def __init__(self, x: Decimal, y: Decimal, weight: Decimal, name: str = ""):
+    def __init__(self, x: Decimal, y: Decimal, weight: Decimal, name: str = "") -> None:
         """Construct point."""
         super(WeightedSite, self).__init__(x, y, name=name)
         self.weight = weight
 
-    def __eq__(self, wsite: Any) -> bool:
+    def __eq__(self, site: "WeightedSite") -> bool:
         """Get equality between weighted sites."""
         return (
-            self.point.x == wsite.point.x
-            and self.point.y == wsite.point.y
-            and self.weight == wsite.weight
+            self.point.x == site.point.x
+            and self.point.y == site.point.y
+            and self.weight == site.weight
         )
 
     def get_site_distance(self, x: Decimal, y: Decimal) -> Decimal:
@@ -220,7 +220,7 @@ class WeightedSite(Site):
             ((self.point.x - x) ** Decimal(2)) + ((self.point.y - y) ** Decimal(2))
         ).sqrt() + abs(self.weight)
 
-    def compare_weights(self, site: Any) -> int:
+    def compare_weights(self, site: "WeightedSite") -> int:
         """Compare weight between sites."""
         if self.weight >= 0:
             return self.weight - site.weight
@@ -323,8 +323,8 @@ class WeightedSite(Site):
         """Get String representation."""
         return f"WS({self.get_point_str()}, {'{0:.4f}'.format(self.weight)})"
 
-    def is_dominated(self, site: Any) -> bool:
-        """Check if this event is dominated to other event."""
+    def is_dominated(self, site: "WeightedSite") -> bool:
+        """Check if this weighted site is dominated by other weighted site."""
         if self.weight >= 0:
             return self.weight >= site.get_weighted_distance(self.point.x, self.point.y)
         else:
@@ -332,7 +332,7 @@ class WeightedSite(Site):
                 site.point.x, self.point.y
             )
 
-    def get_object_to_hash(self) -> Any:
+    def get_object_to_hash(self) -> Tuple[Decimal, Decimal, Decimal]:
         """Get object to hash this site."""
         return (self.point.x, self.point.y, self.weight)
 
