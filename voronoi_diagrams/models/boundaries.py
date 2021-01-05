@@ -2,7 +2,7 @@
 
 # Standard Library
 from typing import Optional, Any, Tuple, List
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 
 # Models
 from .points import Point
@@ -16,10 +16,8 @@ from decimal import Decimal
 from general_utils.numbers import are_close
 
 
-class Boundary:
+class Boundary(ABC):
     """Bisector that is * mapped."""
-
-    __metaclass__ = ABCMeta
 
     bisector: Bisector
     sign: bool
@@ -29,7 +27,7 @@ class Boundary:
     active: bool
     is_to_be_deleted: bool
 
-    def __init__(self, bisector: Bisector, sign: bool, active: bool = False):
+    def __init__(self, bisector: Bisector, sign: bool, active: bool = False) -> None:
         """Construct Boundary."""
         self.bisector = bisector
         self.sign = sign
@@ -57,14 +55,6 @@ class Boundary:
         Return 0 if the point is in the boundary based on l.
         Return > 0 if the point is to the right of the boundary based on l.
         Return < 0 if the point is to the left of the boundary based on l.
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def formula_x(self, y: Decimal) -> List[Decimal]:
-        """Return the x coordinate of the boundary given the y coordinate.
-
-        This method is not implemented in all Boundaries.
         """
         raise NotImplementedError
 
@@ -113,7 +103,7 @@ class Boundary:
         site = self.get_site()
         return site.get_site_distance(point.x, point.y)
 
-    def get_intersections(self, boundary: Any) -> List[Tuple[Point, Point]]:
+    def get_intersections(self, boundary: "Boundary") -> List[Tuple[Point, Point]]:
         """Get intersections between two boundaries.
 
         The return values are a list of the intersections without the star map (the
@@ -132,6 +122,7 @@ class Boundary:
                 all_intersections.append((intersection_point, intersection_point_star))
         return all_intersections
 
+    @abstractmethod
     def get_side_where_point_belongs(self, point: Point) -> int:
         """Get side of the boundary where the point belongs."""
         raise NotImplementedError
@@ -154,7 +145,7 @@ class PointBoundary(Boundary):
         """Construct Boundary of a site point."""
         super(PointBoundary, self).__init__(bisector, sign)
 
-    def get_point_comparison(self, point) -> Optional[Decimal]:
+    def get_point_comparison(self, point: Point) -> Optional[Decimal]:
         """Get the y comparison of a point based on the line y coordinate of the point.
 
         This comparison is based on this boundary with its sign.
@@ -179,20 +170,6 @@ class PointBoundary(Boundary):
             return Decimal(0)
         return Decimal(1)
 
-    # Used in formula_x
-    def _quadratic_solution_with_sign(
-        self, a: Decimal, b: Decimal, c: Decimal
-    ) -> Optional[Decimal]:
-        """Return the solution of the quadratic function based on the sign of the Boundary."""
-        if (b ** 2 - 4 * a * c) < 0:
-            return None
-        if self.sign:
-            sign_value = 1
-        else:
-            sign_value = -1
-        solution = (-b + (-sign_value) * Decimal(b ** 2 - 4 * a * c).sqrt()) / 2 * a
-        return solution
-
     def is_left_to_boundary(self, point: Point) -> bool:
         """Return True if the given point is to the left of the boundary."""
         ys = self.formula_y(point.x)
@@ -209,6 +186,20 @@ class PointBoundary(Boundary):
         This is the the formula of the bisector mapped with the star map.
         In this case is an hiperbola.
         """
+        # No blank spaces after docstring.
+        def quadratic_solution_with_sign(
+            a: Decimal, b: Decimal, c: Decimal
+        ) -> Optional[Decimal]:
+            """Return the solution of the quadratic function based on the sign of the Boundary."""
+            if (b ** 2 - 4 * a * c) < 0:
+                return None
+            if self.sign:
+                sign_value = 1
+            else:
+                sign_value = -1
+            solution = (-b + (-sign_value) * Decimal(b ** 2 - 4 * a * c).sqrt()) / 2 * a
+            return solution
+
         p = self.bisector.sites[0].point
         q = self.bisector.sites[1].point
         a = Decimal(-((q.x - p.x) / (q.y - p.y)))
@@ -218,7 +209,7 @@ class PointBoundary(Boundary):
         e = Decimal(c ** 2 - d ** 2 - p.x ** 2)
         f = Decimal(-1)
         g = Decimal(2 * (-a * (c + d) + p.x))
-        x = self._quadratic_solution_with_sign(f, g, e)
+        x = quadratic_solution_with_sign(f, g, e)
         return [x]
 
     def formula_y(self, x: Decimal) -> List[Decimal]:
@@ -234,7 +225,7 @@ class PointBoundary(Boundary):
             return self.formula_y_without_sign(x)
         return []
 
-    def is_point_in_boundary(self, point) -> bool:
+    def is_point_in_boundary(self, point: Point) -> bool:
         """Check if the point is in this boundary."""
         p, q = self.bisector.sites
         if p.point.y == q.point.y:
@@ -249,7 +240,7 @@ class PointBoundary(Boundary):
         return False
 
     def get_side_where_point_belongs(self, point: Point) -> int:
-        """Get where point belongs."""
+        """Get side where point belongs."""
         return 0
 
     @staticmethod
@@ -343,7 +334,7 @@ class WeightedPointBoundary(Boundary):
 
         return to_return
 
-    def is_point_in_boundary(self, point) -> bool:
+    def is_point_in_boundary(self, point: Point) -> bool:
         """Check if the point is in this boundary."""
         p, q = self.bisector.sites
         if p.point.y == q.point.y and p.weight == q.weight:
@@ -357,7 +348,7 @@ class WeightedPointBoundary(Boundary):
                 return True
         return False
 
-    def get_point_comparison(self, point) -> Optional[Decimal]:
+    def get_point_comparison(self, point: Point) -> Optional[Decimal]:
         """Get the y comparison of a point based on the y coordinate of the point.
 
         This comparison is based on this boundary with its sign.
@@ -396,7 +387,7 @@ class WeightedPointBoundary(Boundary):
         else:
             return self.is_left_when_boundary_is_not_concave(point)
 
-    def is_left_when_boundary_is_not_x_monotone(self, point) -> bool:
+    def is_left_when_boundary_is_not_x_monotone(self, point: Point) -> bool:
         """Return True if the given point is to the left when boundary is not x monotone."""
         ys = self.formula_y(point.x)
         if len(ys) == 0:
@@ -420,7 +411,7 @@ class WeightedPointBoundary(Boundary):
             else:
                 return max(ys) < point.y or min(ys) > point.y
 
-    def is_left_when_boundary_is_stopped_to_infinity(self, point) -> bool:
+    def is_left_when_boundary_is_stopped_to_infinity(self, point: Point) -> bool:
         """Return True if the given point is to the left when boundary is stopped to infinity."""
         ys = self.formula_y(point.x)
         if len(ys) == 0:
@@ -430,7 +421,7 @@ class WeightedPointBoundary(Boundary):
         else:
             return ys[0] > point.y
 
-    def is_left_when_boundary_is_not_concave(self, point) -> bool:
+    def is_left_when_boundary_is_not_concave(self, point: Point) -> bool:
         """Return True if the given point is to the left when boundary is not concave."""
         ys = self.formula_y(point.x)
         if len(ys) == 0:
