@@ -54,26 +54,6 @@ DYNAMIC_MODE = 1
 class FortunesAlgorithm:
     """Fortune's Algorithm implementation."""
 
-    vertices: List[Vertex]
-    vertices_list: List[Point]
-    edges: List[Edge]
-    bisectors_list: List[Bisector]
-    mode: int
-    event: Event  # Current Event
-
-    _vertices_dict: Dict[Tuple[Decimal, Decimal], Vertex]
-    _bisectors: Dict[Any, Bisector]
-    _active_bisectors: Dict[Any, Edge]
-    sites: List[Site]
-    _plot_steps: bool
-    _figure: Optional[go.Figure]
-    _figure_traces: int
-    _boundary_plot_dict: Dict[str, int]
-    _bisector_plot_dict: Dict[Tuple[str, bool], int]
-    _begin_event: bool
-    _updated_regions: List[Region]
-    _updated_boundaries: List[Boundary]
-
     @staticmethod
     def calculate_voronoi_diagram(
         points: List[Point],
@@ -119,6 +99,26 @@ class FortunesAlgorithm:
 
         return voronoi_diagram
 
+    vertices: List[Vertex]
+    vertices_list: List[Point]
+    edges: List[Edge]
+    bisectors_list: List[Bisector]
+    mode: int
+    event: Event  # Current Event
+
+    _vertices_dict: Dict[Tuple[Decimal, Decimal], Vertex]
+    _bisectors: Dict[Any, Bisector]
+    _active_bisectors: Dict[Any, Edge]
+    sites: List[Site]
+    _plot_steps: bool
+    _figure: Optional[go.Figure]
+    _figure_traces: int
+    _boundary_plot_dict: Dict[str, int]
+    _bisector_plot_dict: Dict[Tuple[str, bool], int]
+    _begin_event: bool
+    _updated_regions: List[Region]
+    _updated_boundaries: List[Boundary]
+
     def __init__(
         self,
         sites: Iterable[Site],
@@ -147,13 +147,13 @@ class FortunesAlgorithm:
             self.BISECTOR_CLASS = PointBisector
             self.REGION_CLASS = Region
             self.BOUNDARY_CLASS = PointBoundary
-            self.VD_BISECTOR_CLASS = PointBisectorEdge
+            self.EDGE_CLASS = PointBisectorEdge
             self._site_traces = 1
         elif self.SITE_CLASS == WeightedSite:
             self.BISECTOR_CLASS = WeightedPointBisector
             self.REGION_CLASS = Region
             self.BOUNDARY_CLASS = WeightedPointBoundary
-            self.VD_BISECTOR_CLASS = WeightedPointBisectorEdge
+            self.EDGE_CLASS = WeightedPointBisectorEdge
             self._site_traces = 2
 
         # Plot.
@@ -302,7 +302,7 @@ class FortunesAlgorithm:
         # Create Bisector B*pq.
         # Actually we are creating Bpq.
         bisector_p_q = self.BISECTOR_CLASS(sites=(p, r_q.site))
-        self.add_bisector(bisector_p_q, sign=None)
+        self.add_edge(bisector_p_q, sign=None)
 
         # Step 10.
         # Update list L so that it contains ...,R*q,C-pq,R*p,C+pq,R*q,... in place of R*q.
@@ -380,7 +380,7 @@ class FortunesAlgorithm:
             p.point, r_q.site, r_s.site
         )
         boundary_q_s = self.BOUNDARY_CLASS(bisector_q_s, boundary_q_s_sign)
-        self.add_bisector(bisector_q_s, sign=boundary_q_s_sign)
+        self.add_edge(bisector_q_s, sign=boundary_q_s_sign)
         if boundary_q_s.bisector.is_vertical():
             self.add_begin_vertical_bisector(
                 boundary_q_s.bisector, p.vertex.y, boundary_q_s_sign
@@ -471,50 +471,45 @@ class FortunesAlgorithm:
         )
         self.add_vertex(p.vertex, vd_bisectors)
 
-    def add_vertex(
-        self, point: Point, vd_bisectors: Optional[List[Edge]] = None
-    ) -> None:
+    def add_vertex(self, point: Point, edges: Optional[List[Edge]] = None) -> None:
         """Add point in the vertex list."""
         point_tuple = point.get_tuple()
         if point_tuple not in self._vertices:
-            vd_vertex = Vertex(point)
-            self._vertices[point_tuple] = vd_vertex
-            self.vertices.append(vd_vertex)
+            vertex = Vertex(point)
+            self._vertices[point_tuple] = vertex
+            self.vertices.append(vertex)
             self.vertices_list.append(point)
         else:
-            vd_vertex = self._vertices[point_tuple]
+            vertex = self._vertices[point_tuple]
 
-        if vd_bisectors is not None:
-            for vd_bisector in vd_bisectors:
-                vd_vertex.add_edge(vd_bisector)
-                vd_bisector.add_vertex(vd_vertex)
+        if edges is not None:
+            for vd_bisector in edges:
+                vertex.add_edge(vd_bisector)
+                vd_bisector.add_vertex(vertex)
 
         if self._plot_steps:
-            self._add_vertex_trace(vd_vertex)
+            self._add_vertex_trace(vertex)
 
-    def add_bisector(self, bisector: Bisector, sign: Optional[bool] = True) -> None:
-        """Add point in the vertex list."""
+    def add_edge(self, bisector: Bisector, sign: Optional[bool] = True) -> None:
+        """Add point in the edges list."""
         hasheable_of_bisector = bisector.get_object_to_hash()
         if hasheable_of_bisector not in self._bisectors:
             self._bisectors[hasheable_of_bisector] = bisector
             self.bisectors_list.append(bisector)
-        vd_bisector = self.VD_BISECTOR_CLASS(
+        edge = self.EDGE_CLASS(
             bisector,
             self.BOUNDARY_CLASS(bisector, True),
             self.BOUNDARY_CLASS(bisector, False),
         )
-        self.edges.append(vd_bisector)
+        self.edges.append(edge)
         if sign is None:
-            self._active_bisectors[(hasheable_of_bisector, False)] = vd_bisector
-            self._active_bisectors[(hasheable_of_bisector, True)] = vd_bisector
+            self._active_bisectors[(hasheable_of_bisector, False)] = edge
+            self._active_bisectors[(hasheable_of_bisector, True)] = edge
         else:
-            self._active_bisectors[(hasheable_of_bisector, sign)] = vd_bisector
+            self._active_bisectors[(hasheable_of_bisector, sign)] = edge
 
     def _find_region_containing_p(self, p: Site) -> Tuple[Region, Region, LNode]:
-        """Find an occurrence of a region R*q on L containing p.
-
-        Also returns the Region of p.
-        """
+        """Find an occurrence of a region R*q on L containing p."""
         r_q_node = self.l_list.search_region_node(p)
         r_q = r_q_node.value
         return r_q, r_q_node
@@ -592,12 +587,12 @@ class FortunesAlgorithm:
 
     def get_edges(self, bisectors: List[Tuple[Bisector, bool]]) -> List[Edge]:
         """Get voronoi diagram bisectors based on the current state."""
-        vd_bisectors = []
+        edges = []
         for bisector, sign in bisectors:
             hasheable_of_bisector = bisector.get_object_to_hash()
-            vd_bisector = self._active_bisectors[(hasheable_of_bisector, sign)]
-            vd_bisectors.append(vd_bisector)
-        return vd_bisectors
+            edge = self._active_bisectors[(hasheable_of_bisector, sign)]
+            edges.append(edge)
+        return edges
 
     def _delete_intersection_from_boundary(
         self, boundary: Optional[Boundary], is_left_intersection: bool
