@@ -317,8 +317,8 @@ class FortunesAlgorithm:
         if bisector_p_q.is_vertical():
             self.add_begin_vertical_edge(bisector_p_q, None)
         else:
-            self.add_begin_edge(boundary_p_q_minus, p)
-            self.add_begin_edge(boundary_p_q_plus, p)
+            self.add_begin_edge(boundary_p_q_minus, p.point)
+            self.add_begin_edge(boundary_p_q_plus, p.point)
 
         if self._plot_steps:
             self._add_boundaries_to_plot([boundary_p_q_minus, boundary_p_q_plus])
@@ -381,15 +381,10 @@ class FortunesAlgorithm:
         )
         boundary_q_s = self.BOUNDARY_CLASS(bisector_q_s, boundary_q_s_sign)
         self.add_edge(bisector_q_s, sign=boundary_q_s_sign)
-        if boundary_q_s.bisector.is_vertical():
-            self.add_begin_vertical_edge(
-                boundary_q_s.bisector, p.vertex.y, boundary_q_s_sign
-            )
-        else:
-            self.add_begin_edge(boundary_q_s, p)
         left_region_node = intersection_region_node.left_neighbor
         right_region_node = intersection_region_node.right_neighbor
 
+        self.add_endpoint_to_new_edge(boundary_q_s, p)
         if intersection_region_node.value.left.bisector.is_vertical():
             self.add_end_vertical_edge(
                 intersection_region_node.value.left.bisector,
@@ -397,7 +392,7 @@ class FortunesAlgorithm:
                 intersection_region_node.value.left.sign,
             )
         else:
-            self.add_end_edge(intersection_region_node.value.left, p)
+            self.add_end_edge(intersection_region_node.value.left, p.point)
         if intersection_region_node.value.right.bisector.is_vertical():
             self.add_end_vertical_edge(
                 intersection_region_node.value.right.bisector,
@@ -405,7 +400,7 @@ class FortunesAlgorithm:
                 intersection_region_node.value.right.sign,
             )
         else:
-            self.add_end_edge(intersection_region_node.value.right, p)
+            self.add_end_edge(intersection_region_node.value.right, p.point)
 
         if self._plot_steps:
             # Remove
@@ -513,6 +508,13 @@ class FortunesAlgorithm:
         r_q_node = self.l_list.search_region_node(p)
         r_q = r_q_node.value
         return r_q, r_q_node
+
+    def add_endpoint_to_new_edge(self, boundary: Boundary, p: Intersection):
+        """Add endpoint in new edge."""
+        if boundary.bisector.is_vertical():
+            self.add_begin_vertical_edge(boundary.bisector, p.vertex.y, boundary.sign)
+        else:
+            self.add_begin_edge(boundary, p.point)
 
     def _update_l_list(
         self, r_p: Region, r_q: Region, bisector_p_q: Bisector,
@@ -720,19 +722,19 @@ class FortunesAlgorithm:
         edge = self.get_edges([(bisector, sign)])[0]
         edge.add_begin_range_vertical(y)
 
-    def add_begin_edge(self, boundary: Boundary, event: Event) -> None:
+    def add_begin_edge(self, boundary: Boundary, point: Point) -> None:
         """Add endpoint to begin edge."""
         edge = self.get_edges([(boundary.bisector, boundary.sign)])[0]
-        side = boundary.get_side_where_point_belongs(event.point)
-        edge.add_begin_range(event.point.x, boundary.sign, side)
+        side = boundary.get_side_where_point_belongs(point)
+        edge.add_begin_range(point.x, boundary.sign, side)
 
     def add_end_vertical_edge(self, bisector: Bisector, y: Decimal, sign: bool = True):
         """Add endpoint to end vertical edge."""
         edge = self.get_edges([(bisector, sign)])[0]
         edge.add_end_range_vertical(y)
 
-    def add_end_edge(self, boundary: Boundary, intersection: Intersection) -> None:
+    def add_end_edge(self, boundary: Boundary, point: Point) -> None:
         """Add endpoint to end edge."""
         edge = self.get_edges([(boundary.bisector, boundary.sign)])[0]
-        side = boundary.get_side_where_point_belongs(intersection.point)
-        edge.add_end_range(intersection.point.x, boundary.sign, side)
+        side = boundary.get_side_where_point_belongs(point)
+        edge.add_end_range(point.x, boundary.sign, side)
