@@ -315,10 +315,10 @@ class FortunesAlgorithm:
         ) = self._update_l_list(r_p, r_q, bisector_p_q)
 
         if bisector_p_q.is_vertical():
-            self.add_begin_vertical_bisector(bisector_p_q, None)
+            self.add_begin_vertical_edge(bisector_p_q, None)
         else:
-            self.add_begin_bisector(boundary_p_q_minus, p)
-            self.add_begin_bisector(boundary_p_q_plus, p)
+            self.add_begin_edge(boundary_p_q_minus, p)
+            self.add_begin_edge(boundary_p_q_plus, p)
 
         if self._plot_steps:
             self._add_boundaries_to_plot([boundary_p_q_minus, boundary_p_q_plus])
@@ -382,30 +382,30 @@ class FortunesAlgorithm:
         boundary_q_s = self.BOUNDARY_CLASS(bisector_q_s, boundary_q_s_sign)
         self.add_edge(bisector_q_s, sign=boundary_q_s_sign)
         if boundary_q_s.bisector.is_vertical():
-            self.add_begin_vertical_bisector(
+            self.add_begin_vertical_edge(
                 boundary_q_s.bisector, p.vertex.y, boundary_q_s_sign
             )
         else:
-            self.add_begin_bisector(boundary_q_s, p)
+            self.add_begin_edge(boundary_q_s, p)
         left_region_node = intersection_region_node.left_neighbor
         right_region_node = intersection_region_node.right_neighbor
 
         if intersection_region_node.value.left.bisector.is_vertical():
-            self.add_end_vertical_bisector(
+            self.add_end_vertical_edge(
                 intersection_region_node.value.left.bisector,
                 p.vertex.y,
                 intersection_region_node.value.left.sign,
             )
         else:
-            self.add_end_bisector(intersection_region_node.value.left, p)
+            self.add_end_edge(intersection_region_node.value.left, p)
         if intersection_region_node.value.right.bisector.is_vertical():
-            self.add_end_vertical_bisector(
+            self.add_end_vertical_edge(
                 intersection_region_node.value.right.bisector,
                 p.vertex.y,
                 intersection_region_node.value.right.sign,
             )
         else:
-            self.add_end_bisector(intersection_region_node.value.right, p)
+            self.add_end_edge(intersection_region_node.value.right, p)
 
         if self._plot_steps:
             # Remove
@@ -713,34 +713,26 @@ class FortunesAlgorithm:
             return
         self._traces[self._boundary_plot_dict[str(boundary)]] = None
 
-    def add_begin_vertical_bisector(
+    def add_begin_vertical_edge(
         self, bisector: Bisector, y: Optional[Decimal], sign: bool = True
     ):
-        """Add vertical bisector range."""
-        voronoi_diagram_bisector = self.get_edges([(bisector, sign)])[0]
-        voronoi_diagram_bisector.add_begin_range_vertical(y)
+        """Add endpoint to begin vertical edge."""
+        edge = self.get_edges([(bisector, sign)])[0]
+        edge.add_begin_range_vertical(y)
 
-    def add_begin_bisector(self, boundary: Boundary, event: Event) -> None:
-        """Get range of the bisector based on the boundary and the intersection."""
-        voronoi_diagram_bisector = self.get_edges([(boundary.bisector, boundary.sign)])[
-            0
-        ]
+    def add_begin_edge(self, boundary: Boundary, event: Event) -> None:
+        """Add endpoint to begin edge."""
+        edge = self.get_edges([(boundary.bisector, boundary.sign)])[0]
         side = boundary.get_side_where_point_belongs(event.point)
-        voronoi_diagram_bisector.add_begin_range(event.point.x, boundary.sign, side)
+        edge.add_begin_range(event.point.x, boundary.sign, side)
 
-    def add_end_vertical_bisector(
-        self, bisector: Bisector, y: Decimal, sign: bool = True
-    ):
-        """Add end of vertical bisector range."""
-        voronoi_diagram_bisector = self.get_edges([(bisector, sign)])[0]
-        voronoi_diagram_bisector.add_end_range_vertical(y)
+    def add_end_vertical_edge(self, bisector: Bisector, y: Decimal, sign: bool = True):
+        """Add endpoint to end vertical edge."""
+        edge = self.get_edges([(bisector, sign)])[0]
+        edge.add_end_range_vertical(y)
 
-    def add_end_bisector(self, boundary: Boundary, intersection: Intersection) -> None:
-        """Get range of the bisector based on the boundary and the intersection."""
-        voronoi_diagram_bisector = self.get_edges([(boundary.bisector, boundary.sign)])[
-            0
-        ]
+    def add_end_edge(self, boundary: Boundary, intersection: Intersection) -> None:
+        """Add endpoint to end edge."""
+        edge = self.get_edges([(boundary.bisector, boundary.sign)])[0]
         side = boundary.get_side_where_point_belongs(intersection.point)
-        voronoi_diagram_bisector.add_end_range(
-            intersection.point.x, boundary.sign, side
-        )
+        edge.add_end_range(intersection.point.x, boundary.sign, side)
