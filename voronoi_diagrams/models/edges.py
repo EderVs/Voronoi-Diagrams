@@ -240,6 +240,10 @@ class Edge:
 class PointBisectorEdge(Edge):
     """Point Bisector Edge representation in Voronoi Diagram."""
 
+    bisector: PointBisector
+    boundary_plus: PointBoundary
+    boundary_minus: PointBoundary
+
     def __init__(
         self,
         bisector: PointBisector,
@@ -276,6 +280,10 @@ class PointBisectorEdge(Edge):
 
 class WeightedPointBisectorEdge(Edge):
     """Weighted Point Bisector representation in Voronoi Diagram."""
+
+    bisector: WeightedPointBisector
+    boundary_plus: WeightedPointBoundary
+    boundary_minus: WeightedPointBoundary
 
     def __init__(
         self,
@@ -325,9 +333,9 @@ class WeightedPointBisectorEdge(Edge):
     def complete_ranges(self) -> None:
         """Add a new range if neccessary."""
         # No blank lines
-        def complete_range_in_boundary_if_neccessary(x, side, boundary, sign):
+        def complete_range_in_boundary_if_neccessary(x, side, boundary):
             if x is None and side == 0 and boundary.is_boundary_not_x_monotone():
-                self.add_end_range(None, sign, 1)
+                self.add_end_range(None, boundary.sign, 1)
 
         def delete_first_with_side_0(b_range):
             for i, (_, _, side) in enumerate(b_range):
@@ -338,12 +346,12 @@ class WeightedPointBisectorEdge(Edge):
         if len(self.ranges_b_minus) > 0:
             x1, x0, side = self.ranges_b_minus[-1]
             return complete_range_in_boundary_if_neccessary(
-                x0, side, self.boundary_minus, False
+                x0, side, self.boundary_minus
             )
         if len(self.ranges_b_plus) > 0:
             x0, x1, side = self.ranges_b_plus[-1]
             return complete_range_in_boundary_if_neccessary(
-                x1, side, self.boundary_plus, True
+                x1, side, self.boundary_plus
             )
 
         sites = self.bisector.get_sites_tuple()
