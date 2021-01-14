@@ -385,22 +385,8 @@ class FortunesAlgorithm:
         right_region_node = intersection_region_node.right_neighbor
 
         self.add_endpoint_to_new_edge(boundary_q_s, p)
-        if intersection_region_node.value.left.bisector.is_vertical():
-            self.add_end_vertical_edge(
-                intersection_region_node.value.left.bisector,
-                p.vertex.y,
-                intersection_region_node.value.left.sign,
-            )
-        else:
-            self.add_end_edge(intersection_region_node.value.left, p.point)
-        if intersection_region_node.value.right.bisector.is_vertical():
-            self.add_end_vertical_edge(
-                intersection_region_node.value.right.bisector,
-                p.vertex.y,
-                intersection_region_node.value.right.sign,
-            )
-        else:
-            self.add_end_edge(intersection_region_node.value.right, p.point)
+        self.add_endpoint_to_old_edge(intersection_region_node.value.left, p)
+        self.add_endpoint_to_old_edge(intersection_region_node.value.right, p)
 
         if self._plot_steps:
             # Remove
@@ -509,12 +495,21 @@ class FortunesAlgorithm:
         r_q = r_q_node.value
         return r_q, r_q_node
 
-    def add_endpoint_to_new_edge(self, boundary: Boundary, p: Intersection):
+    def add_endpoint_to_new_edge(self, boundary: Boundary, p: Intersection) -> None:
         """Add endpoint in new edge."""
         if boundary.bisector.is_vertical():
             self.add_begin_vertical_edge(boundary.bisector, p.vertex.y, boundary.sign)
         else:
             self.add_begin_edge(boundary, p.point)
+
+    def add_endpoint_to_old_edge(self, boundary: Boundary, p: Intersection) -> None:
+        """Add endpoint in old edge."""
+        if boundary.bisector.is_vertical():
+            self.add_end_vertical_edge(
+                boundary.bisector, p.vertex.y, boundary.sign,
+            )
+        else:
+            self.add_end_edge(boundary, p.point)
 
     def _update_l_list(
         self, r_p: Region, r_q: Region, bisector_p_q: Bisector,
