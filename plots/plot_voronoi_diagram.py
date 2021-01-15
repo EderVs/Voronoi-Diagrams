@@ -10,8 +10,8 @@ from random import random
 # Voronoi Diagrams
 from voronoi_diagrams.fortunes_algorithm import (
     FortunesAlgorithm,
-    STATIC_MODE,
-    DYNAMIC_MODE,
+    AUTOMATIC_MODE,
+    MANUAL_MODE,
 )
 from voronoi_diagrams.models import Point, WeightedSite, Site
 
@@ -132,7 +132,7 @@ def get_diagram_and_plot(
     type_vd: int,
     plot_steps: bool = False,
     plot_diagram: bool = False,
-    mode: int = STATIC_MODE,
+    mode: int = AUTOMATIC_MODE,
 ) -> None:
     """Get and plot Voronoi Diagram depending on the requested type."""
     sites += limit_sites
@@ -153,7 +153,7 @@ def get_diagram_and_plot(
         site_class = WeightedSite
 
     # Mode
-    if mode == STATIC_MODE:
+    if mode == AUTOMATIC_MODE:
         print("--- %s seconds to calculate diagram. ---" % (time.time() - start_time))
     else:
         while not voronoi_diagram.q_queue.is_empty():

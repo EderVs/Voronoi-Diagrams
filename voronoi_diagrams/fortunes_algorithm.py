@@ -47,8 +47,8 @@ from plots.plot_utils.models.vertices import plot_vertex
 Limit = Tuple[Decimal, Decimal]
 
 # Modes
-STATIC_MODE = 0
-DYNAMIC_MODE = 1
+AUTOMATIC_MODE = 0
+MANUAL_MODE = 1
 
 
 class FortunesAlgorithm:
@@ -60,7 +60,7 @@ class FortunesAlgorithm:
         plot_steps: bool = False,
         xlim: Limit = (-100, 100),
         ylim: Limit = (-100, 100),
-        mode: int = STATIC_MODE,
+        mode: int = AUTOMATIC_MODE,
         names: Optional[List[str]] = None,
     ) -> "FortunesAlgorithm":
         """Calculate Voronoi Diagram."""
@@ -81,7 +81,7 @@ class FortunesAlgorithm:
         plot_steps: bool = False,
         xlim: Limit = (-100, 100),
         ylim: Limit = (-100, 100),
-        mode: int = STATIC_MODE,
+        mode: int = AUTOMATIC_MODE,
         names: Optional[List[str]] = None,
     ) -> "FortunesAlgorithm":
         """Calculate AW Voronoi Diagram."""
@@ -125,7 +125,7 @@ class FortunesAlgorithm:
         plot_steps: bool = False,
         xlim: Optional[Limit] = (-100, 100),
         ylim: Optional[Limit] = (-100, 100),
-        mode: Optional[int] = STATIC_MODE,
+        mode: Optional[int] = AUTOMATIC_MODE,
     ) -> None:
         """Construct and calculate Voronoi Diagram."""
         self.vertices = []
@@ -186,7 +186,7 @@ class FortunesAlgorithm:
         self.mode = mode
         self._begin_event = True
         self._init_structures()
-        if self.mode == STATIC_MODE:
+        if self.mode == AUTOMATIC_MODE:
             self._calculate_diagram()
 
     def _init_structures(self):

@@ -9,7 +9,7 @@ import threading
 from plots.plot_utils.voronoi_diagram import get_vd_html, get_html
 from voronoi_diagrams.fortunes_algorithm import (
     FortunesAlgorithm,
-    DYNAMIC_MODE,
+    MANUAL_MODE,
 )
 
 from .utils import get_event_dict, get_region_dict
@@ -118,11 +118,11 @@ def save_vd(session: Session, sites, names, xlim, ylim, vd_type):
     """Save VD to the DB in the given session."""
     if vd_type == "vd":
         vd = FortunesAlgorithm.calculate_voronoi_diagram(
-            sites, True, xlim=xlim, ylim=ylim, mode=DYNAMIC_MODE, names=names,
+            sites, True, xlim=xlim, ylim=ylim, mode=MANUAL_MODE, names=names,
         )
     elif vd_type == "aw_vd":
         vd = FortunesAlgorithm.calculate_aw_voronoi_diagram(
-            sites, True, xlim=xlim, ylim=ylim, mode=DYNAMIC_MODE, names=names,
+            sites, True, xlim=xlim, ylim=ylim, mode=MANUAL_MODE, names=names,
         )
     db[session] = VDEntry(vd)
 
