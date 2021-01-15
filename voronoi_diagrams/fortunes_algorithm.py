@@ -314,18 +314,6 @@ class FortunesAlgorithm:
             r_q_right_node,
         ) = self._update_l_list(r_p, r_q, bisector_p_q)
 
-        if bisector_p_q.is_vertical():
-            self.add_begin_vertical_edge(bisector_p_q, None)
-        else:
-            self.add_begin_edge(boundary_p_q_minus, p.point)
-            self.add_begin_edge(boundary_p_q_plus, p.point)
-
-        if self._plot_steps:
-            self._add_boundaries_to_plot([boundary_p_q_minus, boundary_p_q_plus])
-            self._add_bisector_to_plot(
-                bisector_p_q, None
-            )  # It doesn't matter the sign here.
-
         # Step 11.
         # Delete from Q the intersection between the left and right boundary of R*q, if any.
         left_boundary: Optional[Boundary] = None
@@ -355,20 +343,21 @@ class FortunesAlgorithm:
             r_q_right_node,
         )
 
+        self.add_endpoint_to_new_edge_in_site(boundary_p_q_plus, boundary_p_q_minus, p)
+
+        if self._plot_steps:
+            self._update_plot_site_event(boundary_p_q_minus, boundary_p_q_plus)
+
     def _handle_intersection(self, p: Intersection):
         """Handle when event is an intersection."""
         # Step 14.
         # Let p be the intersection of boundaries Cqr and Crs.
-        intersection_region_node = p.region_node
+        region_r_node = p.region_node
         r_q, r_s, r_q_node, r_s_node = self._get_regions_and_nodes_of_intersection(p)
         left_boundary = r_q.left
         right_boundary = r_s.right
-        intersection_region_node_value_left = intersection_region_node.value.left
-        intersection_region_node_value_right = intersection_region_node.value.right
-        intersection_left_bisector = intersection_region_node_value_left.bisector
-        intersection_left_bisector_sign = intersection_region_node_value_left.sign
-        intersection_right_bisector = intersection_region_node_value_right.bisector
-        intersection_right_bisector_sign = intersection_region_node_value_right.sign
+        boundary_q_r = region_r_node.value.left
+        boundary_r_s = region_r_node.value.right
 
         # Step 15.
         # Create bisector B*qs.
@@ -381,51 +370,28 @@ class FortunesAlgorithm:
         )
         boundary_q_s = self.BOUNDARY_CLASS(bisector_q_s, boundary_q_s_sign)
         self.add_edge(bisector_q_s, sign=boundary_q_s_sign)
-        left_region_node = intersection_region_node.left_neighbor
-        right_region_node = intersection_region_node.right_neighbor
-
-        self.add_endpoint_to_new_edge(boundary_q_s, p)
-        self.add_endpoint_to_old_edge(intersection_region_node.value.left, p)
-        self.add_endpoint_to_old_edge(intersection_region_node.value.right, p)
-
-        if self._plot_steps:
-            # Remove
-            self._remove_boundaries_from_figure_traces(
-                intersection_region_node.value.left,
-                intersection_region_node.value.right,
-            )
-            self._update_boundaries_bisectors_figure_traces(
-                [
-                    intersection_region_node.value.left,
-                    intersection_region_node.value.right,
-                ]
-            )
-            # Add new boundary
-            self._add_boundary_to_plot(boundary_q_s)
-            # Add new bisector
-            self._add_bisector_to_plot(bisector_q_s, boundary_q_s_sign)
+        region_q_node = region_r_node.left_neighbor
+        region_s_node = region_r_node.right_neighbor
 
         boundary_q_s.active = True
         self._updated_boundaries = [boundary_q_s]
         self._updated_regions = []
-        self.l_list.remove_region(intersection_region_node, boundary_q_s)
+        self.l_list.remove_region(region_r_node, boundary_q_s)
 
         # Step 17.
         # Delete from Q any intersection between Cqr and its neighbor to the
         # left and between Crs and its neighbor to the right.
-        self._delete_intersection_from_boundary(
-            intersection_region_node_value_left, is_left_intersection=True
-        )
-        if left_region_node is not None:
+        self._delete_intersection_from_boundary(boundary_q_r, is_left_intersection=True)
+        if region_q_node is not None:
             self._delete_intersection_from_boundary(
-                left_region_node.value.left, is_left_intersection=False
+                region_q_node.value.left, is_left_intersection=False
             )
         self._delete_intersection_from_boundary(
-            intersection_region_node_value_right, is_left_intersection=False
+            boundary_r_s, is_left_intersection=False
         )
-        if right_region_node is not None:
+        if region_s_node is not None:
             self._delete_intersection_from_boundary(
-                right_region_node.value.right, is_left_intersection=True
+                region_s_node.value.right, is_left_intersection=True
             )
 
         # Step 18.
@@ -443,30 +409,43 @@ class FortunesAlgorithm:
         # Step 19.
         # Mark p as a vertex and as an endpoint of B*qr, B*rs and B*qs.
         # Add that this vertex is an endpoint of B*qr, B*rs and B*qs.
-        vd_bisectors = self.get_edges(
+        self.add_vertex(p, boundary_q_s, boundary_q_r, boundary_r_s)
+
+        if self._plot_steps:
+            self._update_plot_intersection_event(
+                boundary_q_s, boundary_q_r, boundary_r_s
+            )
+
+    def add_vertex(
+        self,
+        p: Intersection,
+        boundary_q_s: Boundary,
+        boundary_q_r: Boundary,
+        boundary_r_s: Boundary,
+    ) -> None:
+        """Add point in the vertex list."""
+        self.add_endpoint_to_new_edge_in_intersection(boundary_q_s, p)
+        self.add_endpoint_to_old_edge(boundary_q_r, p)
+        self.add_endpoint_to_old_edge(boundary_r_s, p)
+        edges = self.get_edges(
             [
-                (intersection_left_bisector, intersection_left_bisector_sign),
-                (intersection_right_bisector, intersection_right_bisector_sign),
-                (bisector_q_s, boundary_q_s_sign),
+                (boundary_q_r.bisector, boundary_q_r.sign),
+                (boundary_r_s.bisector, boundary_r_s.sign),
+                (boundary_q_s.bisector, boundary_q_s.sign),
             ]
         )
-        self.add_vertex(p.vertex, vd_bisectors)
-
-    def add_vertex(self, point: Point, edges: Optional[List[Edge]] = None) -> None:
-        """Add point in the vertex list."""
-        point_tuple = point.get_tuple()
+        point_tuple = p.vertex.get_tuple()
         if point_tuple not in self._vertices:
-            vertex = Vertex(point)
+            vertex = Vertex(p.vertex)
             self._vertices[point_tuple] = vertex
             self.vertices.append(vertex)
-            self.vertices_list.append(point)
+            self.vertices_list.append(p.vertex)
         else:
             vertex = self._vertices[point_tuple]
 
-        if edges is not None:
-            for vd_bisector in edges:
-                vertex.add_edge(vd_bisector)
-                vd_bisector.add_vertex(vertex)
+        for edge in edges:
+            vertex.add_edge(edge)
+            edge.add_vertex(vertex)
 
         if self._plot_steps:
             self._add_vertex_trace(vertex)
@@ -494,22 +473,6 @@ class FortunesAlgorithm:
         r_q_node = self.l_list.search_region_node(p)
         r_q = r_q_node.value
         return r_q, r_q_node
-
-    def add_endpoint_to_new_edge(self, boundary: Boundary, p: Intersection) -> None:
-        """Add endpoint in new edge."""
-        if boundary.bisector.is_vertical():
-            self.add_begin_vertical_edge(boundary.bisector, p.vertex.y, boundary.sign)
-        else:
-            self.add_begin_edge(boundary, p.point)
-
-    def add_endpoint_to_old_edge(self, boundary: Boundary, p: Intersection) -> None:
-        """Add endpoint in old edge."""
-        if boundary.bisector.is_vertical():
-            self.add_end_vertical_edge(
-                boundary.bisector, p.vertex.y, boundary.sign,
-            )
-        else:
-            self.add_end_edge(boundary, p.point)
 
     def _update_l_list(
         self, r_p: Region, r_q: Region, bisector_p_q: Bisector,
@@ -539,57 +502,6 @@ class FortunesAlgorithm:
             r_q_left_node,
             r_q_right_node,
         )
-
-    def _add_boundaries_to_plot(self, boundaries: List[Boundary]):
-        """Add boundaries to plot."""
-        if self._plot_steps:
-            for boundary in boundaries:
-                self._add_boundary_to_plot(boundary)
-
-    def _add_boundary_to_plot(self, boundary: Boundary):
-        """Add boundary to plot."""
-        if self._plot_steps:
-            trace = get_plot_scatter_boundary(
-                boundary, self._xlim, self._ylim, self.BISECTOR_CLASS,
-            )
-            self._traces.append(trace)
-            self._figure_traces += 1
-            # TODO: Change to use complete_string()
-            self._boundary_plot_dict[str(boundary)] = self._figure_traces - 1
-
-    def _add_bisector_to_plot(self, bisector: Bisector, sign: Optional[bool]):
-        """Add boundary to plot."""
-        if self._plot_steps:
-            if sign is None:
-                vd_bisector = self.get_edges([(bisector, True)])[0]
-            else:
-                vd_bisector = self.get_edges([(bisector, sign)])[0]
-            traces = plot_edge(vd_bisector, self._xlim, self._ylim, self.BISECTOR_CLASS)
-            self._traces += traces
-            traces_numbers = list(
-                range(self._figure_traces, self._figure_traces + len(traces))
-            )
-            if sign is None:
-                self._bisector_plot_dict[
-                    (str(bisector.get_object_to_hash()), True)
-                ] = traces_numbers
-                self._bisector_plot_dict[
-                    (str(bisector.get_object_to_hash()), False)
-                ] = traces_numbers
-            else:
-                self._bisector_plot_dict[
-                    (str(bisector.get_object_to_hash()), sign)
-                ] = traces_numbers
-            self._figure_traces += len(traces)
-
-    def get_edges(self, bisectors: List[Tuple[Bisector, bool]]) -> List[Edge]:
-        """Get voronoi diagram bisectors based on the current state."""
-        edges = []
-        for bisector, sign in bisectors:
-            hasheable_of_bisector = bisector.get_object_to_hash()
-            edge = self._active_bisectors[(hasheable_of_bisector, sign)]
-            edges.append(edge)
-        return edges
 
     def _delete_intersection_from_boundary(
         self, boundary: Optional[Boundary], is_left_intersection: bool
@@ -655,6 +567,125 @@ class FortunesAlgorithm:
         r_s = r_s_node.value  # type: ignore
         return r_q, r_s, r_q_node, r_s_node
 
+    def add_endpoint_to_new_edge_in_site(
+        self, boundary_plus: Boundary, boundary_minus: Boundary, p: Intersection
+    ) -> None:
+        """Add endpoint in new edge."""
+        if boundary_plus.bisector.is_vertical():
+            self.add_begin_vertical_edge(boundary_plus.bisector)
+        else:
+            self.add_begin_edge(boundary_plus, p.point)
+            self.add_begin_edge(boundary_minus, p.point)
+
+    def add_endpoint_to_new_edge_in_intersection(
+        self, boundary: Boundary, p: Intersection
+    ) -> None:
+        """Add endpoint in new edge."""
+        if boundary.bisector.is_vertical():
+            self.add_begin_vertical_edge(boundary.bisector, p.vertex.y, boundary.sign)
+        else:
+            self.add_begin_edge(boundary, p.point)
+
+    def add_endpoint_to_old_edge(self, boundary: Boundary, p: Intersection) -> None:
+        """Add endpoint in old edge."""
+        if boundary.bisector.is_vertical():
+            self.add_end_vertical_edge(
+                boundary.bisector, p.vertex.y, boundary.sign,
+            )
+        else:
+            self.add_end_edge(boundary, p.point)
+
+    def get_edges(self, bisectors: List[Tuple[Bisector, bool]]) -> List[Edge]:
+        """Get voronoi diagram bisectors based on the current state."""
+        edges = []
+        for bisector, sign in bisectors:
+            hasheable_of_bisector = bisector.get_object_to_hash()
+            edge = self._active_bisectors[(hasheable_of_bisector, sign)]
+            edges.append(edge)
+        return edges
+
+    def add_begin_vertical_edge(
+        self, bisector: Bisector, y: Optional[Decimal] = None, sign: bool = True
+    ):
+        """Add endpoint to begin vertical edge."""
+        edge = self.get_edges([(bisector, sign)])[0]
+        edge.add_begin_range_vertical(y)
+
+    def add_begin_edge(self, boundary: Boundary, point: Point) -> None:
+        """Add endpoint to begin edge."""
+        edge = self.get_edges([(boundary.bisector, boundary.sign)])[0]
+        side = boundary.get_side_where_point_belongs(point)
+        edge.add_begin_range(point.x, boundary.sign, side)
+
+    def add_end_vertical_edge(self, bisector: Bisector, y: Decimal, sign: bool = True):
+        """Add endpoint to end vertical edge."""
+        edge = self.get_edges([(bisector, sign)])[0]
+        edge.add_end_range_vertical(y)
+
+    def add_end_edge(self, boundary: Boundary, point: Point) -> None:
+        """Add endpoint to end edge."""
+        edge = self.get_edges([(boundary.bisector, boundary.sign)])[0]
+        side = boundary.get_side_where_point_belongs(point)
+        edge.add_end_range(point.x, boundary.sign, side)
+
+    def _update_plot_site_event(
+        self, boundary_plus: Boundary, boundary_minus: Boundary
+    ):
+        self._add_boundaries_to_plot([boundary_minus, boundary_plus])
+        self._add_bisector_to_plot(boundary_plus.bisector, None)
+
+    def _update_plot_intersection_event(
+        self, boundary_q_s: Boundary, boundary_q_r: Boundary, boundary_r_s: Boundary
+    ):
+        self._remove_boundaries_from_figure_traces(
+            boundary_q_r, boundary_r_s,
+        )
+        self._update_boundaries_bisectors_figure_traces([boundary_q_r, boundary_r_s])
+        self._add_boundary_to_plot(boundary_q_s)
+        self._add_bisector_to_plot(boundary_q_s.bisector, boundary_q_s.sign)
+
+    def _add_boundaries_to_plot(self, boundaries: List[Boundary]):
+        """Add boundaries to plot."""
+        if self._plot_steps:
+            for boundary in boundaries:
+                self._add_boundary_to_plot(boundary)
+
+    def _add_boundary_to_plot(self, boundary: Boundary):
+        """Add boundary to plot."""
+        if self._plot_steps:
+            trace = get_plot_scatter_boundary(
+                boundary, self._xlim, self._ylim, self.BISECTOR_CLASS,
+            )
+            self._traces.append(trace)
+            self._figure_traces += 1
+            # TODO: Change to use complete_string()
+            self._boundary_plot_dict[str(boundary)] = self._figure_traces - 1
+
+    def _add_bisector_to_plot(self, bisector: Bisector, sign: Optional[bool]):
+        """Add boundary to plot."""
+        if self._plot_steps:
+            if sign is None:
+                vd_bisector = self.get_edges([(bisector, True)])[0]
+            else:
+                vd_bisector = self.get_edges([(bisector, sign)])[0]
+            traces = plot_edge(vd_bisector, self._xlim, self._ylim, self.BISECTOR_CLASS)
+            self._traces += traces
+            traces_numbers = list(
+                range(self._figure_traces, self._figure_traces + len(traces))
+            )
+            if sign is None:
+                self._bisector_plot_dict[
+                    (str(bisector.get_object_to_hash()), True)
+                ] = traces_numbers
+                self._bisector_plot_dict[
+                    (str(bisector.get_object_to_hash()), False)
+                ] = traces_numbers
+            else:
+                self._bisector_plot_dict[
+                    (str(bisector.get_object_to_hash()), sign)
+                ] = traces_numbers
+            self._figure_traces += len(traces)
+
     def _update_boundaries_bisectors_figure_traces(
         self, boundaries: List[Optional[Boundary]]
     ):
@@ -709,27 +740,3 @@ class FortunesAlgorithm:
         if boundary is None:
             return
         self._traces[self._boundary_plot_dict[str(boundary)]] = None
-
-    def add_begin_vertical_edge(
-        self, bisector: Bisector, y: Optional[Decimal], sign: bool = True
-    ):
-        """Add endpoint to begin vertical edge."""
-        edge = self.get_edges([(bisector, sign)])[0]
-        edge.add_begin_range_vertical(y)
-
-    def add_begin_edge(self, boundary: Boundary, point: Point) -> None:
-        """Add endpoint to begin edge."""
-        edge = self.get_edges([(boundary.bisector, boundary.sign)])[0]
-        side = boundary.get_side_where_point_belongs(point)
-        edge.add_begin_range(point.x, boundary.sign, side)
-
-    def add_end_vertical_edge(self, bisector: Bisector, y: Decimal, sign: bool = True):
-        """Add endpoint to end vertical edge."""
-        edge = self.get_edges([(bisector, sign)])[0]
-        edge.add_end_range_vertical(y)
-
-    def add_end_edge(self, boundary: Boundary, point: Point) -> None:
-        """Add endpoint to end edge."""
-        edge = self.get_edges([(boundary.bisector, boundary.sign)])[0]
-        side = boundary.get_side_where_point_belongs(point)
-        edge.add_end_range(point.x, boundary.sign, side)
