@@ -251,7 +251,6 @@ class FortunesAlgorithm:
 
     def calculate_event(self):
         """Calculate actual event."""
-        self._plot_step()
         # Step 6 and 7.
         if self.event.is_site:
             self._handle_site(self.event)
@@ -280,7 +279,7 @@ class FortunesAlgorithm:
         else:
             self.calculate_event()
 
-    def is_next_step(self):
+    def has_next_step(self):
         """Get if there is a next step to calculate."""
         return not self.q_queue.is_empty() or not self._begin_event
 

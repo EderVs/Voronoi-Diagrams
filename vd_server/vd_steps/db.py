@@ -24,7 +24,7 @@ class VDStepInfo:
 
     q_queue: Dict[str, Any]
     l_list: Dict[str, Any]
-    is_next_step: bool
+    has_next_step: bool
     is_prev_step: bool
     is_diagram: bool
     actual_event: Dict[str, Any]
@@ -33,7 +33,7 @@ class VDStepInfo:
         self,
         q_queue: List[Dict[str, Any]],
         l_list: List[Dict[str, Any]],
-        is_next_step: bool,
+        has_next_step: bool,
         is_prev_step: bool,
         is_diagram: bool,
         actual_event: Optional[Dict[str, Any]],
@@ -41,7 +41,7 @@ class VDStepInfo:
         """Step info constructor."""
         self.q_queue = q_queue
         self.l_list = l_list
-        self.is_next_step = is_next_step
+        self.has_next_step = has_next_step
         self.is_prev_step = is_prev_step
         self.is_diagram = is_diagram
         self.actual_event = actual_event
@@ -67,7 +67,7 @@ class VDEntry:
         self.steps = [get_html(self.vd._figure)]
         self.step_infos = []
         self.current_step = 0
-        self.finished = not vd.is_next_step()
+        self.finished = not vd.has_next_step()
         self.save_step_info()
 
     def save_step_info(self) -> None:
@@ -90,7 +90,7 @@ class VDEntry:
             VDStepInfo(
                 q_queue=q_queue_dict,
                 l_list=l_list_dict,
-                is_next_step=self.vd.is_next_step(),
+                has_next_step=self.vd.has_next_step(),
                 is_prev_step=self.current_step != 0,
                 is_diagram=self.is_diagram,
                 actual_event=actual_event,
@@ -141,7 +141,7 @@ def add_step(session: Session) -> bool:
     entry.vd.next_step()
     step = get_html(entry.vd._figure)
     entry.steps.append(step)
-    entry.finished = not entry.vd.is_next_step()
+    entry.finished = not entry.vd.has_next_step()
     entry.save_step_info()
     return True
 
