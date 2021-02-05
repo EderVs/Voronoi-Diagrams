@@ -15,7 +15,7 @@ Set `SECRET_KEY` env var
 export SECRET_KEY="secret_key"
 ```
 
-Install `voronoi-diagrams` package.
+Install `voronoi-diagrams` and `plots` packages.
 ```
 pip install -e .
 ```
