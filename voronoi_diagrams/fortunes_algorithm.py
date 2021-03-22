@@ -73,6 +73,7 @@ class FortunesAlgorithm:
             sites, plot_steps=plot_steps, xlim=xlim, ylim=ylim, mode=mode,
         )
 
+        print(voronoi_diagram.get_xml())
         return voronoi_diagram
 
     @staticmethod
@@ -96,7 +97,7 @@ class FortunesAlgorithm:
         voronoi_diagram = FortunesAlgorithm(
             sites, plot_steps=plot_steps, xlim=xlim, ylim=ylim, mode=mode,
         )
-
+        print(voronoi_diagram.get_xml())
         return voronoi_diagram
 
     vertices: List[Vertex]
@@ -739,3 +740,178 @@ class FortunesAlgorithm:
         if boundary is None:
             return
         self._traces[self._boundary_plot_dict[str(boundary)]] = None
+
+    def get_xml(self) -> str:
+        """Get xml representation."""
+        all_xml = self.get_base_xml() + "\n"
+        for site in self.sites:
+            all_xml += site.get_xml()
+        for i in range(len(self.edges)):
+            all_xml += self.edges[i].get_xml(i)
+        for i in range(len(self.vertices)):
+            all_xml += self.vertices[i].get_xml(i)
+        all_xml += """\n
+        </construction>
+        </geogebra>
+        """
+        return all_xml
+
+    def get_base_xml(self) -> str:
+        """Get base xml."""
+        base_xml = """
+        <?xml version="1.0" encoding="utf-8"?>
+        <geogebra format="5.0" version="5.0.631.0" app="suite" subApp="graphing" platform="w" id="5A09B9F5-DD5D-45BC-8B0E-F0FC3D01E904"  xsi:noNamespaceSchemaLocation="http://www.geogebra.org/apps/xsd/ggb.xsd" xmlns="" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" >
+        <gui>
+            <window width="1920" height="937" />
+            <perspectives>
+        <perspective id="tmp">
+            <panes>
+                <pane location="" divider="0.2828125" orientation="1" />
+            </panes>
+            <views>
+                <view id="4097" visible="false" inframe="false" stylebar="true" location="1,1,1,1" size="400" window="100,100,700,550" />
+                <view id="512" toolbar="0 | 1 501 5 19 , 67 | 2 15 45 18 , 7 37 | 514 3 9 , 13 44 , 47 | 16 51 | 551 550 11 ,  20 22 21 23 , 55 56 57 , 12 | 69 | 510 511 , 512 513 | 533 531 , 534 532 , 522 523 , 537 536 , 535 , 538 | 521 520 | 36 , 38 49 560 | 571 30 29 570 31 33 | 17 | 540 40 41 42 , 27 28 35 , 6 , 502" visible="false" inframe="false" stylebar="false" location="1,1,1" size="500" window="100,100,600,400" />
+                <view id="4" toolbar="0 || 2020 , 2021 , 2022 || 2001 , 2003 , 2002 , 2004 , 2005 || 2040 , 2041 , 2042 , 2044 , 2043" visible="false" inframe="false" stylebar="false" location="1,1" size="300" window="100,100,600,400" />
+                <view id="8" toolbar="1001 | 1002 | 1003  || 1005 | 1004 || 1006 | 1007 | 1010 || 1008 | 1009 || 6" visible="false" inframe="false" stylebar="false" location="1,3" size="300" window="100,100,600,400" />
+                <view id="1" visible="true" inframe="false" stylebar="false" location="1" size="1377" window="100,100,600,400" />
+                <view id="2" visible="true" inframe="false" stylebar="false" location="3" size="543" tab="ALGEBRA" window="100,100,600,400" />
+                <view id="16" visible="false" inframe="false" stylebar="false" location="1" size="300" window="50,50,500,500" />
+                <view id="32" visible="false" inframe="false" stylebar="true" location="1" size="300" window="50,50,500,500" />
+                <view id="64" toolbar="0" visible="false" inframe="false" stylebar="false" location="1" size="480" window="50,50,500,500" />
+                <view id="128" visible="false" inframe="false" stylebar="false" location="1" size="480" window="50,50,500,500" />
+                <view id="70" toolbar="0 || 2020 || 2021 || 2022" visible="false" inframe="false" stylebar="true" location="1" size="900" window="50,50,500,500" />
+            </views>
+            <toolbar show="true" items="0 77 73 62 | 1 501 67 , 5 19 , 72 75 76 | 2 15 45 , 18 65 , 7 37 | 4 3 8 9 , 13 44 , 58 , 47 | 16 51 64 , 70 | 10 34 53 11 , 24  20 22 , 21 23 | 55 56 57 , 12 | 36 46 , 38 49  50 , 71  14  68 | 30 29 54 32 31 33 | 25 17 26 60 52 61 | 40 41 42 , 27 28 35 , 6" position="1" help="false" />
+            <input show="true" cmd="true" top="algebra" />
+            <dockBar show="false" east="false" />
+        </perspective>
+            </perspectives>
+            <labelingStyle  val="1"/>
+            <font  size="16"/>
+        </gui>
+        <euclidianView>
+            <viewNumber viewNo="1"/>
+            <size  width="1377" height="937"/>
+            <coordSystem xZero="518.5891474746063" yZero="469.5869353568916" scale="3.722628839279324" yscale="3.722628839279312"/>
+            <evSettings axes="true" grid="true" gridIsBold="false" pointCapturing="3" rightAngleStyle="1" checkboxSize="26" gridType="3"/>
+            <bgColor r="255" g="255" b="255"/>
+            <axesColor r="0" g="0" b="0"/>
+            <gridColor r="192" g="192" b="192"/>
+            <lineStyle axes="1" grid="0"/>
+            <axis id="0" show="true" label="" unitLabel="" tickStyle="1" showNumbers="true"/>
+            <axis id="1" show="true" label="" unitLabel="" tickStyle="1" showNumbers="true"/>
+        </euclidianView>
+        <algebraView>
+            <mode val="3"/>
+        </algebraView>
+        <kernel>
+            <continuous val="false"/>
+            <usePathAndRegionParameters val="true"/>
+            <decimals val="4"/>
+            <angleUnit val="degree"/>
+            <algebraStyle val="3" spreadsheet="0"/>
+            <coordStyle val="0"/>
+        </kernel>
+        <tableview min="-2" max="2" step="1"/>
+        <scripting blocked="false" disabled="false"/>
+        <construction title="Voronoi Diagram" author="" date="">
+        <expression label="b" exp="b(x, x_{p}, x_{q}, y_{p}, y_{q}) = ((-((x_{q} - x_{p}) / (y_{q} - y_{p}))) * x) + (x_{q}^(2) - x_{p}^(2) + y_{q}^(2) - y_{p}^(2)) / ((2 * (y_{q} - y_{p})))" type="function"/>
+        <element type="functionnvar" label="b">
+            <show object="false" label="true"/>
+            <objColor r="204" g="0" b="0" alpha="0.75"/>
+            <layer val="0"/>
+            <labelMode val="0"/>
+            <animation step="0.1" speed="2" type="0" playing="false"/>
+        </element>
+        <expression label="s" exp="s(w_{1}, w_{2}) = (4 * (w_{1} - w_{2})^(2))" type="function"/>
+        <element type="functionnvar" label="s">
+            <show object="true" label="true" ev="4"/>
+            <objColor r="0" g="168" b="213" alpha="0.75"/>
+            <layer val="0"/>
+            <labelMode val="0"/>
+            <animation step="0.1" speed="1" type="0" playing="false"/>
+            <lineStyle thickness="1" type="0" typeHidden="1"/>
+        </element>
+        <expression label="r" exp="r(x_{p}, x_{q}, y_{p}, y_{q}, w_{1}, w_{2}) = x_{q}^(2) + y_{q}^(2) - x_{p}^(2) - y_{p}^(2) - (w_{1} - w_{2})^(2)" type="function"/>
+        <element type="functionnvar" label="r">
+            <show object="true" label="true"/>
+            <objColor r="204" g="0" b="0" alpha="0.75"/>
+            <layer val="0"/>
+            <labelMode val="0"/>
+            <animation step="0.1" speed="1" type="0" playing="false"/>
+        </element>
+        <expression label="A" exp="A(x_{p}, x_{q}, w_{1}, w_{2}) = s(w_{1}, w_{2}) - ((2 * x_{p}) - (2 * x_{q}))^(2)" />
+        <element type="functionnvar" label="A">
+            <show object="true" label="true"/>
+            <objColor r="21" g="101" b="192" alpha="0"/>
+            <layer val="0"/>
+            <labelMode val="0"/>
+        </element>
+        <expression label="B" exp="B(x_{p}, x_{q}, y_{p}, y_{q}) = ((-2 * ((2 * x_{p}) - (2 * x_{q}))) * ((2 * y_{p}) - (2 * y_{q})))" type="function"/>
+        <element type="functionnvar" label="B">
+            <show object="true" label="true"/>
+            <objColor r="204" g="0" b="0" alpha="0.75"/>
+            <layer val="0"/>
+            <labelMode val="0"/>
+            <animation step="0.1" speed="1" type="0" playing="false"/>
+        </element>
+        <expression label="C" exp="C(y_{p}, y_{q}, w_{1}, w_{2}) = s(w_{1}, w_{2}) - ((2 * y_{p}) - (2 * y_{q}))^(2)" />
+        <element type="functionnvar" label="C">
+            <show object="true" label="true"/>
+            <objColor r="204" g="0" b="0" alpha="0.75"/>
+            <layer val="0"/>
+            <labelMode val="0"/>
+        </element>
+        <expression label="D" exp="D(x_{p}, x_{q}, y_{p}, y_{q}, w_{1}, w_{2}) = ((-2 * x_{p}) * s(w_{1}, w_{2})) - ((2 * ((2 * x_{p}) - (2 * x_{q}))) * r(x_{p}, x_{q}, y_{p}, y_{q}, w_{1}, w_{2}))" />
+        <element type="functionnvar" label="D">
+            <show object="true" label="true"/>
+            <objColor r="204" g="0" b="0" alpha="0.75"/>
+            <layer val="0"/>
+            <labelMode val="0"/>
+        </element>
+        <expression label="E" exp="E(x_{p}, x_{q}, y_{p}, y_{q}, w_{1}, w_{2}) = ((-2 * y_{p}) * s(w_{1}, w_{2})) - ((2 * ((2 * y_{p}) - (2 * y_{q}))) * r(x_{p}, x_{q}, y_{p}, y_{q}, w_{1}, w_{2}))" />
+        <element type="functionnvar" label="E">
+            <show object="true" label="true"/>
+            <objColor r="204" g="0" b="0" alpha="0.75"/>
+            <layer val="0"/>
+            <labelMode val="0"/>
+        </element>
+        <expression label="F" exp="F(x_{p}, x_{q}, y_{p}, y_{q}, w_{1}, w_{2}) = (s(w_{1}, w_{2}) * x_{p}^(2)) + (s(w_{1}, w_{2}) * y_{p}^(2)) - (r(x_{p}, x_{q}, y_{p}, y_{q}, w_{1}, w_{2}))^(2)" />
+        <element type="functionnvar" label="F">
+            <show object="true" label="true"/>
+            <objColor r="204" g="0" b="0" alpha="0.75"/>
+            <layer val="0"/>
+            <labelMode val="0"/>
+        </element>
+        <expression label="B_{p}" exp="B_{p}(x, x_{p}, x_{q}, y_{p}, y_{q}, w_{1}, w_{2}) = ((-((B(x_{p}, x_{q}, y_{p}, y_{q}) * x) + E(x_{p}, x_{q}, y_{p}, y_{q}, w_{1}, w_{2}))) + sqrt(((B(x_{p}, x_{q}, y_{p}, y_{q}) * x) + E(x_{p}, x_{q}, y_{p}, y_{q}, w_{1}, w_{2}))^(2) - ((4 * C(y_{p}, y_{q}, w_{1}, w_{2})) * ((A(x_{p}, x_{q}, w_{1}, w_{2}) * x^(2)) + (D(x_{p}, x_{q}, y_{p}, y_{q}, w_{1}, w_{2}) * x) + F(x_{p}, x_{q}, y_{p}, y_{q}, w_{1}, w_{2}))))) / ((2 * C(y_{p}, y_{q}, w_{1}, w_{2})))" />
+        <element type="functionnvar" label="B_{p}">
+            <show object="true" label="true"/>
+            <objColor r="204" g="0" b="0" alpha="0.75"/>
+            <layer val="0"/>
+            <labelMode val="0"/>
+        </element>
+        <expression label="B_{m}" exp="B_{m}(x, x_{p}, x_{q}, y_{p}, y_{q}, w_{1}, w_{2}) = ((-((B(x_{p}, x_{q}, y_{p}, y_{q}) * x) + E(x_{p}, x_{q}, y_{p}, y_{q}, w_{1}, w_{2}))) - sqrt(((B(x_{p}, x_{q}, y_{p}, y_{q}) * x) + E(x_{p}, x_{q}, y_{p}, y_{q}, w_{1}, w_{2}))^(2) - ((4 * C(y_{p}, y_{q}, w_{1}, w_{2})) * ((A(x_{p}, x_{q}, w_{1}, w_{2}) * x^(2)) + (D(x_{p}, x_{q}, y_{p}, y_{q}, w_{1}, w_{2}) * x) + F(x_{p}, x_{q}, y_{p}, y_{q}, w_{1}, w_{2}))))) / ((2 * C(y_{p}, y_{q}, w_{1}, w_{2})))" />
+        <element type="functionnvar" label="B_{m}">
+            <show object="true" label="true"/>
+            <objColor r="204" g="0" b="0" alpha="0.75"/>
+            <layer val="0"/>
+            <labelMode val="0"/>
+        </element>
+        <expression label="c_{1}" exp="c_{1}(x, h_{1}, k_{1}, r_{1}) = k_{1} + sqrt(r_{1}^(2) - (x - h_{1})^(2))" type="function"/>
+        <element type="functionnvar" label="c_{1}">
+            <show object="true" label="true"/>
+            <objColor r="204" g="0" b="0" alpha="0.75"/>
+            <layer val="0"/>
+            <labelMode val="0"/>
+            <animation step="0.1" speed="1" type="0" playing="false"/>
+        </element>
+        <expression label="c_{2}" exp="c_{2}(x, h_{1}, k_{1}, r_{1}) = k_{1} - sqrt(r_{1}^(2) - (x - h_{1})^(2))" type="function"/>
+        <element type="functionnvar" label="c_{2}">
+            <show object="true" label="true"/>
+            <objColor r="204" g="0" b="0" alpha="0.75"/>
+            <layer val="0"/>
+            <labelMode val="0"/>
+            <animation step="0.1" speed="1" type="0" playing="false"/>
+        </element>
+        """
+        return base_xml

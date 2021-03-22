@@ -3,6 +3,7 @@
 # Standar Library
 from typing import Any, Optional, Tuple
 from abc import ABCMeta, abstractmethod
+from xml.etree import ElementTree as ET
 
 # Models
 from .points import Point
@@ -75,6 +76,35 @@ class Event:
         if other_event_point.y == event_point.y:
             return other_event_point.x - event_point.x
         return event_point.y - other_event_point.y
+
+    def get_xml_element_value(self, label: str, value: str) -> str:
+        """Get xml element with value."""
+        numeric_element = ET.Element("element")
+        numeric_element.set("type", "numeric")
+        numeric_element.set("label", label)
+        numeric_show = ET.SubElement(numeric_element, "value")
+        numeric_show.set("val", value)
+        numeric_show = ET.SubElement(numeric_element, "show")
+        numeric_show.set("object", "false")
+        numeric_show.set("label", "true")
+        numeric_obj_color = ET.SubElement(numeric_element, "objColor")
+        numeric_obj_color.set("r", "0")
+        numeric_obj_color.set("g", "0")
+        numeric_obj_color.set("b", "0")
+        numeric_obj_color.set("alpha", "0")
+        numeric_layer = ET.SubElement(numeric_element, "layer")
+        numeric_layer.set("val", "0")
+        numeric_label_mode = ET.SubElement(numeric_element, "labelMode")
+        numeric_label_mode.set("val", "1")
+        numeric_line_style = ET.SubElement(numeric_element, "lineStyle")
+        numeric_line_style.set("thickness", "10")
+        numeric_line_style.set("type", "0")
+        numeric_line_style.set("typeHidden", "1")
+
+        numeric_xml = (
+            ET.tostring(numeric_element, encoding="unicode", method="xml") + "\n"
+        )
+        return numeric_xml
 
 
 class Site(Event):
@@ -166,6 +196,21 @@ class Site(Event):
     def get_object_to_hash(self) -> Coordinates:
         """Get object to hash this site."""
         return (self.point.x, self.point.y)
+
+    def get_xml(self) -> str:
+        """Get XML representation."""
+        xml_str = ""
+        label_x = "p_{{{0}x}}".format(self.name)
+        value_x = "{}".format(self.point.x)
+        xml_str += self.get_xml_element_value(label_x, value_x) + "\n"
+        label_y = "p_{{{0}y}}".format(self.name)
+        value_y = "{}".format(self.point.y)
+        xml_str += self.get_xml_element_value(label_y, value_y) + "\n"
+
+        label_point = "p_{{{0}}}".format(self.name)
+        exp = "({0}, {1})".format(label_x, label_y)
+        xml_str += self.point.get_xml(label_point, exp) + "\n"
+        return xml_str
 
 
 class Intersection(Event):
@@ -353,3 +398,77 @@ class WeightedSite(Site):
             # The smallest site will be first.
             return self.weight - event.weight
         return event_point.y - other_event_point.y
+
+    def get_xml(self) -> str:
+        """Get xml representation."""
+        wp_xml = super().get_xml() + "\n"
+        label_x = "p_{{{0}x}}".format(self.name)
+        label_y = "p_{{{0}y}}".format(self.name)
+        label_w = "p_{{{0}w}}".format(self.name)
+        value_w = "{}".format(self.weight)
+        wp_xml += self.get_xml_element_value(label_w, value_w) + "\n"
+        wp_xml += self.get_weight_circle_xml(label_x, label_y, label_w) + "\n"
+        return wp_xml
+
+    def get_weight_circle_xml(self, label_x, label_y, label_w) -> str:
+        """Get weight circle in xml."""
+        all_xml = ""
+        circle_label = "w_{{{},{}}}"
+        expression = "c_{{{0}}}(x, {1}, {2}, {3})"
+        exp_1 = "{0}(x) = {1}".format(
+            circle_label.format(self.name, "1"),
+            expression.format("1", label_x, label_y, label_w),
+        )
+        all_xml += (
+            self.get_xml_expression(circle_label.format(self.name, "1"), exp_1) + "\n"
+        )
+
+        exp_2 = "{0}(x) = {1}".format(
+            circle_label.format(self.name, "2"),
+            expression.format("2", label_x, label_y, label_w),
+        )
+        all_xml += (
+            self.get_xml_expression(circle_label.format(self.name, "2"), exp_2) + "\n"
+        )
+        return all_xml
+
+    def get_xml_expression(self, label, exp) -> str:
+        """Get expression."""
+        weight_expression = ET.Element("expression")
+        weight_expression.set(
+            "label", label,
+        )
+        weight_expression.set(
+            "exp", exp,
+        )
+
+        weight_element = ET.Element("element")
+        weight_element.set("type", "function")
+        weight_element.set("label", label)
+        weight_show = ET.SubElement(weight_element, "show")
+        weight_show.set("object", "true")
+        weight_show.set("label", "true")
+        weight_show.set("ev", "4")
+        weight_obj_color = ET.SubElement(weight_element, "objColor")
+        weight_obj_color.set("r", "0")
+        weight_obj_color.set("g", "0")
+        weight_obj_color.set("b", "0")
+        weight_obj_color.set("alpha", "0")
+        weight_layer = ET.SubElement(weight_element, "layer")
+        weight_layer.set("val", "0")
+        weight_label_mode = ET.SubElement(weight_element, "labelMode")
+        weight_label_mode.set("val", "0")
+        weight_fixed = ET.SubElement(weight_element, "fixed")
+        weight_fixed.set("val", "true")
+        weight_line_style = ET.SubElement(weight_element, "lineStyle")
+        weight_line_style.set("thickness", "5")
+        weight_line_style.set("type", "0")
+        weight_line_style.set("typeHidden", "1")
+        weight_line_style.set("opacity", "204")
+
+        expression_xml = (
+            ET.tostring(weight_expression, encoding="unicode", method="xml")
+            + "\n"
+            + ET.tostring(weight_element, encoding="unicode", method="xml")
+        )
+        return expression_xml

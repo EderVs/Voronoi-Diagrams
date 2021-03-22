@@ -4,6 +4,7 @@ from abc import abstractmethod
 from typing import Tuple, Any, Optional, List, Iterable
 from decimal import Decimal
 import numpy as np
+from xml.etree import ElementTree as ET
 
 # Models
 from .bisectors import Bisector, PointBisector, WeightedPointBisector
@@ -236,6 +237,58 @@ class Edge:
         """Add a new range if neccessary."""
         raise NotImplementedError
 
+    @abstractmethod
+    def get_xml(self) -> str:
+        """Get xml representation of the edge.
+
+        The xml representation is based on Geogebra ggb xml.
+        Docs: https://wiki.geogebra.org/en/Reference:XML
+        """
+        raise NotImplementedError
+
+    def create_xml_expression(self, label, condition, expression):
+        """Something."""
+        exp_str = "{0} = If[{1}, {2}]".format(label, condition, expression)
+
+        edge_expression = ET.Element("expression")
+        edge_expression.set(
+            "label", label,
+        )
+        edge_expression.set(
+            "exp", exp_str,
+        )
+
+        edge_element = ET.Element("element")
+        edge_element.set("type", "function")
+        edge_element.set("label", label)
+        edge_show = ET.SubElement(edge_element, "show")
+        edge_show.set("object", "true")
+        edge_show.set("label", "true")
+        edge_show.set("ev", "4")
+        edge_obj_color = ET.SubElement(edge_element, "objColor")
+        edge_obj_color.set("r", "0")
+        edge_obj_color.set("g", "0")
+        edge_obj_color.set("b", "0")
+        edge_obj_color.set("alpha", "0")
+        edge_layer = ET.SubElement(edge_element, "layer")
+        edge_layer.set("val", "0")
+        edge_label_mode = ET.SubElement(edge_element, "labelMode")
+        edge_label_mode.set("val", "0")
+        edge_fixed = ET.SubElement(edge_element, "fixed")
+        edge_fixed.set("val", "true")
+        edge_line_style = ET.SubElement(edge_element, "lineStyle")
+        edge_line_style.set("thickness", "5")
+        edge_line_style.set("type", "0")
+        edge_line_style.set("typeHidden", "1")
+        edge_line_style.set("opacity", "204")
+
+        expression_xml = (
+            ET.tostring(edge_expression, encoding="unicode", method="xml")
+            + "\n"
+            + ET.tostring(edge_element, encoding="unicode", method="xml")
+        )
+        return expression_xml
+
 
 class PointBisectorEdge(Edge):
     """Point Bisector Edge representation in Voronoi Diagram."""
@@ -276,6 +329,93 @@ class PointBisectorEdge(Edge):
     def complete_ranges(self):
         """Add a new range if neccessary."""
         pass
+
+    def get_xml(self, i: int) -> str:
+        """Get xml representation of the edge.
+
+        The xml representation is based on Geogebra ggb xml.
+        Docs: https://wiki.geogebra.org/en/Reference:XML
+        """
+        self.complete_ranges()
+        xml_str = ""
+        edge_label = "e_{{{0},{1}," + str(i) + "}}"
+        expression_l = "b(x, p_{{{0}x}}, p_{{{1}x}}, p_{{{0}y}}, p_{{{1}y}})"
+        if len(self.ranges_b_plus) > 0 and len(self.ranges_b_minus) > 0:
+            # Both Boundaries have one type
+            condition = "{0} x {1}"
+            if self.ranges_b_minus[-1][1] is None:
+                first_limit = ""
+            else:
+                first_limit = "{0} ≤".format(self.ranges_b_minus[-1][1])
+            if self.ranges_b_plus[-1][1] is None:
+                last_limit = ""
+            else:
+                last_limit = "≤ {0}".format(self.ranges_b_plus[-1][1])
+
+            edge_label_1 = edge_label.format(
+                self.bisector.sites[0].name, self.bisector.sites[1].name
+            )
+            condition_1 = condition.format(first_limit, last_limit)
+            expression_1 = expression_l.format(
+                self.bisector.sites[0].name, self.bisector.sites[1].name
+            )
+            xml_str += (
+                self.create_xml_expression(edge_label_1, condition_1, expression_1)
+                + "\n"
+            )
+        elif len(self.ranges_b_plus) > 0:
+            condition = "{0} x {1}"
+            if self.ranges_b_plus[-1][2] == 0:
+                if self.ranges_b_plus[-1][1] is None:
+                    last_limit = ""
+                else:
+                    last_limit = "≤ {0}".format(self.ranges_b_plus[-1][1])
+                first_limit = "{0} ≤".format(self.ranges_b_plus[-1][0])
+            else:
+                if self.ranges_b_plus[-1][1] is None:
+                    first_limit = ""
+                else:
+                    first_limit = "{0} ≤".format(self.ranges_b_plus[-1][1])
+                last_limit = "≤ {0}".format(self.ranges_b_plus[-1][0])
+
+            edge_label_1 = edge_label.format(
+                self.bisector.sites[0].name, self.bisector.sites[1].name
+            )
+            condition_1 = condition.format(first_limit, last_limit)
+            expression_1 = expression_l.format(
+                self.bisector.sites[0].name, self.bisector.sites[1].name
+            )
+            xml_str += (
+                self.create_xml_expression(edge_label_1, condition_1, expression_1)
+                + "\n"
+            )
+        elif len(self.ranges_b_minus) > 0:
+            condition = "{0} x {1}"
+            if self.ranges_b_minus[-1][2] == 0:
+                if self.ranges_b_minus[-1][1] is None:
+                    first_limit = ""
+                else:
+                    first_limit = "{0} ≤".format(self.ranges_b_minus[-1][1])
+                last_limit = "≤ {0}".format(self.ranges_b_minus[-1][0])
+            else:
+                if self.ranges_b_minus[-1][1] is None:
+                    last_limit = ""
+                else:
+                    last_limit = "≤ {0}".format(self.ranges_b_minus[-1][1])
+                first_limit = "{0} ≤".format(self.ranges_b_minus[-1][0])
+
+            edge_label_1 = edge_label.format(
+                self.bisector.sites[0].name, self.bisector.sites[1].name
+            )
+            condition_1 = condition.format(first_limit, last_limit)
+            expression_1 = expression_l.format(
+                self.bisector.sites[0].name, self.bisector.sites[1].name
+            )
+            xml_str += (
+                self.create_xml_expression(edge_label_1, condition_1, expression_1)
+                + "\n"
+            )
+        return xml_str
 
 
 class WeightedPointBisectorEdge(Edge):
@@ -343,6 +483,12 @@ class WeightedPointBisectorEdge(Edge):
                     del b_range[i]
                     break
 
+        if len(self.ranges_b_minus) > 0 and len(self.ranges_b_plus) > 0:
+            x0, x1, side = self.ranges_b_plus[-1]
+            complete_range_in_boundary_if_neccessary(x1, side, self.boundary_plus)
+            x1, x0, side = self.ranges_b_minus[-1]
+            complete_range_in_boundary_if_neccessary(x0, side, self.boundary_minus)
+            return
         if len(self.ranges_b_minus) > 0:
             x1, x0, side = self.ranges_b_minus[-1]
             return complete_range_in_boundary_if_neccessary(
@@ -361,3 +507,214 @@ class WeightedPointBisectorEdge(Edge):
         if not self.bisector.is_vertical() and are_sites_in_same_y:
             delete_first_with_side_0(self.ranges_b_plus)
             delete_first_with_side_0(self.ranges_b_minus)
+
+    def get_xml(self, i: int) -> str:
+        """Get xml representation of the edge.
+
+        The xml representation is based on Geogebra ggb xml.
+        Docs: https://wiki.geogebra.org/en/Reference:XML
+        """
+        self.complete_ranges()
+        xml_str = ""
+        edge_label = "e_{{{0},{1},{2}," + str(i) + "}}"
+        expression = "B_{{{2}}}(x, p_{{{0}x}}, p_{{{1}x}}, p_{{{0}y}}, p_{{{1}y}}, p_{{{0}w}}, p_{{{1}w}})"
+        expression_l = "b(x, p_{{{0}x}}, p_{{{1}x}}, p_{{{0}y}}, p_{{{1}y}})"
+        if len(self.ranges_b_minus) > 1:
+            # Boundary minus has two types
+            condition = "{0} ≤ x {1}"
+            if self.ranges_b_minus[-1][1] is None:
+                first_limit = ""
+            else:
+                first_limit = "≤ {0}".format(self.ranges_b_minus[-1][1])
+            if len(self.ranges_b_plus) > 0:
+                if self.ranges_b_plus[-1][1] is None:
+                    last_limit = ""
+                else:
+                    last_limit = "≤ {0}".format(self.ranges_b_plus[-1][1])
+            else:
+                last_limit = "≤ {0}".format(self.ranges_b_minus[0][0])
+
+            edge_label_1 = edge_label.format(
+                self.bisector.sites[0].name, self.bisector.sites[1].name, "p"
+            )
+            condition_1 = condition.format(self.ranges_b_minus[-1][0], first_limit)
+            expression_1 = expression.format(
+                self.bisector.sites[0].name, self.bisector.sites[1].name, "p"
+            )
+            xml_str += (
+                self.create_xml_expression(edge_label_1, condition_1, expression_1)
+                + "\n"
+            )
+            edge_label_2 = edge_label.format(
+                self.bisector.sites[0].name, self.bisector.sites[1].name, "m"
+            )
+            condition_2 = condition.format(self.ranges_b_minus[-1][0], last_limit)
+            expression_2 = expression.format(
+                self.bisector.sites[0].name, self.bisector.sites[1].name, "m"
+            )
+            xml_str += (
+                self.create_xml_expression(edge_label_2, condition_2, expression_2)
+                + "\n"
+            )
+
+        elif len(self.ranges_b_plus) > 1:
+            # Boundary plus has two types
+            condition = "{0} x ≤ {1}"
+            if self.ranges_b_plus[-1][1] is None:
+                first_limit = ""
+            else:
+                first_limit = "{0} ≤".format(self.ranges_b_plus[-1][1])
+            if len(self.ranges_b_minus) > 0:
+                if self.ranges_b_minus[-1][1] is None:
+                    last_limit = ""
+                else:
+                    last_limit = "{0} ≤".format(self.ranges_b_minus[-1][1])
+            else:
+                last_limit = "{0} ≤".format(self.ranges_b_plus[0][0])
+
+            edge_label_1 = edge_label.format(
+                self.bisector.sites[0].name, self.bisector.sites[1].name, "p"
+            )
+            condition_1 = condition.format(first_limit, self.ranges_b_plus[-1][0])
+            expression_1 = expression.format(
+                self.bisector.sites[0].name, self.bisector.sites[1].name, "p"
+            )
+            xml_str += (
+                self.create_xml_expression(edge_label_1, condition_1, expression_1)
+                + "\n"
+            )
+            edge_label_2 = edge_label.format(
+                self.bisector.sites[0].name, self.bisector.sites[1].name, "m"
+            )
+            condition_2 = condition.format(last_limit, self.ranges_b_plus[-1][0])
+            expression_2 = expression.format(
+                self.bisector.sites[0].name, self.bisector.sites[1].name, "m"
+            )
+            xml_str += (
+                self.create_xml_expression(edge_label_2, condition_2, expression_2)
+                + "\n"
+            )
+        elif len(self.ranges_b_plus) > 0 and len(self.ranges_b_minus) > 0:
+            # Both Boundaries have one type
+            p, q = self.bisector.get_sites_tuple()
+            if p.point.y - p.weight > q.point.y - q.weight:
+                if p.weight > q.weight:
+                    sign_str = "m"
+                else:
+                    sign_str = "p"
+            else:
+                sign_str = "p"
+
+            condition = "{0} x {1}"
+            if self.ranges_b_minus[-1][1] is None:
+                first_limit = ""
+            else:
+                first_limit = "{0} ≤".format(self.ranges_b_minus[-1][1])
+            if self.ranges_b_plus[-1][1] is None:
+                last_limit = ""
+            else:
+                last_limit = "≤ {0}".format(self.ranges_b_plus[-1][1])
+
+            edge_label_1 = edge_label.format(
+                self.bisector.sites[0].name, self.bisector.sites[1].name, sign_str
+            )
+            condition_1 = condition.format(first_limit, last_limit)
+            if self.bisector.sites[0].weight == self.bisector.sites[1].weight:
+                expression_1 = expression_l.format(
+                    self.bisector.sites[0].name, self.bisector.sites[1].name
+                )
+            else:
+                expression_1 = expression.format(
+                    self.bisector.sites[0].name, self.bisector.sites[1].name, sign_str
+                )
+            xml_str += (
+                self.create_xml_expression(edge_label_1, condition_1, expression_1)
+                + "\n"
+            )
+        elif len(self.ranges_b_plus) > 0:
+            p, q = self.bisector.get_sites_tuple()
+            if p.point.y - p.weight > q.point.y - q.weight:
+                if p.weight > q.weight:
+                    sign_str = "m"
+                else:
+                    sign_str = "p"
+            else:
+                if self.ranges_b_plus[-1][2] == 0:
+                    sign_str = "m"
+                else:
+                    sign_str = "p"
+
+            condition = "{0} x {1}"
+            if self.ranges_b_plus[-1][2] == 0:
+                if self.ranges_b_plus[-1][1] is None:
+                    last_limit = ""
+                else:
+                    last_limit = "≤ {0}".format(self.ranges_b_plus[-1][1])
+                first_limit = "{0} ≤".format(self.ranges_b_plus[-1][0])
+            else:
+                if self.ranges_b_plus[-1][1] is None:
+                    first_limit = ""
+                else:
+                    first_limit = "{0} ≤".format(self.ranges_b_plus[-1][1])
+                last_limit = "≤ {0}".format(self.ranges_b_plus[-1][0])
+
+            edge_label_1 = edge_label.format(
+                self.bisector.sites[0].name, self.bisector.sites[1].name, sign_str
+            )
+            condition_1 = condition.format(first_limit, last_limit)
+            if self.bisector.sites[0].weight == self.bisector.sites[1].weight:
+                expression_1 = expression_l.format(
+                    self.bisector.sites[0].name, self.bisector.sites[1].name
+                )
+            else:
+                expression_1 = expression.format(
+                    self.bisector.sites[0].name, self.bisector.sites[1].name, sign_str
+                )
+            xml_str += (
+                self.create_xml_expression(edge_label_1, condition_1, expression_1)
+                + "\n"
+            )
+        elif len(self.ranges_b_minus) > 0:
+            p, q = self.bisector.get_sites_tuple()
+            if p.point.y - p.weight > q.point.y - q.weight:
+                if p.weight > q.weight:
+                    sign_str = "m"
+                else:
+                    sign_str = "p"
+            else:
+                if self.ranges_b_minus[-1][2] == 0:
+                    sign_str = "m"
+                else:
+                    sign_str = "p"
+
+            condition = "{0} x {1}"
+            if self.ranges_b_minus[-1][2] == 0:
+                if self.ranges_b_minus[-1][1] is None:
+                    first_limit = ""
+                else:
+                    first_limit = "{0} ≤".format(self.ranges_b_minus[-1][1])
+                last_limit = "≤ {0}".format(self.ranges_b_minus[-1][0])
+            else:
+                if self.ranges_b_minus[-1][1] is None:
+                    last_limit = ""
+                else:
+                    last_limit = "≤ {0}".format(self.ranges_b_minus[-1][1])
+                first_limit = "{0} ≤".format(self.ranges_b_minus[-1][0])
+
+            edge_label_1 = edge_label.format(
+                self.bisector.sites[0].name, self.bisector.sites[1].name, sign_str
+            )
+            condition_1 = condition.format(first_limit, last_limit)
+            if self.bisector.sites[0].weight == self.bisector.sites[1].weight:
+                expression_1 = expression_l.format(
+                    self.bisector.sites[0].name, self.bisector.sites[1].name
+                )
+            else:
+                expression_1 = expression.format(
+                    self.bisector.sites[0].name, self.bisector.sites[1].name, sign_str
+                )
+            xml_str += (
+                self.create_xml_expression(edge_label_1, condition_1, expression_1)
+                + "\n"
+            )
+        return xml_str
