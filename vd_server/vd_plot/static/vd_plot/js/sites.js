@@ -436,3 +436,13 @@ $(document).ready(function () {
     });
     $('#sidebar').toggleClass('active');
 });
+
+function download_gpp() {
+    var a = document.createElement("a");
+    a.href = '/geogebra/gpp/?session=' + session;
+    a.setAttribute("download", "voronoi_diagram.ggb");
+    a.click();
+}
+
+$('#download-gpp').click(download_gpp)
+$('#download-gpp-responsive').click(download_gpp)

@@ -248,7 +248,10 @@ class Edge:
 
     def create_xml_expression(self, label, condition, expression):
         """Something."""
-        exp_str = "{0} = If[{1}, {2}]".format(label, condition, expression)
+        if condition == " x ":
+            exp_str = "{0}(x) = {1}".format(label, expression)
+        else:
+            exp_str = "{0}(x) = If[{1}, {2}]".format(label, condition, expression)
 
         edge_expression = ET.Element("expression")
         edge_expression.set(
@@ -603,7 +606,10 @@ class WeightedPointBisectorEdge(Edge):
                 else:
                     sign_str = "p"
             else:
-                sign_str = "p"
+                if self.ranges_b_plus[-1][2] == 0:
+                    sign_str = "m"
+                else:
+                    sign_str = "p"
 
             condition = "{0} x {1}"
             if self.ranges_b_minus[-1][1] is None:

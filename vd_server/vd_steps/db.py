@@ -59,15 +59,26 @@ class VDEntry:
     is_diagram: bool
     current_step: int
 
-    def __init__(self, vd: FortunesAlgorithm):
+    def __init__(
+        self,
+        vd: FortunesAlgorithm,
+        steps: bool = True,
+        xlim: Optional[Any] = None,
+        ylim: Optional[Any] = None,
+    ):
         """Create entry."""
         self.vd = vd
         self.created_at = datetime.now()
-        self.is_diagram = False
-        self.steps = [get_html(self.vd._figure)]
+        if steps:
+            self.steps = [get_html(self.vd._figure)]
+            self.is_diagram = False
+            self.finished = not vd.has_next_step()
+        else:
+            self.steps = [get_vd_html(vd, [], xlim, ylim)]
+            self.is_diagram = True
+            self.finished = True
         self.step_infos = []
         self.current_step = 0
-        self.finished = not vd.has_next_step()
         self.save_step_info()
 
     def save_step_info(self) -> None:
@@ -114,6 +125,14 @@ def get_vd(session: Session) -> Optional[FortunesAlgorithm]:
     return entry.vd
 
 
+def is_vd_finished(session: Session) -> bool:
+    """Get if the voronoi diagram has been calculated completely."""
+    entry = db.get(session, None)
+    if entry is None:
+        return False
+    return entry.finished and entry.is_diagram
+
+
 def save_vd(session: Session, sites, names, xlim, ylim, vd_type):
     """Save VD to the DB in the given session."""
     if vd_type == "vd":
@@ -125,6 +144,11 @@ def save_vd(session: Session, sites, names, xlim, ylim, vd_type):
             sites, True, xlim=xlim, ylim=ylim, mode=MANUAL_MODE, names=names,
         )
     db[session] = VDEntry(vd)
+
+
+def save_vd_completed(session: Session, vd: FortunesAlgorithm, xlim, ylim):
+    """Save completed VD to the DB in the given session."""
+    db[session] = VDEntry(vd, steps=False, xlim=xlim, ylim=ylim)
 
 
 def add_step(session: Session) -> bool:

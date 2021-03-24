@@ -11,6 +11,7 @@ from django import http
 from voronoi_diagrams.fortunes_algorithm import FortunesAlgorithm
 from voronoi_diagrams.models import Point
 from plots.plot_utils.voronoi_diagram import get_vd_html
+from vd_steps import db
 
 from decimal import Decimal
 
@@ -32,6 +33,10 @@ class PlotVDView(View):
 
     def get(self, request):
         """Get voronoi diagram."""
+        session = request.GET.get("session")
+        if not session:
+            return http.HttpResponseBadRequest()
+
         # TODO: Add serializer of sites.
         body = request.GET["body"]
         if not body:
@@ -67,5 +72,10 @@ class PlotVDView(View):
             Decimal(body_data.get("limit_y0", "-100")),
             Decimal(body_data.get("limit_y1", "100")),
         )
-        plot_div = get_vd_html(voronoi_diagram, [], xlim, ylim)
-        return http.HttpResponse(plot_div)
+
+        db.save_vd_completed(session, voronoi_diagram, xlim, ylim)
+        step, ok = db.get_current_step(session)
+        if not ok:
+            return http.HttpResponseNotFound()
+
+        return http.HttpResponse(step)

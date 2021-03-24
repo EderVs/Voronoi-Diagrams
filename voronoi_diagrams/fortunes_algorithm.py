@@ -73,7 +73,6 @@ class FortunesAlgorithm:
             sites, plot_steps=plot_steps, xlim=xlim, ylim=ylim, mode=mode,
         )
 
-        print(voronoi_diagram.get_xml())
         return voronoi_diagram
 
     @staticmethod
@@ -97,7 +96,6 @@ class FortunesAlgorithm:
         voronoi_diagram = FortunesAlgorithm(
             sites, plot_steps=plot_steps, xlim=xlim, ylim=ylim, mode=mode,
         )
-        print(voronoi_diagram.get_xml())
         return voronoi_diagram
 
     vertices: List[Vertex]
@@ -760,7 +758,7 @@ class FortunesAlgorithm:
         """Get base xml."""
         base_xml = """
         <?xml version="1.0" encoding="utf-8"?>
-        <geogebra format="5.0" version="5.0.631.0" app="suite" subApp="graphing" platform="w" id="5A09B9F5-DD5D-45BC-8B0E-F0FC3D01E904"  xsi:noNamespaceSchemaLocation="http://www.geogebra.org/apps/xsd/ggb.xsd" xmlns="" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" >
+        <geogebra format="5.0" version="5.0.631.0" app="suite" subApp="geometry" platform="w" id="5A09B9F5-DD5D-45BC-8B0E-F0FC3D01E904"  xsi:noNamespaceSchemaLocation="http://www.geogebra.org/apps/xsd/ggb.xsd" xmlns="" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" >
         <gui>
             <window width="1920" height="937" />
             <perspectives>

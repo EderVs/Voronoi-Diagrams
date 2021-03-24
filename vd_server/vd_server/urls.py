@@ -20,4 +20,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("vd_plot.urls")),
     path("steps/", include("vd_steps.urls")),
+    path("geogebra/", include("vd_geogebra.urls")),
 ]
