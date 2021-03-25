@@ -174,6 +174,8 @@ $('#plot-vd').click(function () {
                         $('#next-step-responsive').attr('disabled', 'disabled');
                         $('#prev-step').attr('disabled', 'disabled');
                         $('#prev-step-responsive').attr('disabled', 'disabled');
+                        $('#download-ggb').removeAttr('disabled');
+                        $('#download-ggb-responsive').removeAttr('disabled');
                         // Actual Event
                         $('#actual_event').html("");
                         // Queue
@@ -384,9 +386,13 @@ function get_info() {
             if (resp.is_next_step || !resp.is_diagram) {
                 $('#next-step').removeAttr('disabled');
                 $('#next-step-responsive').removeAttr('disabled');
+                $('#download-ggb').attr('disabled', 'disabled');
+                $('#download-ggb-responsive').attr('disabled', 'disabled');
             } else {
                 $('#next-step').attr('disabled', 'disabled');
                 $('#next-step-responsive').attr('disabled', 'disabled');
+                $('#download-ggb').removeAttr('disabled');
+                $('#download-ggb-responsive').removeAttr('disabled');
             }
             if (resp.is_prev_step) {
                 $('#prev-step').removeAttr('disabled');
@@ -406,6 +412,8 @@ $('#prev-step').attr('disabled', 'disabled');
 $('#next-step').attr('disabled', 'disabled');
 $('#prev-step-responsive').attr('disabled', 'disabled');
 $('#next-step-responsive').attr('disabled', 'disabled');
+$('#download-ggb').attr('disabled', 'disabled');
+$('#download-ggb-responsive').attr('disabled', 'disabled');
 evaluate_start_buttons();
 add_site_event();
 
@@ -444,5 +452,5 @@ function download_gpp() {
     a.click();
 }
 
-$('#download-gpp').click(download_gpp)
-$('#download-gpp-responsive').click(download_gpp)
+$('#download-ggb').click(download_gpp)
+$('#download-ggb-responsive').click(download_gpp)

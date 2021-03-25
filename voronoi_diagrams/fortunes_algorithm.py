@@ -155,6 +155,9 @@ class FortunesAlgorithm:
             self.EDGE_CLASS = WeightedPointBisectorEdge
             self._site_traces = 2
 
+        self._xlim = xlim
+        self._ylim = ylim
+
         # Plot.
         self._plot_steps = plot_steps
         if self._plot_steps:
@@ -169,8 +172,6 @@ class FortunesAlgorithm:
             self._figure.update_layout(title="VD", template=template)
             self._figure.update_xaxes(range=list(xlim))
             self._figure.update_yaxes(range=list(ylim), scaleanchor="x", scaleratio=1)
-            self._xlim = xlim
-            self._ylim = ylim
             self._figure_traces = 0
             self._traces = []
             self._boundary_plot_dict = {}
@@ -745,7 +746,7 @@ class FortunesAlgorithm:
         for site in self.sites:
             all_xml += site.get_xml()
         for i in range(len(self.edges)):
-            all_xml += self.edges[i].get_xml(i)
+            all_xml += self.edges[i].get_xml(i, self._ylim)
         for i in range(len(self.vertices)):
             all_xml += self.vertices[i].get_xml(i)
         all_xml += """\n

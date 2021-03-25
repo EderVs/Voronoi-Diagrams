@@ -50,20 +50,6 @@ class PlotVDView(View):
         names = []
 
         vd_type = body_data.get("vd_type", "vd")
-        if vd_type == "vd":
-            for x, y, name in body_data["sites"]:
-                sites.append(Point(Decimal(x), Decimal(y)))
-                names.append(name)
-            voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(
-                sites, False, names=names
-            )
-        elif vd_type == "aw_vd":
-            for x, y, w, name in body_data["sites"]:
-                sites.append((Point(Decimal(x), Decimal(y)), Decimal(w)))
-                names.append(name)
-            voronoi_diagram = FortunesAlgorithm.calculate_aw_voronoi_diagram(
-                sites, False, names=names
-            )
         xlim = (
             Decimal(body_data.get("limit_x0", "-100")),
             Decimal(body_data.get("limit_x1", "100")),
@@ -72,6 +58,20 @@ class PlotVDView(View):
             Decimal(body_data.get("limit_y0", "-100")),
             Decimal(body_data.get("limit_y1", "100")),
         )
+        if vd_type == "vd":
+            for x, y, name in body_data["sites"]:
+                sites.append(Point(Decimal(x), Decimal(y)))
+                names.append(name)
+            voronoi_diagram = FortunesAlgorithm.calculate_voronoi_diagram(
+                sites, False, xlim=xlim, ylim=ylim, names=names
+            )
+        elif vd_type == "aw_vd":
+            for x, y, w, name in body_data["sites"]:
+                sites.append((Point(Decimal(x), Decimal(y)), Decimal(w)))
+                names.append(name)
+            voronoi_diagram = FortunesAlgorithm.calculate_aw_voronoi_diagram(
+                sites, False, xlim=xlim, ylim=ylim, names=names
+            )
 
         db.save_vd_completed(session, voronoi_diagram, xlim, ylim)
         step, ok = db.get_current_step(session)

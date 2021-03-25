@@ -8,12 +8,12 @@
     height: 60px;
 }
 
-#steps button {
+#steps button, #download button {
     background-color: #0f4c81;
     color: white;
 }
 
-#steps button:disabled {
+#steps button:disabled, #download button:disabled {
     background-color: #dddddd;
     color: black;
 }

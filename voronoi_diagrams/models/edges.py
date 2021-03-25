@@ -246,12 +246,18 @@ class Edge:
         """
         raise NotImplementedError
 
-    def create_xml_expression(self, label, condition, expression):
+    def create_xml_expression(self, label, condition, expression, include_label=True):
         """Something."""
-        if condition == " x ":
-            exp_str = "{0}(x) = {1}".format(label, expression)
+        if include_label:
+            if condition == " x ":
+                exp_str = "{0}(x) = {1}".format(label, expression)
+            else:
+                exp_str = "{0}(x) = If[{1}, {2}]".format(label, condition, expression)
         else:
-            exp_str = "{0}(x) = If[{1}, {2}]".format(label, condition, expression)
+            if condition == " x ":
+                exp_str = "{0}".format(expression)
+            else:
+                exp_str = "If[{0}, {1}]".format(condition, expression)
 
         edge_expression = ET.Element("expression")
         edge_expression.set(
@@ -287,6 +293,54 @@ class Edge:
 
         expression_xml = (
             ET.tostring(edge_expression, encoding="unicode", method="xml")
+            + "\n"
+            + ET.tostring(edge_element, encoding="unicode", method="xml")
+        )
+        return expression_xml
+
+    def create_xml_curve_expression(
+        self, label: str, x: str, first_limit: str, last_limit: str
+    ):
+        """Create curve expression."""
+        edge_command = ET.Element("command")
+        edge_command.set(
+            "name", "CurveCartesian",
+        )
+        edge_input = ET.SubElement(edge_command, "input")
+        edge_input.set("a0", x)
+        edge_input.set("a1", "t")
+        edge_input.set("a2", "t")
+        edge_input.set("a3", first_limit)
+        edge_input.set("a4", last_limit)
+        edge_output = ET.SubElement(edge_command, "output")
+        edge_output.set("a0", label)
+
+        edge_element = ET.Element("element")
+        edge_element.set("type", "curvecartesian")
+        edge_element.set("label", label)
+        edge_show = ET.SubElement(edge_element, "show")
+        edge_show.set("object", "true")
+        edge_show.set("label", "true")
+        edge_show.set("ev", "4")
+        edge_obj_color = ET.SubElement(edge_element, "objColor")
+        edge_obj_color.set("r", "0")
+        edge_obj_color.set("g", "0")
+        edge_obj_color.set("b", "0")
+        edge_obj_color.set("alpha", "0")
+        edge_layer = ET.SubElement(edge_element, "layer")
+        edge_layer.set("val", "0")
+        edge_label_mode = ET.SubElement(edge_element, "labelMode")
+        edge_label_mode.set("val", "0")
+        edge_fixed = ET.SubElement(edge_element, "fixed")
+        edge_fixed.set("val", "true")
+        edge_line_style = ET.SubElement(edge_element, "lineStyle")
+        edge_line_style.set("thickness", "5")
+        edge_line_style.set("type", "0")
+        edge_line_style.set("typeHidden", "1")
+        edge_line_style.set("opacity", "204")
+
+        expression_xml = (
+            ET.tostring(edge_command, encoding="unicode", method="xml")
             + "\n"
             + ET.tostring(edge_element, encoding="unicode", method="xml")
         )
@@ -333,7 +387,7 @@ class PointBisectorEdge(Edge):
         """Add a new range if neccessary."""
         pass
 
-    def get_xml(self, i: int) -> str:
+    def get_xml(self, i: int, ylim: Tuple[Decimal, Decimal] = (-100, 100)) -> str:
         """Get xml representation of the edge.
 
         The xml representation is based on Geogebra ggb xml.
@@ -342,6 +396,25 @@ class PointBisectorEdge(Edge):
         self.complete_ranges()
         xml_str = ""
         edge_label = "e_{{{0},{1}," + str(i) + "}}"
+        if len(self.ranges_vertical) > 0:
+            first_limit = ylim[0]
+            last_limit = ylim[1]
+            if self.ranges_vertical[-1][1] is not None:
+                last_limit = self.ranges_vertical[-1][1]
+            if self.ranges_vertical[0][0] is not None:
+                first_limit = self.ranges_vertical[0][0]
+            x = self.get_x(1)
+            edge_label_1 = edge_label.format(
+                self.bisector.sites[0].name, self.bisector.sites[1].name
+            )
+            xml_str += (
+                self.create_xml_curve_expression(
+                    edge_label_1, str(x), str(first_limit), str(last_limit)
+                )
+                + "\n"
+            )
+            return xml_str
+
         expression_l = "b(x, p_{{{0}x}}, p_{{{1}x}}, p_{{{0}y}}, p_{{{1}y}})"
         if len(self.ranges_b_plus) > 0 and len(self.ranges_b_minus) > 0:
             # Both Boundaries have one type
@@ -511,7 +584,7 @@ class WeightedPointBisectorEdge(Edge):
             delete_first_with_side_0(self.ranges_b_plus)
             delete_first_with_side_0(self.ranges_b_minus)
 
-    def get_xml(self, i: int) -> str:
+    def get_xml(self, i: int, ylim: Tuple[Decimal, Decimal] = (-100, 100)) -> str:
         """Get xml representation of the edge.
 
         The xml representation is based on Geogebra ggb xml.
@@ -520,6 +593,25 @@ class WeightedPointBisectorEdge(Edge):
         self.complete_ranges()
         xml_str = ""
         edge_label = "e_{{{0},{1},{2}," + str(i) + "}}"
+        if len(self.ranges_vertical) > 0:
+            first_limit = ylim[0]
+            last_limit = ylim[1]
+            if self.ranges_vertical[-1][1] is not None:
+                last_limit = self.ranges_vertical[-1][1]
+            if self.ranges_vertical[0][0] is not None:
+                first_limit = self.ranges_vertical[0][0]
+            x = self.get_x(1)
+            edge_label_1 = edge_label.format(
+                self.bisector.sites[0].name, self.bisector.sites[1].name, "p"
+            )
+            xml_str += (
+                self.create_xml_curve_expression(
+                    edge_label_1, str(x), str(first_limit), str(last_limit)
+                )
+                + "\n"
+            )
+            return xml_str
+
         expression = "B_{{{2}}}(x, p_{{{0}x}}, p_{{{1}x}}, p_{{{0}y}}, p_{{{1}y}}, p_{{{0}w}}, p_{{{1}w}})"
         expression_l = "b(x, p_{{{0}x}}, p_{{{1}x}}, p_{{{0}y}}, p_{{{1}y}})"
         if len(self.ranges_b_minus) > 1:
