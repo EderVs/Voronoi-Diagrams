@@ -191,9 +191,9 @@ class Edge:
         step = abs(x0 - x1) / num_steps
         if step > 0:
             if side == 1:
-                x_range = np.arange(x0, x1, -step)
+                x_range = np.arange(x0, x1 - Decimal(step), -step)
             else:
-                x_range = np.arange(x0, x1, step)
+                x_range = np.arange(x0, x1 + Decimal(step), step)
             y_range = []
             for x in x_range:
                 y_range.append(self.get_y_by_side(x, side))
