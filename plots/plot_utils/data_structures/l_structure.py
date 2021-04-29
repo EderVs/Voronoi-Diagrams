@@ -1,9 +1,9 @@
-"""L List plots."""
+"""L structures plots."""
 
 from typing import Tuple, Type
 
 # Data structures
-from voronoi_diagrams.data_structures import LList
+from voronoi_diagrams.data_structures import LStructure
 
 # Models.
 from voronoi_diagrams.models import Bisector
@@ -17,15 +17,15 @@ from plotly import graph_objects as go
 from decimal import Decimal
 
 
-def plot_l_list(
+def plot_l_structure(
     figure: go.Figure,
-    l_list: LList,
+    l_structure: LStructure,
     xlim: Tuple[Decimal, Decimal],
     ylim: Tuple[Decimal, Decimal],
     bisector_class: Type[Bisector],
 ):
-    """Plot L List."""
-    node = l_list.head.right_neighbor
+    """Plot L structure."""
+    node = l_structure.head.right_neighbor
     while node is not None:
         plot_boundary(figure, node.value.left, xlim, ylim, bisector_class)
         node = node.right_neighbor

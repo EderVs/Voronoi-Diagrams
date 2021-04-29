@@ -156,7 +156,7 @@ def get_diagram_and_plot(
     if mode == AUTOMATIC_MODE:
         print("--- %s seconds to calculate diagram. ---" % (time.time() - start_time))
     else:
-        while not voronoi_diagram.q_queue.is_empty():
+        while not voronoi_diagram.q_structure.is_empty():
             input("Press Enter to get next event.")
             voronoi_diagram.calculate_next_event()
 

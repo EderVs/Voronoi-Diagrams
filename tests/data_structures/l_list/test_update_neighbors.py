@@ -1,15 +1,15 @@
 """Test update neighborgs."""
 # Data structures
-from voronoi_diagrams.data_structures import LList
+from voronoi_diagrams.data_structures import LStructure
 from voronoi_diagrams.data_structures.l import LNode
 
 # Models
 from voronoi_diagrams.models import Region, Site
 
 
-def create_l_list(region: Region) -> LList:
+def create_l_list(region: Region) -> LStructure:
     """Create an L List."""
-    l_list = LList(region)
+    l_list = LStructure(region)
     return l_list
 
 

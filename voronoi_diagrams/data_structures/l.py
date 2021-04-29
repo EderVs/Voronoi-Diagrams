@@ -1,4 +1,4 @@
-"""L list implementation."""
+"""L Structure implementation."""
 
 # Standard Library
 from typing import Any, Optional, Tuple, List
@@ -22,7 +22,7 @@ class RegionNotFoundException(Exception):
 
 
 class LNode(AVLNode):
-    """List L AVLNode that contains Region in their values."""
+    """L Structure AVLNode that contains Region in their values."""
 
     left: Optional["LNode"]
     right: Optional["LNode"]
@@ -37,7 +37,7 @@ class LNode(AVLNode):
         left: Optional["LNode"] = None,
         right: Optional["LNode"] = None,
     ) -> None:
-        """List L AVL Node constructor."""
+        """L structure AVL Node constructor."""
         super(LNode, self).__init__(value, left, right)
 
     def is_contained(self, site: Site, *args: Any, **kwargs: Any) -> bool:
@@ -53,8 +53,8 @@ class LNode(AVLNode):
         return self.value.is_right(site.get_event_point())
 
 
-class LList:
-    """List L used in the Fortune's Algorithm."""
+class LStructure:
+    """L Structure used in the Fortune's Algorithm."""
 
     t: AVLTree
     head: Optional[LNode]
@@ -149,7 +149,7 @@ class LList:
     def update_regions(
         self, left_region: Region, center_region: Region, right_region: Region,
     ) -> Tuple[LNode, LNode, LNode]:
-        """Update the L list given a site and the regions to put.
+        """Update the L structure given a site and the regions to put.
 
         - left_region is the Region that will be in the left. This region must have q as its site.
         - center_region is the Region that will be in the center. This region must have p as its
@@ -207,7 +207,7 @@ class LList:
         self.t.remove_node(region_node)
 
     def get_all_regions(self) -> List[Region]:
-        """Get all region in the L List."""
+        """Get all region in the L structure."""
         if self.head is None:
             return []
         region_list = []

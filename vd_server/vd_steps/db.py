@@ -22,8 +22,8 @@ Finished = bool
 class VDStepInfo:
     """VD step info."""
 
-    q_queue: Dict[str, Any]
-    l_list: Dict[str, Any]
+    q_structure: Dict[str, Any]
+    l_structure: Dict[str, Any]
     has_next_step: bool
     is_prev_step: bool
     is_diagram: bool
@@ -31,16 +31,16 @@ class VDStepInfo:
 
     def __init__(
         self,
-        q_queue: List[Dict[str, Any]],
-        l_list: List[Dict[str, Any]],
+        q_structure: List[Dict[str, Any]],
+        l_structure: List[Dict[str, Any]],
         has_next_step: bool,
         is_prev_step: bool,
         is_diagram: bool,
         actual_event: Optional[Dict[str, Any]],
     ):
         """Step info constructor."""
-        self.q_queue = q_queue
-        self.l_list = l_list
+        self.q_structure = q_structure
+        self.l_structure = l_structure
         self.has_next_step = has_next_step
         self.is_prev_step = is_prev_step
         self.is_diagram = is_diagram
@@ -83,24 +83,24 @@ class VDEntry:
 
     def save_step_info(self) -> None:
         """Save snapshot info of the current step."""
-        # Q Queue
+        # Q structure
         q_queue_dict = []
-        for event in self.vd.q_queue.get_all_events():
+        for event in self.vd.q_structure.get_all_events():
             q_queue_dict.append(get_event_dict(event))
 
-        l_list_dict = []
+        l_structure_dict = []
         if self.finished and self.is_diagram:
             actual_event = None
         else:
             actual_event = get_event_dict(self.vd.event)
-            # L List
-            for region in self.vd.l_list.get_all_regions():
-                l_list_dict.append(get_region_dict(region))
+            # L structure
+            for region in self.vd.l_structure.get_all_regions():
+                l_structure_dict.append(get_region_dict(region))
 
         self.step_infos.append(
             VDStepInfo(
-                q_queue=q_queue_dict,
-                l_list=l_list_dict,
+                q_structure=q_queue_dict,
+                l_structure=l_structure_dict,
                 has_next_step=self.vd.has_next_step(),
                 is_prev_step=self.current_step != 0,
                 is_diagram=self.is_diagram,

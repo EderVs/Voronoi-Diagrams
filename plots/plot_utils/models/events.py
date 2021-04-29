@@ -5,7 +5,7 @@ from random import randint
 
 # Models.
 from voronoi_diagrams.models import Site, WeightedSite, Event, Point
-from voronoi_diagrams.data_structures.q import QQueue
+from voronoi_diagrams.data_structures.q import QStructure
 
 # Plot.
 from plotly import graph_objects as go
@@ -111,7 +111,7 @@ def is_equal_limit_site(
         )
 
 
-def plot_events_traces(figure: go.Figure, q_queue: QQueue):
+def plot_events_traces(figure: go.Figure, q_queue: QStructure):
     """Get events traces."""
     for event in q_queue.get_all_events():
         color = f"rgb({randint(0, 255)}, {randint(0, 255)}, {randint(0, 255)})"

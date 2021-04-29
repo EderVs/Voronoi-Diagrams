@@ -6,7 +6,7 @@ General Solution.
 from typing import Iterable, List, Any, Optional, Tuple, Dict, Type
 
 # Data structures
-from .data_structures import LList, QQueue
+from .data_structures import LStructure, QStructure
 from .data_structures.l import LNode
 
 # Models
@@ -192,20 +192,20 @@ class FortunesAlgorithm:
     def _init_structures(self):
         """Init data structures used."""
         # Step 1.
-        self.q_queue = QQueue()
+        self.q_structure = QStructure()
         for site in self.sites:
-            self.q_queue.enqueue(site)
+            self.q_structure.enqueue(site)
             if self._plot_steps:
                 self._set_site_trace(site)
 
         # Step 2.
-        self.event = self.q_queue.dequeue()
+        self.event = self.q_structure.dequeue()
 
         # Step 3.
         r_p = self.REGION_CLASS(self.event, None, None)
         self._updated_regions = [r_p]
         r_p.active = True
-        self.l_list = LList(r_p)
+        self.l_structure = LStructure(r_p)
         self._plot_step()
 
     def _set_site_trace(self, site):
@@ -218,7 +218,7 @@ class FortunesAlgorithm:
     def _calculate_diagram(self):
         """Calculate point diagram."""
         # Step 4.
-        while not self.q_queue.is_empty():
+        while not self.q_structure.is_empty():
             self.calculate_next_event()
 
     def calculate_next_event(self):
@@ -237,11 +237,11 @@ class FortunesAlgorithm:
         self._updated_boundaries = []
 
         # Step 4.
-        if self.q_queue.is_empty():
+        if self.q_structure.is_empty():
             return
 
         # Step 5.
-        self.event = self.q_queue.dequeue()
+        self.event = self.q_structure.dequeue()
         self._plot_step()
         self._begin_event = False
         if not self.event.is_site:
@@ -269,7 +269,7 @@ class FortunesAlgorithm:
                 if trace is not None:
                     self._figure.add_trace(trace)
             plot_sweep_line(self._figure, self._xlim, self._ylim, self.event)
-            plot_events_traces(self._figure, self.q_queue)
+            plot_events_traces(self._figure, self.q_structure)
             # self._figure.show()
 
     def next_step(self):
@@ -281,7 +281,7 @@ class FortunesAlgorithm:
 
     def has_next_step(self):
         """Get if there is a next step to calculate."""
-        return not self.q_queue.is_empty() or not self._begin_event
+        return not self.q_structure.is_empty() or not self._begin_event
 
     def _handle_site(self, p: Site):
         """Handle when event is a site."""
@@ -304,14 +304,14 @@ class FortunesAlgorithm:
         self.add_edge(bisector_p_q, sign=None)
 
         # Step 10.
-        # Update list L so that it contains ...,R*q,C-pq,R*p,C+pq,R*q,... in place of R*q.
+        # Update L so that it contains ...,R*q,C-pq,R*p,C+pq,R*q,... in place of R*q.
         r_p = self.REGION_CLASS(p, None, None)
         (
             boundary_p_q_plus,
             boundary_p_q_minus,
             r_q_left_node,
             r_q_right_node,
-        ) = self._update_l_list(r_p, r_q, bisector_p_q)
+        ) = self._update_l_structure(r_p, r_q, bisector_p_q)
 
         # Step 11.
         # Delete from Q the intersection between the left and right boundary of R*q, if any.
@@ -363,7 +363,7 @@ class FortunesAlgorithm:
         bisector_q_s = self.BISECTOR_CLASS(sites=(r_q.site, r_s.site))
 
         # Step 16.
-        # Update list L so it contains Cqs instead of Cqr, Rr*, Crs
+        # Update L so it contains Cqs instead of Cqr, Rr*, Crs
         boundary_q_s_sign = self.BOUNDARY_CLASS.get_boundary_sign(
             p.point, r_q.site, r_s.site
         )
@@ -375,7 +375,7 @@ class FortunesAlgorithm:
         boundary_q_s.active = True
         self._updated_boundaries = [boundary_q_s]
         self._updated_regions = []
-        self.l_list.remove_region(region_r_node, boundary_q_s)
+        self.l_structure.remove_region(region_r_node, boundary_q_s)
 
         # Step 17.
         # Delete from Q any intersection between Cqr and its neighbor to the
@@ -469,14 +469,14 @@ class FortunesAlgorithm:
 
     def _find_region_containing_p(self, p: Site) -> Tuple[Region, Region, LNode]:
         """Find an occurrence of a region R*q on L containing p."""
-        r_q_node = self.l_list.search_region_node(p)
+        r_q_node = self.l_structure.search_region_node(p)
         r_q = r_q_node.value
         return r_q, r_q_node
 
-    def _update_l_list(
+    def _update_l_structure(
         self, r_p: Region, r_q: Region, bisector_p_q: Bisector,
     ) -> Tuple[Boundary, Boundary, LNode, LNode]:
-        """Update list L so that it contains ...,R*q,C-pq,R*p,C+pq,R*q,... in the place of R*q."""
+        """Update L so that it contains ...,R*q,C-pq,R*p,C+pq,R*q,... in the place of R*q."""
         boundary_p_q_plus = self.BOUNDARY_CLASS(bisector_p_q, True)  # type: ignore
         boundary_p_q_minus = self.BOUNDARY_CLASS(bisector_p_q, False)  # type: ignore
         r_q_left = self.REGION_CLASS(r_q.site, r_q.left, boundary_p_q_minus)
@@ -491,8 +491,8 @@ class FortunesAlgorithm:
         for boundary in self._updated_boundaries:
             boundary.active = True
 
-        # Update L list.
-        r_q_left_node, r_p_node, r_q_right_node = self.l_list.update_regions(
+        # Update L.
+        r_q_left_node, r_p_node, r_q_right_node = self.l_structure.update_regions(
             r_q_left, r_p, r_q_right
         )
         return (
@@ -509,10 +509,10 @@ class FortunesAlgorithm:
             return
 
         if is_left_intersection and boundary.left_intersection is not None:
-            self.q_queue.delete(boundary.left_intersection)
+            self.q_structure.delete(boundary.left_intersection)
             boundary.left_intersection = None
         elif not is_left_intersection and boundary.right_intersection is not None:
-            self.q_queue.delete(boundary.right_intersection)
+            self.q_structure.delete(boundary.right_intersection)
             boundary.right_intersection = None
 
     def _insert_posible_intersections(
@@ -551,7 +551,7 @@ class FortunesAlgorithm:
             for vertex, event in intersection_point_tuples:
                 intersection = Intersection(event, vertex, region_node)
                 # Insert intersection to Q.
-                self.q_queue.enqueue(intersection)
+                self.q_structure.enqueue(intersection)
                 # Save intersection in both boundaries.
                 boundary_1.right_intersection = intersection
                 boundary_2.left_intersection = intersection

@@ -351,13 +351,13 @@ function get_info() {
 
             // L List
             console.log(resp)
-            if (resp.l_list.length > 0) {
+            if (resp.l_structure.length > 0) {
                 left_boundary = { is_null: true, active: false }
-                resp.l_list[0].left = left_boundary
-                $('#llist').append(get_boundary_div(resp.l_list[0].left));
+                resp.l_structure[0].left = left_boundary
+                $('#llist').append(get_boundary_div(resp.l_structure[0].left));
             }
-            for (let i = 0; i < resp.l_list.length; i++) {
-                var region = resp.l_list[i]
+            for (let i = 0; i < resp.l_structure.length; i++) {
+                var region = resp.l_structure[i]
                 if (region.right == null) {
                     right_boundary = { is_null: true, active: false }
                     region.right = right_boundary
@@ -367,8 +367,8 @@ function get_info() {
             }
 
             // Q Queue
-            for (let i = 0; i < resp.q_queue.length; i++) {
-                var event = resp.q_queue[i]
+            for (let i = 0; i < resp.q_structure.length; i++) {
+                var event = resp.q_structure[i]
                 var event_div = "<div class='event'>" + event.event_str + "</div>"
                 $('#qqueue').append(event_div);
                 $('#qqueue-responsive').append(event_div);

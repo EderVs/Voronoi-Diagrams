@@ -3,7 +3,7 @@
 from typing import List, Optional
 
 # Data structures
-from voronoi_diagrams.data_structures import LList
+from voronoi_diagrams.data_structures import LStructure
 from voronoi_diagrams.data_structures.l import LNode
 
 # Models
@@ -19,14 +19,14 @@ from voronoi_diagrams.models import (
 from tests.data_structures.avl_tree.test_insert import check_if_tree_is_balanced
 
 
-def create_l_list(region: Region) -> LList:
+def create_l_list(region: Region) -> LStructure:
     """Create an L List."""
-    l_list = LList(region)
+    l_list = LStructure(region)
     return l_list
 
 
 def validate_l_list_with_expected_list(
-    l_list: LList, expected_list: List[Region]
+    l_list: LStructure, expected_list: List[Region]
 ) -> None:
     """Validate l list with expected list."""
     actual_node: Optional[LNode] = l_list.head

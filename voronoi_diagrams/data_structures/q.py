@@ -1,4 +1,4 @@
-"""Q Queue implementation."""
+"""Q Structure implementation."""
 
 # Standard Library
 from typing import Any, Optional, List
@@ -11,7 +11,7 @@ from voronoi_diagrams.models import Event
 
 
 class QNode(AVLNode):
-    """Queue Q AVLNode that contains an event in their values."""
+    """Q structure AVLNode that contains an event in their values."""
 
     def __init__(self, value: Event, left=None, right=None) -> None:
         """List L AVL Node constructor."""
@@ -37,8 +37,8 @@ class QNode(AVLNode):
         return comparison < 0
 
 
-class QQueue:
-    """Queue Q used in the Fortune's Algorithm."""
+class QStructure:
+    """Q Structure used in the Fortune's Algorithm."""
 
     t: AVLTree
     head: Optional[QNode]
@@ -76,7 +76,7 @@ class QQueue:
         return event
 
     def is_empty(self) -> bool:
-        """Return True if the Queue is Empty."""
+        """Return True if the structure is Empty."""
         return self.t.is_empty()
 
     def get_all_events(self) -> List[Event]:
