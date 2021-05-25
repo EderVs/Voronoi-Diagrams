@@ -22,7 +22,7 @@ VORONOI_DIAGRAM_TYPE = 1
 AW_VORONOI_DIAGRAM_TYPE = 2
 
 
-def get_diagram_and_time(sites: List[SiteToUse], type_vd: int,) -> None:
+def get_diagram_and_time(sites: List[SiteToUse], type_vd: int,) -> float:
     """Get and plot Voronoi Diagram depending on the requested type."""
     start_time = time.time()
     if type_vd == VORONOI_DIAGRAM_TYPE:
@@ -65,20 +65,20 @@ def execute_x_times(times: int, n: int) -> Decimal:
     print("Executing", n, " sites in Voronoi Diagrams")
     total_vd_time = Decimal(0)
     for _ in range(times):
-        print("|")
         sites = get_sites_to_use(n, VORONOI_DIAGRAM_TYPE)
-        total_vd_time += Decimal(get_diagram_and_time(sites, VORONOI_DIAGRAM_TYPE))
+        vd_time = Decimal(get_diagram_and_time(sites, VORONOI_DIAGRAM_TYPE))
+        total_vd_time += vd_time
+        print("|", vd_time)
     average_vd_time = total_vd_time / Decimal(times)
     print("Average VD time:", average_vd_time)
 
     print("Executing", n, " weighted sites in AW Voronoi Diagrams")
     total_aw_vd_time = Decimal(0)
     for _ in range(times):
-        print("|")
         sites = get_sites_to_use(n, AW_VORONOI_DIAGRAM_TYPE)
-        total_aw_vd_time += Decimal(
-            get_diagram_and_time(sites, AW_VORONOI_DIAGRAM_TYPE)
-        )
+        aw_vd_time = Decimal(get_diagram_and_time(sites, AW_VORONOI_DIAGRAM_TYPE))
+        total_aw_vd_time += aw_vd_time
+        print("|", aw_vd_time)
     average_aw_vd_time = total_aw_vd_time / Decimal(times)
     print("Average AW VD time:", average_aw_vd_time)
 
