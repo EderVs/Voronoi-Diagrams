@@ -50,12 +50,20 @@ def get_plot_scatter_boundary(
         else:
             step = abs(Decimal(xlim[0]) - boundary.get_site().point.x) / num_steps
             if step > 0:
-                x_list = np.arange(Decimal(xlim[0]), boundary.get_site().point.x, step)
+                x_list = np.arange(
+                    Decimal(xlim[0]), boundary.get_site().point.x - step, step
+                )
 
         if y_list == []:
-            for x in x_list:
+            pass_limit = False
+            last = len(x_list) - 1
+            for i in range(len(x_list)):
+                x = x_list[i]
                 if x < xlim[0] or x > xlim[1]:
                     y_list.append(None)
+                    continue
+                if (boundary.sign and i == 0) or (not boundary.sign and i == last):
+                    y_list.append(boundary.get_site().get_highest_site_point().y)
                     continue
                 ys = boundary.formula_y(Decimal(x))
                 if len(ys) == 0:
@@ -63,7 +71,11 @@ def get_plot_scatter_boundary(
                 elif ys[0] >= ylim[0] and ys[0] <= ylim[1]:
                     y_list.append(ys[0])
                 else:
-                    y_list.append(None)
+                    if pass_limit:
+                        y_list.append(None)
+                    else:
+                        y_list.append(ys[0])
+                        pass_limit = True
     elif bisector_class == WeightedPointBisector:
         x_list = []
         y_list = []
@@ -91,10 +103,15 @@ def get_plot_scatter_boundary(
                         x_lists[1] = np.arange(change_of_x, Decimal(xlim[1]), step)
 
             func_map = {0: min, 1: max}
+            pass_limit = False
             for i, _ in enumerate(x_lists):
-                for x in x_lists[i]:
+                for j in range(len(x_lists[i])):
+                    x = x_lists[i][j]
                     if x < xlim[0] or x > xlim[1]:
                         y_list.append(None)
+                        continue
+                    if i == 0 and j == 0:
+                        y_list.append(boundary.get_site().get_highest_site_point().y)
                         continue
                     ys = boundary.formula_y(Decimal(x))
                     if len(ys) == 0:
@@ -102,9 +119,13 @@ def get_plot_scatter_boundary(
                     else:
                         y = func_map[i](ys)
                         if y >= ylim[0] and y <= ylim[1]:
-                            y_list.append(func_map[i](ys))
+                            y_list.append(y)
                         else:
-                            y_list.append(None)
+                            if pass_limit:
+                                y_list.append(None)
+                            else:
+                                y_list.append(y)
+                                pass_limit = True
             x_list = np.concatenate(x_lists)
         elif boundary.bisector.is_vertical():
             if not boundary.sign:
@@ -129,9 +150,15 @@ def get_plot_scatter_boundary(
                 x_list = np.arange(Decimal(xlim[0]), boundary.get_site().point.x, step)
 
         if y_list == []:
-            for x in x_list:
+            pass_limit = False
+            last = len(x_list) - 1
+            for i in range(len(x_list)):
+                x = x_list[i]
                 if x < xlim[0] or x > xlim[1]:
                     y_list.append(None)
+                    continue
+                if (boundary.sign and i == 0) or (not boundary.sign and i == last):
+                    y_list.append(boundary.get_site().get_highest_site_point().y)
                     continue
                 ys = boundary.formula_y(Decimal(x))
                 if len(ys) == 0:
@@ -139,7 +166,11 @@ def get_plot_scatter_boundary(
                 elif ys[0] >= ylim[0] and ys[0] <= ylim[1]:
                     y_list.append(ys[0])
                 else:
-                    y_list.append(None)
+                    if pass_limit:
+                        y_list.append(None)
+                    else:
+                        y_list.append(ys[0])
+                        pass_limit = True
 
     return go.Scatter(
         x=x_list,
